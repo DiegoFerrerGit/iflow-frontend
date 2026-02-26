@@ -16,6 +16,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage)
     },
     {
+        path: 'odin',
+        loadChildren: () => import('./modules/odin/odin-module').then(m => m.OdinModule)
+    },
+    {
         path: '**',
         redirectTo: 'home'
     }
