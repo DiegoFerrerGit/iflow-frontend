@@ -1,0 +1,44 @@
+.glass-card {
+    background: rgba(22, 18, 29, 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(244, 37, 123, 0.3);
+    box-shadow: 0 0 60px rgba(6, 78, 59, 0.25);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+
+    &:hover {
+        box-shadow: 0 0 80px rgba(6, 78, 59, 0.35);
+        transform: translateY(-2px);
+    }
+}
+
+.netflow-bg {
+    background: radial-gradient(circle at top right, #16121d, #0f0a15);
+    position: relative;
+    overflow: hidden;
+}
+
+.netflow-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-color), transparent);
+    width: 100%;
+    opacity: 0.3;
+}
+
+.google-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.google-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(244, 37, 123, 0.5);
+    box-shadow: 0 0 20px rgba(244, 37, 123, 0.2);
+    transform: translateY(-1px);
+}
+
+.google-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
