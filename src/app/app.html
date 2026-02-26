@@ -1,1 +1,13 @@
-<router-outlet></router-outlet>
+<div class="bg-background-dark text-slate-100 min-h-screen relative flex overflow-x-hidden font-sans">
+    <app-sidebar-menu (expandedChange)="isSidebarExpanded = $event"></app-sidebar-menu>
+
+    <div class="content-wrapper flex-1 flex flex-col min-w-0 transition-all duration-300"
+        [class.ml-[256px]]="isSidebarExpanded" [class.ml-[80px]]="!isSidebarExpanded"
+        [class.w-[calc(100%-256px)]]="isSidebarExpanded" [class.w-[calc(100%-80px)]]="!isSidebarExpanded">
+
+        <main class="relative z-10 w-full mx-auto flex flex-col items-center">
+            <router-outlet></router-outlet>
+        </main>
+
+    </div>
+</div>
