@@ -1,44 +1,32 @@
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
+.glass-card {
+    background: rgba(22, 18, 29, 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(244, 37, 123, 0.3);
+    box-shadow: 0 0 60px rgba(6, 78, 59, 0.25);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
-.login-card {
-    width: 100%;
-    max-width: 26rem;
-    /* 416px */
-    padding: 3rem 2.5rem;
-    border-radius: 1.25rem;
+.netflow-bg {
+    background: radial-gradient(circle at top right, #16121d, #0f0a15);
     position: relative;
     overflow: hidden;
 }
 
-.logo-text {
-    background: linear-gradient(135deg, var(--color-primary), #a855f7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.netflow-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-color), transparent);
+    width: 100%;
+    opacity: 0.3;
 }
 
 .google-btn {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
 
-    &:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(244, 37, 123, 0.2);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    &:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    &:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
+.google-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }

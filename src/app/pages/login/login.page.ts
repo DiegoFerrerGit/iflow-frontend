@@ -7,7 +7,10 @@ import { Router } from '@angular/router';
     standalone: true,
     imports: [CommonModule],
     templateUrl: './login.page.html',
-    styleUrl: './login.page.scss'
+    styleUrls: [
+        './styles/login.page.mobile.scss',
+        './styles/login.page.desktop.scss'
+    ]
 })
 export class LoginPage {
     isLoading = signal(false);
