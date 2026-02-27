@@ -1,0 +1,18 @@
+.synth-grid {
+    background-image: linear-gradient(rgba(168, 85, 247, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(168, 85, 247, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.hero-gradient {
+    background: radial-gradient(circle at 50% 50%, #2d1b4d 0%, #16121d 100%);
+}
+
+.neon-glow {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+:host {
+    display: block;
+    width: 100%;
+}

@@ -1,0 +1,60 @@
+<div class="w-full relative flex justify-center py-6 h-[100px] overflow-visible">
+    <svg width="100%" height="80" class="overflow-visible absolute top-0" preserveAspectRatio="none">
+
+        <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                </feMerge>
+            </filter>
+            <!-- Animation for the dashes -->
+            <style>
+                .animated-path {
+                    stroke-dasharray: 6 8;
+                    animation: dash-flow 3s linear infinite;
+                }
+
+                .animated-path-reverse {
+                    stroke-dasharray: 6 8;
+                    animation: dash-flow-reverse 3s linear infinite;
+                }
+
+                @keyframes dash-flow {
+                    to {
+                        stroke-dashoffset: -100;
+                    }
+                }
+
+                @keyframes dash-flow-reverse {
+                    to {
+                        stroke-dashoffset: 100;
+                    }
+                }
+            </style>
+        </defs>
+
+        <!-- Dynamic paths based on points -->
+        @for (point of getPointsArray(); track point) {
+        <!-- Helper Background path for depth -->
+        <path [attr.d]="generatePath(point, points)" fill="none" [attr.stroke]="getColorHex()" stroke-width="2"
+            opacity="0.1" stroke-linecap="round" />
+
+        <!-- Animated foreground dashed line -->
+        <path [attr.d]="generatePath(point, points)" fill="none" [attr.stroke]="getColorHex()" stroke-width="2"
+            [attr.class]="direction === 'in' ? 'animated-path' : 'animated-path-reverse'" filter="url(#glow)"
+            stroke-linecap="round" />
+        }
+
+        <!-- Target connection dots -->
+        @for (point of getPointsArray(); track point) {
+        <circle [attr.cx]="(100 / points * point) + (100 / points / 2) + '%'" [attr.cy]="direction === 'in' ? 0 : 80"
+            r="4" [attr.fill]="getColorHex()" filter="url(#glow)" />
+        }
+
+        <circle cx="50%" [attr.cy]="direction === 'in' ? 80 : 0" r="6" [attr.fill]="getColorHex()"
+            filter="url(#glow)" />
+
+    </svg>
+</div>
