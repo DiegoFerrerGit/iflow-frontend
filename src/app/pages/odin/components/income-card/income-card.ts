@@ -1,0 +1,14 @@
+import { Component, Input } from '@angular/core';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { IncomeSource } from '../../../../models/income.model';
+
+@Component({
+  selector: 'app-income-card',
+  standalone: true,
+  imports: [CommonModule, DecimalPipe],
+  templateUrl: './income-card.html',
+  styleUrl: './income-card.scss',
+})
+export class IncomeCardComponent {
+  @Input({ required: true }) income!: IncomeSource;
+}

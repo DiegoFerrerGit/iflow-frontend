@@ -17,7 +17,7 @@ export const routes: Routes = [
     },
     {
         path: 'odin',
-        loadChildren: () => import('./modules/odin/odin-module').then(m => m.OdinModule)
+        loadChildren: () => import('./modules/odin/odin.module').then(m => m.OdinModule)
     },
     {
         path: '**',

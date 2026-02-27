@@ -1,3 +1,66 @@
-<main class="w-full flex flex-col items-center">
-    <app-banner class="w-full"></app-banner>
+<main class="w-full flex flex-col items-center pb-32">
+    <app-banner class="w-full shrink-0"></app-banner>
+
+    <div class="w-full max-w-6xl mx-auto px-6 mt-12 flex flex-col items-center">
+        <!-- Incomes Section Header -->
+        <div class="w-full flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-white tracking-wide uppercase">Fuentes de Ingreso</h2>
+            <button
+                class="flex items-center gap-2 bg-primary/20 hover:bg-primary/30 text-primary px-4 py-2 rounded-xl transition-colors text-sm font-bold border border-primary/20">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Añadir fuente
+            </button>
+        </div>
+
+        <!-- Incomes Grid -->
+        <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20">
+            @for (income of incomes; track income.id) {
+            <app-income-card [income]="income"></app-income-card>
+            }
+        </div>
+
+        <!-- Incomes to Pool Flow -->
+        <app-animated-flow class="w-full max-w-2xl mx-auto -mt-6 relative z-10 block" [points]="incomes.length"
+            color="green" direction="in">
+        </app-animated-flow>
+
+        <!-- Total Pool Central Card -->
+        <div
+            class="w-full max-w-2xl mx-auto bg-[#16121d] border border-primary/30 rounded-3xl p-6 relative z-20 flex items-center justify-between shadow-[0_0_30px_rgba(168,85,247,0.15)] mt-2">
+            <!-- Left side: Icon/Chart placeholder -->
+            <div class="flex items-center gap-6">
+                <!-- Circular Segment Graphic -->
+                <div class="relative w-24 h-24 flex items-center justify-center shrink-0">
+                    <svg class="w-full h-full transform -rotate-90 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+                        viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" fill="none" class="stroke-white/5" stroke-width="12"></circle>
+                        <circle cx="50" cy="50" r="40" fill="none" class="stroke-primary" stroke-width="12"
+                            stroke-dasharray="251.2" stroke-dashoffset="100"></circle>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-3xl">water_drop</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-slate-400 text-[10px] font-black tracking-[0.2em] uppercase mb-1">Pozo Total</h3>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-primary text-2xl font-bold">$</span>
+                        <span class="text-white text-5xl font-black tracking-tighter">14,500</span>
+                    </div>
+                    <p
+                        class="text-primary text-xs font-bold mt-1 bg-primary/10 inline-block px-2 py-1 rounded-md border border-primary/20">
+                        100% ingresos combinados</p>
+                </div>
+            </div>
+
+            <!-- Right side: Actions -->
+            <div class="flex flex-col gap-3">
+                <button
+                    class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </main>
