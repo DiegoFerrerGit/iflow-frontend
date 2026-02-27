@@ -42,7 +42,7 @@ export class AllocationFormModalComponent implements OnInit {
     'bolt', 'security', 'trending_up', 'work', 'business_center'
   ];
 
-  colorsList: ThemeColor[] = ['primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange', 'blue', 'fuchsia'];
+  colorsList: ThemeColor[] = ['primary', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange', 'fuchsia'];
 
   get availableColors(): ThemeColor[] {
     const usedColors = this.existingAllocations.map(a => a.color);

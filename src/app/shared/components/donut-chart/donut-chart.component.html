@@ -1,0 +1,77 @@
+<div class="relative w-80 h-80 md:w-[340px] md:h-[340px] flex shrink-0 items-center justify-center">
+    <svg class="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 120 120">
+        <!-- Background Track -->
+        <circle cx="60" cy="60" r="50" fill="none" class="stroke-slate-800" stroke-width="12" />
+
+        <!-- Dynamic Segments -->
+        @for (segment of segments; track segment.id) {
+        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
+            [attr.stroke-width]="hoveredSegment?.id === segment.id ? 20 : 16" stroke-linecap="round"
+            [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
+            class="transition-all duration-200 ease-out cursor-pointer"
+            [class.brightness-125]="hoveredSegment?.id === segment.id" (mouseenter)="hoveredSegment = segment"
+            (mouseleave)="hoveredSegment = null" />
+        }
+
+        <!-- Linecap overlap fix for the first segment -->
+        @if (segments.length > 1) {
+        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segments[0].color"
+            [attr.stroke-width]="hoveredSegment?.id === segments[0].id ? 20 : 16" stroke-linecap="round"
+            stroke-dasharray="0 314.159" [attr.stroke-dashoffset]="segments[0].dashOffset"
+            class="pointer-events-none transition-all duration-200 ease-out"
+            [class.brightness-125]="hoveredSegment?.id === segments[0].id" />
+        }
+
+        <!-- Hover Z-Index Overlays -->
+        @for (segment of segments; track segment.id) {
+        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
+            [attr.stroke-width]="hoveredSegment?.id === segment.id ? 20 : 16" stroke-linecap="round"
+            [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
+            class="pointer-events-none transition-all duration-200 ease-out"
+            [class.brightness-125]="hoveredSegment?.id === segment.id"
+            [style.opacity]="hoveredSegment?.id === segment.id ? '1' : '0'" />
+        }
+    </svg>
+
+    <!-- Center Information Display -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30">
+
+        <!-- Idle State (Title) -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
+            [class.opacity-100]="!hoveredSegment" [class.scale-100]="!hoveredSegment" [class.opacity-0]="hoveredSegment"
+            [class.scale-95]="hoveredSegment">
+            @if (title) {
+            <span class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase text-center px-6 leading-relaxed">
+                {{ title }}
+            </span>
+            }
+        </div>
+
+        <!-- Hover State (Segment Details) -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
+            [class.opacity-100]="hoveredSegment" [class.scale-100]="hoveredSegment" [class.opacity-0]="!hoveredSegment"
+            [class.scale-95]="!hoveredSegment">
+
+            <div class="flex flex-col items-center text-center mt-2 w-full">
+                @if (hoveredSegment) {
+                <span class="material-symbols-outlined text-[28px] mb-2 drop-shadow-sm transition-colors"
+                    [style.color]="hoveredSegment.color">
+                    {{ hoveredSegment.icon || 'work' }}
+                </span>
+                <span
+                    class="text-white/60 text-[10px] font-black tracking-widest uppercase mb-1 truncate w-full px-2 transition-colors"
+                    [style.color]="hoveredSegment.color">
+                    {{ hoveredSegment.name }}
+                </span>
+                <!-- Defaulting to class text-white if missing the specified class property -->
+                <span class="text-4xl font-black tracking-tighter drop-shadow-md transition-colors mt-1 mb-1"
+                    [ngClass]="hoveredSegment.amountColorClass || 'text-white'">
+                    {{ hoveredSegment.amount | currency:'USD':'symbol':'1.0-0' }}
+                </span>
+                <span class="text-slate-400 font-black text-sm">({{ hoveredSegment.percentage | number:'1.1-1'
+                    }}%)</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>

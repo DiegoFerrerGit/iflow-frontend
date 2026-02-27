@@ -10,19 +10,12 @@ import { IncomeFormModal } from './components/income-form-modal/income-form-moda
 import { AnimatedFlowComponent } from './components/animated-flow/animated-flow';
 import { AllocationCardComponent } from './components/allocation-card/allocation-card';
 import { AllocationFormModalComponent } from './components/allocation-form-modal/allocation-form-modal';
-
-export interface DonutSegment {
-  income: IncomeSource;
-  dashArray: string;
-  dashOffset: number;
-  color: string;
-  percentage: number;
-}
+import { DonutChartComponent, DonutChartSegment } from '../../shared/components/donut-chart/donut-chart.component';
 
 @Component({
   selector: 'app-odin',
   standalone: true,
-  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent],
+  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent, DonutChartComponent],
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
 })
@@ -39,9 +32,10 @@ export class OdinPageComponent implements OnInit {
   allocations: AllocationBox[] = [];
   isAllocationModalOpen = false;
 
-  // Donut chart hover state
-  hoveredSegment: DonutSegment | null = null;
-  hoveredAllocationSegment: any | null = null;
+  // Donut chart hover state -- moved mostly into the donut chart component internally
+  // These are kept here just in case they are needed for cross-component interactions
+  hoveredSegment: DonutChartSegment | null = null;
+  hoveredAllocationSegment: DonutChartSegment | null = null;
 
   ngOnInit() {
     this.incomes = this.mockService.getIncomes();
@@ -60,6 +54,8 @@ export class OdinPageComponent implements OnInit {
       return a.effortPercentage - b.effortPercentage;
     });
   }
+
+
 
   get totalPool(): number {
     return this.incomes.reduce((sum, income) => sum + income.amount, 0);
@@ -82,48 +78,73 @@ export class OdinPageComponent implements OnInit {
     return Math.max(0, this.totalPool - this.totalAllocated);
   }
 
-  get allocationDonutSegments() {
-    const total = this.totalAllocated;
-    if (total === 0) return [];
+  get allocationDonutSegments(): DonutChartSegment[] {
+    const totalAllocated = this.totalAllocated;
+    const pool = this.totalPool;
+    const freeMoney = this.freeMoney;
+
+    // Total chart represents the entire pool now
+    if (pool === 0) return [];
 
     let currentOffset = 0;
-    const pool = this.totalPool;
+    const r = 50;
+    const circumference = 2 * Math.PI * r;
 
-    return this.allocations.map(box => {
-      // Calculate amount
+    // First map actual allocations
+    const segments = this.allocations.map(box => {
       const amount = box.calculationType === 'absoluto'
         ? box.targetAmount
         : (box.targetAmount / 100) * pool;
 
-      const percentage = amount / total; // relative to total allocated
-
-      // Donut SVG logic (radius = 50, circumference = 2 * PI * 50 = 314.159)
-      const r = 50;
-      const circumference = 2 * Math.PI * r;
+      const percentage = amount / pool; // relative to entire pool to fit with free money
       const strokeLength = percentage * circumference;
       const dashArray = `${strokeLength} ${circumference}`;
 
-      const segment = {
-        box,
+      const segment: DonutChartSegment = {
+        id: box.id,
         amount,
-        percentage: percentage * 100, // display format
+        percentage: percentage * 100,
         dashArray,
-        dashOffset: -currentOffset, // the fix for stacking order
-        color: this.getCategoryColor(box.color)
+        dashOffset: -currentOffset,
+        color: this.getCategoryColor(box.color),
+        icon: box.icon,
+        name: box.name,
+        amountColorClass: `text-${box.color}-400`
       };
 
       currentOffset += strokeLength;
       return segment;
     });
+
+    // Append Free Money block if available
+    if (freeMoney > 0) {
+      const percentage = freeMoney / pool;
+      const strokeLength = percentage * circumference;
+      const dashArray = `${strokeLength} ${circumference}`;
+
+      segments.push({
+        id: 'free-money-indicator',
+        amount: freeMoney,
+        percentage: percentage * 100,
+        dashArray,
+        dashOffset: -currentOffset,
+        color: this.getCategoryColor('blue'), // Cyan/Blue as requested
+        icon: 'account_balance_wallet',
+        name: 'Dinero Libre',
+        amountColorClass: 'text-blue-400'
+      });
+    }
+
+    return segments;
   }
 
-  get donutSegments(): DonutSegment[] {
+  get donutSegments(): DonutChartSegment[] {
     const total = this.totalPool;
     if (total === 0) return [];
 
     let currentOffset = 0;
-    // Radius of the circle. We will use r=45 in the SVG.
-    const r = 45;
+    // Radius of the circle. We will use r=50 in the SVG
+    const r = 50;
     const circumference = 2 * Math.PI * r;
 
     return this.incomes.map(income => {
@@ -131,12 +152,16 @@ export class OdinPageComponent implements OnInit {
       const strokeLength = percentage * circumference;
       const dashArray = `${strokeLength} ${circumference}`;
 
-      const segment: DonutSegment = {
-        income,
+      const segment: DonutChartSegment = {
+        id: income.id,
         dashArray,
         dashOffset: -currentOffset,
         color: this.getCategoryColor(income.category.color as 'primary' | 'cyan' | 'pink'),
-        percentage: percentage * 100
+        percentage: percentage * 100,
+        icon: income.icon,
+        name: income.name,
+        amount: income.amount,
+        amountColorClass: 'text-white'
       };
 
       currentOffset += strokeLength;
@@ -202,10 +227,9 @@ export class OdinPageComponent implements OnInit {
   }
 
   handleSaveAllocation(newBox: AllocationBox) {
-    // Append to the beginning
     this.allocations.unshift(newBox);
+    this.sortAllocations();
     this.closeAllocationModal();
-    // sort allocations if there is a specific order, or just leave unshifted
   }
 
   promptDelete(income: IncomeSource) {
@@ -216,6 +240,7 @@ export class OdinPageComponent implements OnInit {
     if (this.incomeToDelete) {
       this.incomes = this.incomes.filter(i => i.id !== this.incomeToDelete!.id);
       this.incomeToDelete = null;
+      this.sortAllocations();
     }
   }
 
@@ -250,6 +275,7 @@ export class OdinPageComponent implements OnInit {
     }
 
     this.sortIncomes();
+    this.sortAllocations();
     this.closeModal();
   }
 }

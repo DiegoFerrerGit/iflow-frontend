@@ -125,7 +125,7 @@ export class IncomeFormModal implements OnInit {
   onSubmit() {
     if (this.incomeForm.valid) {
       const formValue = this.incomeForm.value;
-      const availableColors: ThemeColor[] = ['primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange'];
+      const availableColors: ThemeColor[] = ['primary', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange'];
 
       // 1. Determine card's primary color (unique per source)
       let cardColorMatch = this.initialIncome?.color;

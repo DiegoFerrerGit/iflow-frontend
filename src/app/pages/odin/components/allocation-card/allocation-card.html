@@ -67,15 +67,17 @@
             <!-- Calculation Badges -->
             <div class="flex items-center gap-2 mb-6">
                 <!-- Percentage reciprocal calculation shown on everything -->
-                <div
-                    class="inline-flex items-center px-2 py-0.5 rounded border border-white/5 bg-white/5 text-slate-300">
-                    <span class="text-[10px] font-bold">{{ computedPercentage | number:'1.0-1' }}%</span>
+                <div class="inline-flex items-center px-2 py-0.5 rounded border border-white/5 bg-white/5">
+                    <span class="text-[10px] font-bold text-slate-200">{{ computedPercentage | number:'1.0-1' }}%</span>
                 </div>
 
-                <div
-                    class="inline-flex items-center px-1.5 py-0.5 rounded border border-white/5 bg-white/5 text-slate-400">
+                <div class="inline-flex items-center px-1.5 py-0.5 rounded border border-white/5 bg-white/5 transition-colors"
+                    [ngClass]="{
+                        'text-blue-300/80': box.calculationType === 'porcentaje',
+                        'text-orange-300/80': box.calculationType !== 'porcentaje'
+                    }">
                     <span class="text-[9px] font-bold uppercase tracking-wider">
-                        {{ box.calculationType === 'porcentaje' ? 'PERCENTAGE' : 'ABSOLUTE' }}
+                        {{ box.calculationType === 'porcentaje' ? 'PORCENTAJE' : 'ABSOLUTO' }}
                     </span>
                 </div>
             </div>

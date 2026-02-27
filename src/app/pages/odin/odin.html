@@ -49,82 +49,28 @@
         <div id="pool" class="w-full max-w-4xl mx-auto -mt-4 relative z-20 px-4">
             <!-- Pool Card -->
             <div
-                class="mt-[10px] bg-[#151821] border-2 border-emerald-500/20 rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-12 md:gap-24 relative overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.05)]">
+                class="mt-[10px] bg-sidebar-bg border border-white/5 rounded-[32px] p-8 md:p-12 mb-4 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 relative overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.15)]">
 
                 <!-- Inner soft highlight -->
                 <div
                     class="absolute inset-0 bg-gradient-to-br from-[#2d7a5d]/10 to-transparent pointer-events-none rounded-[32px] z-30">
                 </div>
 
-                <div class="flex flex-col items-center md:items-start shrink-0">
-                    <h3 class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase mb-6 md:ml-2">FUENTES DE
-                        INGRESOS</h3>
-
+                <div class="flex flex-col items-center md:items-start shrink-0 z-20">
                     <!-- Dynamic Donut Chart Area -->
-                    <div class="relative w-72 h-72 md:w-80 md:h-80 flex items-center justify-center">
-                        <svg class="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 120 120">
-                            <!-- Background track -->
-                            <circle cx="60" cy="60" r="45" fill="none" class="stroke-white/5" stroke-width="16">
-                            </circle>
-
-                            <!-- Dynamic Segments -->
-                            @for (segment of donutSegments; track segment.income.id) {
-                            <!-- We use style="transform-origin: 60px 60px;" and CSS transform to correctly scale SVG circles from their center -->
-                            <circle cx="60" cy="60" r="45" fill="none" [attr.stroke]="segment.color"
-                                [attr.stroke-width]="hoveredSegment === segment ? 20 : 16"
-                                [attr.stroke-dasharray]="segment.dashArray"
-                                [attr.stroke-dashoffset]="segment.dashOffset" style="transform-origin: 60px 60px;"
-                                [class.drop-shadow-xl]="hoveredSegment === segment"
-                                class="transition-all duration-300 ease-out cursor-pointer"
-                                [style.transform]="hoveredSegment === segment ? 'scale(1.05)' : 'scale(1)'"
-                                (mouseenter)="hoveredSegment = segment" (mouseleave)="hoveredSegment = null">
-                            </circle>
-                            }
-                        </svg>
-
-                        <!-- Center Content (Hovered only) -->
-                        <div class="absolute inset-0 flex items-center justify-center p-6 mt-1 pointer-events-none">
-
-                            <!-- Wrapper for transition -->
-                            <div class="flex flex-col items-center justify-center text-center transition-all duration-300 ease-out"
-                                [class.opacity-100]="hoveredSegment" [class.opacity-0]="!hoveredSegment"
-                                [class.scale-100]="hoveredSegment" [class.scale-95]="!hoveredSegment">
-
-                                @if (hoveredSegment) {
-                                <!-- Hover State Details -->
-                                <div class="w-10 h-10 rounded-xl mb-2 flex items-center justify-center bg-white/5 border border-white/10"
-                                    [style.color]="hoveredSegment.color">
-                                    <span class="material-symbols-outlined text-2xl">
-                                        {{ hoveredSegment.income.icon || 'work' }}
-                                    </span>
-                                </div>
-                                <span
-                                    class="text-white/60 text-[10px] font-black tracking-widest uppercase mb-1 truncate w-full px-2"
-                                    [style.color]="hoveredSegment.color">
-                                    {{ hoveredSegment.income.name }}
-                                </span>
-                                <span
-                                    class="text-white text-3xl font-black tracking-tighter mb-1 relative z-10 drop-shadow-md">
-                                    {{ hoveredSegment.income.amount | currency:'USD':'symbol':'1.0-0' }}
-                                </span>
-                                <span class="text-slate-400 font-black text-sm">({{ hoveredSegment.percentage |
-                                    number:'1.1-1' }}%)</span>
-                                }
-                            </div>
-                        </div>
-                    </div>
+                    <app-donut-chart title="FUENTES DE INGRESOS" [segments]="donutSegments"></app-donut-chart>
                 </div>
 
                 <!-- Right side: Information -->
-                <div class="flex flex-col w-full">
+                <div class="flex flex-col w-full z-20">
                     <h3 class="text-slate-400 text-[11px] font-black tracking-[0.2em] uppercase mb-2">Total de
                         Ingresos
                     </h3>
                     <div class="flex items-baseline gap-3 mb-8">
-                        <span class="text-white text-5xl leading-none font-black tracking-tighter">
+                        <span class="text-emerald-400 text-5xl leading-none font-black tracking-tighter drop-shadow-md">
                             {{ totalPool | currency:'USD':'symbol':'1.0-0' }}
                         </span>
-                        <span class="text-slate-500 text-2xl font-black tracking-wide">USD</span>
+                        <span class="text-emerald-500/50 text-2xl font-black tracking-wide">USD</span>
                     </div>
 
                     <div class="w-full h-px bg-white/10 mb-8 mt-2"></div>
@@ -138,21 +84,15 @@
         </div>
 
         <!-- Outbound Flow from Pool to Distribution Boxes -->
-        <div class="w-full max-w-[80%] mx-auto -mt-3 relative z-10">
+        <div class="w-full max-w-[80%] mx-auto relative z-10">
             <!-- Current mockup assumes 4 distribution boxes max per row -->
             <app-animated-flow class="w-full" [points]="4" direction="out" color="orange"></app-animated-flow>
         </div>
 
         <!-- Allocation Boxes Section -->
-        <section class="mt-8 mb-24 w-full">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-white text-3xl font-black tracking-tighter shadow-sm mb-1">
-                        CAJAS DE DISTRIBUCIÓN
-                    </h2>
-                    <p class="text-slate-400 font-medium text-sm">Organiza el pool total en objetivos y fondos
-                        específicos.</p>
-                </div>
+        <section class="mt-8 w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-white tracking-wide uppercase">Distribución de ingresos</h2>
 
                 @if (allocations.length >= 4) {
                 <button (click)="openAllocationModal()"
@@ -191,69 +131,23 @@
 
             <!-- Global Summary Card -->
             <div id="global-summary"
-                class="bg-[#151821] border-2 border-emerald-500/20 rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-12 md:gap-24 relative overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.05)]">
+                class="bg-sidebar-bg border border-white/5 rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 w-full max-w-5xl mx-auto relative overflow-hidden shadow-[0_0_40px_rgba(239,68,68,0.1)]">
 
                 <!-- Inner soft highlight -->
                 <div
-                    class="absolute inset-0 bg-gradient-to-br from-[#2d7a5d]/10 to-transparent pointer-events-none rounded-[32px] z-30">
+                    class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none rounded-[32px] z-30">
                 </div>
 
                 <div class="flex flex-col items-center md:items-start shrink-0 z-20">
-                    <h3 class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase mb-6 md:ml-2">DISTRIBUCIÓN
-                        DE CAJAS</h3>
-
                     <!-- SVG Donut Logic Container -->
-                    <div class="relative w-72 h-72 md:w-80 md:h-80 flex shrink-0 items-center justify-center">
-                        <svg class="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 120 120">
-                            <!-- Background Track -->
-                            <circle cx="60" cy="60" r="50" fill="none" class="stroke-slate-800" stroke-width="12" />
-
-                            <!-- Dynamic Segments -->
-                            @for (segment of allocationDonutSegments; track segment.box.id) {
-                            <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color" stroke-width="16"
-                                stroke-linecap="round" [attr.stroke-dasharray]="segment.dashArray"
-                                [attr.stroke-dashoffset]="segment.dashOffset"
-                                class="transition-all duration-1000 ease-out cursor-pointer hover:stroke-[20px] hover:brightness-125"
-                                (mouseenter)="hoveredAllocationSegment = segment"
-                                (mouseleave)="hoveredAllocationSegment = null" />
-                            }
-                        </svg>
-
-                        <!-- Center Information Display -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 transition-all duration-300"
-                            [class.opacity-100]="hoveredAllocationSegment" [class.scale-100]="hoveredAllocationSegment"
-                            [class.opacity-0]="!hoveredAllocationSegment" [class.scale-95]="!hoveredAllocationSegment">
-
-                            <div class="flex flex-col items-center text-center mt-2">
-                                @if (hoveredAllocationSegment) {
-                                <span
-                                    class="material-symbols-outlined text-[28px] mb-2 drop-shadow-sm transition-colors"
-                                    [style.color]="hoveredAllocationSegment.color">
-                                    {{ hoveredAllocationSegment.box.icon }}
-                                </span>
-                                <span
-                                    class="text-white/60 text-[10px] font-black tracking-widest uppercase mb-1 truncate w-full px-2 transition-colors"
-                                    [style.color]="hoveredAllocationSegment.color">
-                                    {{ hoveredAllocationSegment.box.name }}
-                                </span>
-                                <span
-                                    class="text-white text-4xl font-black tracking-tighter drop-shadow-md transition-colors mt-1 mb-1"
-                                    [ngClass]="'text-' + hoveredAllocationSegment.box.color + '-400'">
-                                    {{ hoveredAllocationSegment.amount | currency:'USD':'symbol':'1.0-0' }}
-                                </span>
-                                <span class="text-slate-400 font-black text-sm">({{ hoveredAllocationSegment.percentage
-                                    | number:'1.1-1' }}%)</span>
-                                }
-                            </div>
-                        </div>
-                    </div>
+                    <app-donut-chart title="DISTRIBUCIÓN DE GASTOS"
+                        [segments]="allocationDonutSegments"></app-donut-chart>
                 </div>
 
                 <!-- Right side: Information -->
                 <div class="flex flex-col w-full md:w-auto -mt-4 z-20">
-                    <h3 class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase mb-1">RESUMEN GLOBAL</h3>
 
-                    <div class="flex items-start gap-12 mb-6 mt-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-12 sm:gap-16 mb-6 mt-4">
                         <!-- Total Expenses -->
                         <div>
                             <span
@@ -261,26 +155,28 @@
                                 DE GASTOS</span>
                             <div class="flex items-baseline gap-1.5">
                                 <span
-                                    class="text-emerald-400 text-4xl leading-none font-black tracking-tighter drop-shadow-sm">
+                                    class="text-logout-coral text-4xl leading-none font-black tracking-tighter drop-shadow-sm">
                                     {{ totalAllocated | currency:'USD':'symbol':'1.0-0' }}
                                 </span>
-                                <span class="text-emerald-500/50 text-lg font-black tracking-wide">USD</span>
+                                <span class="text-logout-coral/50 text-lg font-black tracking-wide">USD</span>
                             </div>
                         </div>
 
                         <!-- Free Money -->
+                        @if (freeMoney > 0) {
                         <div>
                             <span
                                 class="text-slate-400 text-[11px] font-black tracking-[0.2em] uppercase block mb-1 cursor-help"
-                                title="Dinero remanente sin asignar">DINERO LIBRE</span>
+                                title="Dinero remanente sin asignar">DINERO LIBRE / DISPONIBLE</span>
                             <div class="flex items-baseline gap-1.5">
                                 <span
-                                    class="text-white text-4xl leading-none font-black tracking-tighter drop-shadow-sm">
+                                    class="text-cyan-400 text-4xl leading-none font-black tracking-tighter drop-shadow-sm">
                                     {{ freeMoney | currency:'USD':'symbol':'1.0-0' }}
                                 </span>
-                                <span class="text-white/50 text-lg font-black tracking-wide">USD</span>
+                                <span class="text-cyan-500/50 text-lg font-black tracking-wide">USD</span>
                             </div>
                         </div>
+                        }
                     </div>
 
                     <div class="w-full h-px bg-white/10 mb-6 max-w-[400px]"></div>
