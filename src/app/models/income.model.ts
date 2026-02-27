@@ -1,4 +1,4 @@
-export type ThemeColor = 'primary' | 'cyan' | 'pink' | 'emerald' | 'amber' | 'indigo' | 'rose' | 'orange';
+export type ThemeColor = 'primary' | 'cyan' | 'pink' | 'emerald' | 'amber' | 'indigo' | 'rose' | 'orange' | 'blue' | 'fuchsia';
 
 export interface IncomeSource {
     id: string;

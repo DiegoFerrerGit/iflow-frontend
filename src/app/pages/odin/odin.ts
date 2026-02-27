@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { BannerComponent } from './components/banner/banner';
 import { IncomeCardComponent } from './components/income-card/income-card';
 import { OdinMockService } from '../../modules/odin/services/odin-mock.service';
-import { IncomeSource } from '../../models/income.model';
+import { IncomeSource, ThemeColor } from '../../models/income.model';
+import { AllocationBox } from '../../models/allocation.model';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { IncomeFormModal } from './components/income-form-modal/income-form-modal';
 import { AnimatedFlowComponent } from './components/animated-flow/animated-flow';
+import { AllocationCardComponent } from './components/allocation-card/allocation-card';
+import { AllocationFormModalComponent } from './components/allocation-form-modal/allocation-form-modal';
 
 export interface DonutSegment {
   income: IncomeSource;
@@ -19,23 +22,32 @@ export interface DonutSegment {
 @Component({
   selector: 'app-odin',
   standalone: true,
-  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent],
+  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent],
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
 })
 export class OdinPageComponent implements OnInit {
   private mockService = inject(OdinMockService);
+
+  // Incomes State
   incomes: IncomeSource[] = [];
   incomeToDelete: IncomeSource | null = null;
   isModalOpen = false;
   incomeToEdit: IncomeSource | null = null;
 
+  // Allocations State
+  allocations: AllocationBox[] = [];
+  isAllocationModalOpen = false;
+
   // Donut chart hover state
   hoveredSegment: DonutSegment | null = null;
+  hoveredAllocationSegment: any | null = null;
 
   ngOnInit() {
     this.incomes = this.mockService.getIncomes();
+    this.allocations = this.mockService.getAllocations();
     this.sortIncomes();
+    this.sortAllocations();
   }
 
   private sortIncomes() {
@@ -51,6 +63,58 @@ export class OdinPageComponent implements OnInit {
 
   get totalPool(): number {
     return this.incomes.reduce((sum, income) => sum + income.amount, 0);
+  }
+
+  get totalAllocated(): number {
+    const total = this.totalPool;
+    if (total === 0) return 0;
+
+    return this.allocations.reduce((sum, box) => {
+      if (box.calculationType === 'absoluto') {
+        return sum + box.targetAmount;
+      } else {
+        return sum + ((box.targetAmount / 100) * total);
+      }
+    }, 0);
+  }
+
+  get freeMoney(): number {
+    return Math.max(0, this.totalPool - this.totalAllocated);
+  }
+
+  get allocationDonutSegments() {
+    const total = this.totalAllocated;
+    if (total === 0) return [];
+
+    let currentOffset = 0;
+    const pool = this.totalPool;
+
+    return this.allocations.map(box => {
+      // Calculate amount
+      const amount = box.calculationType === 'absoluto'
+        ? box.targetAmount
+        : (box.targetAmount / 100) * pool;
+
+      const percentage = amount / total; // relative to total allocated
+
+      // Donut SVG logic (radius = 50, circumference = 2 * PI * 50 = 314.159)
+      const r = 50;
+      const circumference = 2 * Math.PI * r;
+      const strokeLength = percentage * circumference;
+      const dashArray = `${strokeLength} ${circumference}`;
+
+      const segment = {
+        box,
+        amount,
+        percentage: percentage * 100, // display format
+        dashArray,
+        dashOffset: -currentOffset, // the fix for stacking order
+        color: this.getCategoryColor(box.color)
+      };
+
+      currentOffset += strokeLength;
+      return segment;
+    });
   }
 
   get donutSegments(): DonutSegment[] {
@@ -80,16 +144,20 @@ export class OdinPageComponent implements OnInit {
     });
   }
 
-  private getCategoryColor(colorCode: 'primary' | 'cyan' | 'pink'): string {
-    switch (colorCode) {
-      case 'primary': return '#6d489b'; // Purple
-      case 'cyan': return '#10b981'; // Green (#2d7a5d in design, but let's use the brighter #10b981 or what's in tailwind)
-      // Actually let's use the exact chart colors from previous hardcoded svg:
-      // Purple: #6d489b, Green: #2d7a5d, Pink: #b35c75
-      // Wait, Tinasoft represents 8000 (primary/purple), Modak 5000 (cyan/green), Sunset 1500 (pink)
-      case 'pink': return '#b35c75';
-      default: return '#6d489b';
-    }
+  private getCategoryColor(color: ThemeColor): string {
+    const colorMap: Record<ThemeColor, string> = {
+      'primary': '#8b5cf6', // Violet-500
+      'cyan': '#06b6d4',    // Cyan-500
+      'pink': '#ec4899',    // Pink-500
+      'emerald': '#10b981', // Emerald-500
+      'amber': '#f59e0b',   // Amber-500
+      'indigo': '#6366f1',  // Indigo-500
+      'rose': '#f43f5e',    // Rose-500
+      'orange': '#f97316',  // Orange-500
+      'blue': '#3b82f6',    // Blue-500
+      'fuchsia': '#d946ef'  // Fuchsia-500
+    };
+    return colorMap[color] || colorMap['primary'];
   }
 
   // Override to exact chart colors:
@@ -102,8 +170,42 @@ export class OdinPageComponent implements OnInit {
     }
   }
 
-  drop(event: CdkDragDrop<IncomeSource[]>) {
+  // --- Methods ---
+
+  sortAllocations() {
+    // Determine the real amount for sorting
+    const getAmount = (box: AllocationBox) => {
+      return box.calculationType === 'absoluto' ? box.targetAmount : (box.targetAmount / 100) * this.totalPool;
+    };
+    this.allocations.sort((a, b) => getAmount(b) - getAmount(a));
+  }
+
+  dropIncome(event: CdkDragDrop<IncomeSource[]>) {
     moveItemInArray(this.incomes, event.previousIndex, event.currentIndex);
+  }
+
+  dropAllocation(event: CdkDragDrop<AllocationBox[]>) {
+    if (event.previousIndex !== event.currentIndex) {
+      moveItemInArray(this.allocations, event.previousIndex, event.currentIndex);
+    }
+  }
+
+  // Modals - Allocations
+  openAllocationModal() {
+    if (this.freeMoney > 0) {
+      this.isAllocationModalOpen = true;
+    }
+  }
+
+  closeAllocationModal() {
+    this.isAllocationModalOpen = false;
+  }
+
+  handleSaveAllocation(newBox: AllocationBox) {
+    // Append to the beginning
+    this.allocations.unshift(newBox);
+    this.closeAllocationModal();
+    // sort allocations if there is a specific order, or just leave unshifted
   }
 
   promptDelete(income: IncomeSource) {
@@ -115,6 +217,10 @@ export class OdinPageComponent implements OnInit {
       this.incomes = this.incomes.filter(i => i.id !== this.incomeToDelete!.id);
       this.incomeToDelete = null;
     }
+  }
+
+  deleteAllocation(box: AllocationBox) {
+    this.allocations = this.allocations.filter(a => a.id !== box.id);
   }
 
   cancelDelete() {

@@ -1,0 +1,130 @@
+<div
+    class="allocation-card w-full bg-[#1b202c] rounded-2xl relative group transition-all duration-300 hover:-translate-y-1 flex flex-col overflow-hidden hover:shadow-[0_8px_30px_rgba(168,85,247,0.25)] h-full min-h-[260px]">
+
+    <!-- Safelist for dynamic Tailwind colors -->
+    <div
+        class="hidden bg-emerald-500 bg-rose-500 bg-orange-500 bg-cyan-500 bg-emerald-500/10 bg-rose-500/10 bg-orange-500/10 bg-cyan-500/10 bg-blue-500 bg-fuchsia-500 bg-blue-500/10 bg-fuchsia-500/10 text-emerald-400 text-rose-400 text-orange-400 text-cyan-400 text-blue-400 text-fuchsia-400 bg-primary bg-amber-400 bg-pink-400 bg-indigo-400">
+    </div>
+
+    <!-- Glowing Background effect (visible mostly on hover) -->
+    <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[50px] opacity-10 pointer-events-none transition-opacity duration-300 group-hover:opacity-40"
+        [ngClass]="{
+            'bg-primary': box.color === 'primary',
+            'bg-cyan-400': box.color === 'cyan',
+            'bg-pink-400': box.color === 'pink',
+            'bg-emerald-400': box.color === 'emerald',
+            'bg-amber-400': box.color === 'amber',
+            'bg-indigo-400': box.color === 'indigo',
+            'bg-rose-400': box.color === 'rose',
+            'bg-orange-400': box.color === 'orange',
+            'bg-blue-400': box.color === 'blue',
+            'bg-fuchsia-400': box.color === 'fuchsia'
+        }">
+    </div>
+
+    <!-- Colorful top accent line -->
+    <div class="absolute top-0 left-0 right-0 h-2 transition-colors duration-300 z-10"
+        [ngClass]="'bg-' + box.color + '-500'"></div>
+
+    <!-- Top-center drag handle (visible on hover) -->
+    <div
+        class="absolute top-2 left-1/2 -translate-x-1/2 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-grab z-20">
+        <span class="material-symbols-outlined text-[16px]">drag_indicator</span>
+    </div>
+
+    <!-- Action Buttons (Delete) -->
+    <div class="absolute top-4 right-4 flex items-center gap-2 z-20">
+        <!-- Delete Button (Visible on hover) -->
+        <button (click)="delete.emit(); $event.stopPropagation()"
+            class="w-7 h-7 flex items-center justify-center rounded-lg bg-logout-coral/10 text-logout-coral hover:bg-logout-coral/20 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">delete</span>
+        </button>
+    </div>
+
+    <div class="p-5 pt-6 flex flex-col flex-grow z-10">
+        <!-- Icon Badge -->
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-6 shadow-sm border border-white/5"
+            [ngClass]="[
+                 'bg-' + box.color + '-500/10',
+                 'text-' + box.color + '-400'
+             ]">
+            <span class="material-symbols-outlined text-[22px] drop-shadow-sm">{{ box.icon }}</span>
+        </div>
+
+        <div class="flex flex-col">
+            <!-- Box Name -->
+            <h3 class="font-extrabold text-white text-[13px] tracking-[0.1em] uppercase leading-tight mb-2">{{ box.name
+                }}</h3>
+
+            <!-- Amount -->
+            <div class="flex items-start gap-1 mb-3">
+                <span class="text-slate-500 text-lg font-bold mt-1">$</span>
+                <span class="text-white text-4xl font-black tracking-tighter drop-shadow-md">
+                    {{ computedAmount | number:'1.0-0' }}
+                </span>
+            </div>
+
+            <!-- Calculation Badges -->
+            <div class="flex items-center gap-2 mb-6">
+                <!-- Percentage reciprocal calculation shown on everything -->
+                <div
+                    class="inline-flex items-center px-2 py-0.5 rounded border border-white/5 bg-white/5 text-slate-300">
+                    <span class="text-[10px] font-bold">{{ computedPercentage | number:'1.0-1' }}%</span>
+                </div>
+
+                <div
+                    class="inline-flex items-center px-1.5 py-0.5 rounded border border-white/5 bg-white/5 text-slate-400">
+                    <span class="text-[9px] font-bold uppercase tracking-wider">
+                        {{ box.calculationType === 'porcentaje' ? 'PERCENTAGE' : 'ABSOLUTE' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="w-full h-px bg-white/5 mb-6"></div>
+
+            <!-- Progress Bar Section (For Temporal or Savings) -->
+            @if (box.type === 'temporal' && box.savingsTarget && box.savedAmount !== undefined) {
+            <div class="flex flex-col mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-500 text-[9px] font-bold uppercase tracking-wider">PROGRESO <span
+                            class="text-slate-400">(SAVED: ${{ box.savedAmount | number:'1.0-0' }} / TARGET: ${{
+                            box.savingsTarget | number:'1.0-0' }})</span></span>
+                    <span class="text-slate-400 text-[10px] font-bold">{{ (box.savedAmount / box.savingsTarget * 100) |
+                        number:'1.0-0' }}%</span>
+                </div>
+                <!-- Bar -->
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-1000" [ngClass]="'bg-' + box.color + '-500'"
+                        [style.width.%]="(box.savedAmount / box.savingsTarget) * 100">
+                    </div>
+                </div>
+            </div>
+            } @else if (box.type === 'remanente') {
+            <div class="flex flex-col mb-6">
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                    <div class="h-full rounded-full bg-cyan-500 w-[10%]"></div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- Description centered in the lower portion -->
+        <div class="mt-2 mb-2">
+            <span class="text-slate-400 text-[13px] font-medium leading-tight line-clamp-2">{{ box.subCategory }}</span>
+        </div>
+
+        <!-- Spacer to push bottom section down -->
+        <div class="flex-grow"></div>
+
+        <!-- Bottom section: Status Tag only, aligned right -->
+        <div class="flex items-center justify-end mt-1">
+            <div class="flex gap-2">
+                <div class="inline-flex items-center px-2 py-1 rounded border shadow-sm backdrop-blur-sm transition-colors"
+                    [ngClass]="{
+                          'border-amber-500/30 text-amber-500': box.type === 'temporal',
+                          'border-blue-500/30 text-blue-500': box.type === 'permanente',
+                          'border-yellow-500/30 text-yellow-500': box.type === 'remanente'
+                      }">
+                    <span class="text-[9px] font-black uppercase tracking-wider">{{ box.type }}</span>
+                </div>
+            </div>
