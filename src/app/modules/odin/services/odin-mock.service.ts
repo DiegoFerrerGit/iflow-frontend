@@ -14,6 +14,7 @@ export class OdinMockService {
                 role: 'Engineering Manager',
                 amount: 8000,
                 effortPercentage: 60,
+                icon: 'code',
                 category: {
                     label: 'Management',
                     type: 'primary'
@@ -25,6 +26,7 @@ export class OdinMockService {
                 role: 'Consulting',
                 amount: 5000,
                 effortPercentage: 30,
+                icon: 'group',
                 category: {
                     label: 'Consulting',
                     type: 'cyan'
@@ -36,6 +38,7 @@ export class OdinMockService {
                 role: 'Advisory',
                 amount: 1500,
                 effortPercentage: 10,
+                icon: 'account_balance',
                 category: {
                     label: 'Advisory',
                     type: 'pink'

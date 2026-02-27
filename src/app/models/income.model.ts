@@ -4,6 +4,7 @@ export interface IncomeSource {
     role: string;
     amount: number;
     effortPercentage: number;
+    icon?: string;
     category: {
         label: string;
         type: 'primary' | 'cyan' | 'pink';
