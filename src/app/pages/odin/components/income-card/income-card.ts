@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { IncomeSource } from '../../../../models/income.model';
 
@@ -11,4 +11,5 @@ import { IncomeSource } from '../../../../models/income.model';
 })
 export class IncomeCardComponent {
   @Input({ required: true }) income!: IncomeSource;
+  @Output() delete = new EventEmitter<void>();
 }
