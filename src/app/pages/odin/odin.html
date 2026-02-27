@@ -20,11 +20,12 @@
         </div>
 
         <!-- Incomes to Pool Flow -->
-        <div class="w-full max-w-2xl mx-auto -mt-6 relative z-10 flex justify-center py-6 h-[100px] overflow-visible">
-            <svg width="100%" height="80" class="overflow-visible absolute top-0" preserveAspectRatio="none">
+        <div class="w-full max-w-2xl mx-auto -mt-3 relative z-10 flex justify-center py-6 h-[120px] overflow-visible">
+            <svg viewBox="0 0 1000 120" class="w-[100%] h-full overflow-visible absolute top-0"
+                preserveAspectRatio="none">
                 <defs>
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
+                    <filter id="glow-flow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
                         <feMerge>
                             <feMergeNode in="blur" />
                             <feMergeNode in="SourceGraphic" />
@@ -32,8 +33,8 @@
                     </filter>
                     <style>
                         .animated-path {
-                            stroke-dasharray: 6 8;
-                            animation: dash-flow 3s linear infinite;
+                            stroke-dasharray: 8 12;
+                            animation: dash-flow 2s linear infinite;
                         }
 
                         @keyframes dash-flow {
@@ -45,62 +46,76 @@
                 </defs>
 
                 @for (income of incomes; track income; let i = $index) {
-                <!-- Helper Background path for depth -->
+                <!-- Background Track -->
                 <path
-                    [attr.d]="'M ' + (((100 / incomes.length) * i) + ((100 / incomes.length) / 2)) + '% 0 C ' + (((100 / incomes.length) * i) + ((100 / incomes.length) / 2)) + '% 40, 50% 40, 50% 80'"
-                    fill="none" stroke="#34d399" stroke-width="2" opacity="0.1" stroke-linecap="round" />
+                    [attr.d]="'M ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 0 C ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 60, 500 60, 500 120'"
+                    fill="none" stroke="#22c55e" stroke-width="2" opacity="0.15" stroke-linecap="round" />
 
-                <!-- Animated foreground dashed line -->
+                <!-- Animated flow -->
                 <path
-                    [attr.d]="'M ' + (((100 / incomes.length) * i) + ((100 / incomes.length) / 2)) + '% 0 C ' + (((100 / incomes.length) * i) + ((100 / incomes.length) / 2)) + '% 40, 50% 40, 50% 80'"
-                    fill="none" stroke="#34d399" stroke-width="2" class="animated-path" filter="url(#glow)"
+                    [attr.d]="'M ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 0 C ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 60, 500 60, 500 120'"
+                    fill="none" stroke="#22c55e" stroke-width="3" class="animated-path" filter="url(#glow-flow)"
                     stroke-linecap="round" />
 
-                <!-- Top Connection Dots -->
-                <circle [attr.cx]="(((100 / incomes.length) * i) + ((100 / incomes.length) / 2)) + '%'" cy="0" r="4"
-                    fill="#34d399" filter="url(#glow)" />
+                <!-- Source Dots -->
+                <circle [attr.cx]="(((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2))" cy="0" r="5"
+                    fill="#4ade80" filter="url(#glow-flow)" />
                 }
 
-                <!-- Bottom Sink Dot -->
-                <circle cx="50%" cy="80" r="6" fill="#34d399" filter="url(#glow)" />
+                <!-- Target Pool Entry Dot -->
+                <circle cx="500" cy="120" r="7" fill="#4ade80" filter="url(#glow-flow)" />
             </svg>
         </div>
 
         <!-- Total Pool Central Card -->
         <div
-            class="w-full max-w-2xl mx-auto bg-[#16121d] border border-primary/30 rounded-3xl p-6 relative z-20 flex items-center justify-between shadow-[0_0_30px_rgba(168,85,247,0.15)] mt-2">
+            class="w-full max-w-2xl mx-auto bg-sidebar-bg border border-white/10 rounded-[32px] p-8 relative z-20 flex items-center justify-between shadow-2xl mt-4 
+            before:absolute before:inset-0 before:rounded-[32px] before:bg-gradient-to-t before:from-primary/10 before:to-transparent before:pointer-events-none overflow-hidden group">
+
+            <!-- Shimmer effect overlay -->
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]">
+            </div>
+
             <!-- Left side: Icon/Chart placeholder -->
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-8 relative z-10">
                 <!-- Circular Segment Graphic -->
-                <div class="relative w-24 h-24 flex items-center justify-center shrink-0">
-                    <svg class="w-full h-full transform -rotate-90 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+                <div class="relative w-28 h-28 flex items-center justify-center shrink-0">
+                    <svg class="w-full h-full transform -rotate-90 drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]"
                         viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="40" fill="none" class="stroke-white/5" stroke-width="12"></circle>
-                        <circle cx="50" cy="50" r="40" fill="none" class="stroke-primary" stroke-width="12"
-                            stroke-dasharray="251.2" stroke-dashoffset="100"></circle>
+                        <circle cx="50" cy="50" r="42" fill="none" class="stroke-white/5" stroke-width="8"></circle>
+                        <circle cx="50" cy="50" r="42" fill="none" class="stroke-primary" stroke-width="8"
+                            stroke-dasharray="263.89" stroke-dashoffset="52.7"></circle>
                     </svg>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-primary text-3xl">water_drop</span>
+                    <div
+                        class="absolute inset-0 flex items-center justify-center bg-primary/10 rounded-full m-4 border border-primary/20 backdrop-blur-md">
+                        <span class="material-symbols-outlined text-primary text-4xl">inventory_2</span>
                     </div>
                 </div>
 
                 <div>
-                    <h3 class="text-slate-400 text-[10px] font-black tracking-[0.2em] uppercase mb-1">Pozo Total</h3>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-primary text-2xl font-bold">$</span>
-                        <span class="text-white text-5xl font-black tracking-tighter">14,500</span>
+                    <h3 class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase mb-2">Pozo Total</h3>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-primary text-2xl font-black">$</span>
+                        <span class="text-white text-[56px] leading-none font-black tracking-tighter">14,500</span>
                     </div>
                     <p
-                        class="text-primary text-xs font-bold mt-1 bg-primary/10 inline-block px-2 py-1 rounded-md border border-primary/20">
-                        100% ingresos combinados</p>
+                        class="text-primary text-[10px] font-black uppercase mt-3 tracking-widest bg-primary/10 inline-flex items-center px-3 py-1.5 rounded-lg border border-primary/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary mr-2 shadow-[0_0_8px_currentColor]"></span>
+                        100% Retorno Flujos
+                    </p>
                 </div>
             </div>
 
             <!-- Right side: Actions -->
-            <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-3 relative z-10">
                 <button
-                    class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
-                    <span class="material-symbols-outlined">settings</span>
+                    class="w-12 h-12 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors border border-white/5 hover:border-white/20">
+                    <span class="material-symbols-outlined text-xl">settings</span>
+                </button>
+                <button
+                    class="w-12 h-12 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary flex items-center justify-center transition-colors border border-primary/20 hover:border-primary/40">
+                    <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
                 </button>
             </div>
         </div>
