@@ -12,6 +12,7 @@ import { IncomeSource } from '../../../../models/income.model';
 })
 export class IncomeFormModal implements OnInit {
   @Input() initialIncome: IncomeSource | null = null;
+  @Input() existingIncomes: IncomeSource[] = [];
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<IncomeSource>();
 
@@ -42,7 +43,7 @@ export class IncomeFormModal implements OnInit {
       amount: [null, [Validators.required, Validators.min(0)]],
       currency: ['USD ($)'], // Default based on select
       categoryLabel: ['', Validators.required],
-      icon: ['category'],
+      icon: [''],
       effortPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
     });
 
@@ -78,13 +79,26 @@ export class IncomeFormModal implements OnInit {
 
       const categoryTypeMatch = this.initialIncome?.category.type || 'primary'; // Simplification for now
 
+      let finalIcon = formValue.icon?.trim();
+
+      // If empty, generate a random icon not currently in use
+      if (!finalIcon) {
+        const usedIcons = new Set(this.existingIncomes.map(i => i.icon).filter(i => !!i));
+        const availableIcons = this.curatedIcons.filter(icon => !usedIcons.has(icon));
+
+        // If somehow all 50+ are used, fallback to the entire list
+        const poolToPickFrom = availableIcons.length > 0 ? availableIcons : this.curatedIcons;
+        const randomIndex = Math.floor(Math.random() * poolToPickFrom.length);
+        finalIcon = poolToPickFrom[randomIndex];
+      }
+
       const result: IncomeSource = {
         id: this.initialIncome?.id || crypto.randomUUID(),
         name: formValue.name,
         role: formValue.role,
         amount: Number(formValue.amount),
         effortPercentage: Number(formValue.effortPercentage),
-        icon: formValue.icon,
+        icon: finalIcon,
         category: {
           label: formValue.categoryLabel,
           type: categoryTypeMatch as any

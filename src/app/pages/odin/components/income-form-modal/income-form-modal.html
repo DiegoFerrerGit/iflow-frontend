@@ -66,9 +66,14 @@
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Tag /
                             Categoría</label>
-                        <input formControlName="categoryLabel"
-                            class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary px-4 py-3 placeholder:text-slate-600 transition-all"
-                            placeholder="Ej: Management" type="text" />
+                        <input formControlName="categoryLabel" list="tag-options"
+                            class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary px-4 py-3 placeholder:text-slate-600 transition-all cursor-pointer"
+                            placeholder="Ej: Management" type="text" autocomplete="off" />
+                        <datalist id="tag-options">
+                            <option value="Management"></option>
+                            <option value="Developer"></option>
+                            <option value="Consulting"></option>
+                        </datalist>
                     </div>
                     <div class="space-y-2 relative">
                         <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Icono o
@@ -79,9 +84,11 @@
                                 @if (isImageUrl(incomeForm.get('icon')?.value)) {
                                 <img [src]="incomeForm.get('icon')?.value" class="w-full h-full object-cover"
                                     alt="icon preview">
-                                } @else {
+                                } @else if (incomeForm.get('icon')?.value) {
                                 <span class="material-symbols-outlined text-slate-400 text-[20px]">{{
-                                    incomeForm.get('icon')?.value || 'category' }}</span>
+                                    incomeForm.get('icon')?.value }}</span>
+                                } @else {
+                                <span class="material-symbols-outlined text-slate-600 text-[20px]">help</span>
                                 }
                             </div>
                             <input formControlName="icon"
