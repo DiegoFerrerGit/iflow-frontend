@@ -38,89 +38,77 @@
         </div>
 
         <!-- Incomes to Pool Flow -->
-        <div class="w-full max-w-2xl mx-auto -mt-3 relative z-10 flex justify-center py-6 h-[120px] overflow-visible">
-            <svg viewBox="0 0 1000 120" class="w-[100%] h-full overflow-visible absolute top-0"
-                preserveAspectRatio="none">
-                <defs>
-                    <filter id="glow-flow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="blur" />
-                        <feMerge>
-                            <feMergeNode in="blur" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                    <style>
-                        .animated-path {
-                            stroke-dasharray: 8 12;
-                            animation: dash-flow 2s linear infinite;
-                        }
-
-                        @keyframes dash-flow {
-                            to {
-                                stroke-dashoffset: -100;
-                            }
-                        }
-                    </style>
-                </defs>
-
-                @for (income of incomes; track income; let i = $index) {
-                <!-- Background Track -->
-                <path
-                    [attr.d]="'M ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 0 C ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 60, 500 60, 500 120'"
-                    fill="none" stroke="#22c55e" stroke-width="2" opacity="0.15" stroke-linecap="round" />
-
-                <!-- Animated flow -->
-                <path
-                    [attr.d]="'M ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 0 C ' + (((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2)) + ' 60, 500 60, 500 120'"
-                    fill="none" stroke="#22c55e" stroke-width="3" class="animated-path" filter="url(#glow-flow)"
-                    stroke-linecap="round" />
-
-                <!-- Source Dots -->
-                <circle [attr.cx]="(((1000 / incomes.length) * i) + ((1000 / incomes.length) / 2))" cy="0" r="5"
-                    fill="#4ade80" filter="url(#glow-flow)" />
-                }
-
-                <!-- Target Pool Entry Dot -->
-                <circle cx="500" cy="120" r="7" fill="#4ade80" filter="url(#glow-flow)" />
-            </svg>
+        <div class="w-full max-w-[80%] mx-auto -mt-3 relative z-10">
+            <app-animated-flow class="w-full" [points]="incomes.length" direction="in"
+                color="green"></app-animated-flow>
         </div>
 
-        <!-- Total Pool Central Card Match Stitch -->
-        <div class="w-full max-w-4xl mx-auto relative mt-8">
+        <!-- Central Pool Section (Target for flow) -->
+        <div id="pool" class="w-full max-w-4xl mx-auto -mt-4 relative z-20 px-4">
+            <!-- Pool Card -->
             <div
-                class="w-full h-full bg-[#110e15] border border-[#2d7a5d] rounded-[32px] p-12 relative z-20 flex flex-col md:flex-row items-center gap-16 overflow-hidden shadow-[0_0_20px_rgba(45,122,93,0.3)]">
+                class="mt-[10px] bg-[#151821] border-2 border-emerald-500/20 rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-12 md:gap-24 relative overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.05)]">
+
                 <!-- Inner soft highlight -->
                 <div
                     class="absolute inset-0 bg-gradient-to-br from-[#2d7a5d]/10 to-transparent pointer-events-none rounded-[32px] z-30">
                 </div>
 
                 <div class="flex flex-col items-center md:items-start shrink-0">
-                    <h3 class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase mb-6 ml-2">Distribución</h3>
+                    <h3 class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase mb-6 md:ml-2">FUENTES DE
+                        INGRESOS</h3>
 
-                    <div class="relative w-56 h-56 flex items-center justify-center">
-                        <!-- SVG Donut Chart -->
-                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                    <!-- Dynamic Donut Chart Area -->
+                    <div class="relative w-72 h-72 md:w-80 md:h-80 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 120 120">
                             <!-- Background track -->
-                            <circle cx="60" cy="60" r="50" fill="none" class="stroke-white/5" stroke-width="10">
+                            <circle cx="60" cy="60" r="45" fill="none" class="stroke-white/5" stroke-width="16">
                             </circle>
 
-                            <!-- Purple Segment 55% -->
-                            <circle cx="60" cy="60" r="50" fill="none" stroke="#6d489b" stroke-width="10"
-                                stroke-dasharray="172.78 314.15" stroke-dashoffset="0"></circle>
-
-                            <!-- Green Segment 30% -->
-                            <circle cx="60" cy="60" r="50" fill="none" stroke="#2d7a5d" stroke-width="10"
-                                stroke-dasharray="94.24 314.15" stroke-dashoffset="-172.78"></circle>
-
-                            <!-- Pink Segment 15% -->
-                            <circle cx="60" cy="60" r="50" fill="none" stroke="#b35c75" stroke-width="10"
-                                stroke-dasharray="47.12 314.15" stroke-dashoffset="-267.02"></circle>
+                            <!-- Dynamic Segments -->
+                            @for (segment of donutSegments; track segment.income.id) {
+                            <!-- We use style="transform-origin: 60px 60px;" and CSS transform to correctly scale SVG circles from their center -->
+                            <circle cx="60" cy="60" r="45" fill="none" [attr.stroke]="segment.color"
+                                [attr.stroke-width]="hoveredSegment === segment ? 20 : 16"
+                                [attr.stroke-dasharray]="segment.dashArray"
+                                [attr.stroke-dashoffset]="segment.dashOffset" style="transform-origin: 60px 60px;"
+                                [class.drop-shadow-xl]="hoveredSegment === segment"
+                                class="transition-all duration-300 ease-out cursor-pointer"
+                                [style.transform]="hoveredSegment === segment ? 'scale(1.05)' : 'scale(1)'"
+                                (mouseenter)="hoveredSegment = segment" (mouseleave)="hoveredSegment = null">
+                            </circle>
+                            }
                         </svg>
 
-                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center mt-2">
-                            <span class="text-slate-400 text-[10px] font-black tracking-widest uppercase mb-1">Total
-                                Pool</span>
-                            <span class="text-white text-[32px] font-black tracking-tighter">$14,500</span>
+                        <!-- Center Content (Hovered only) -->
+                        <div class="absolute inset-0 flex items-center justify-center p-6 mt-1 pointer-events-none">
+
+                            <!-- Wrapper for transition -->
+                            <div class="flex flex-col items-center justify-center text-center transition-all duration-300 ease-out"
+                                [class.opacity-100]="hoveredSegment" [class.opacity-0]="!hoveredSegment"
+                                [class.scale-100]="hoveredSegment" [class.scale-95]="!hoveredSegment">
+
+                                @if (hoveredSegment) {
+                                <!-- Hover State Details -->
+                                <div class="w-10 h-10 rounded-xl mb-2 flex items-center justify-center bg-white/5 border border-white/10"
+                                    [style.color]="hoveredSegment.color">
+                                    <span class="material-symbols-outlined text-2xl">
+                                        {{ hoveredSegment.income.icon || 'work' }}
+                                    </span>
+                                </div>
+                                <span
+                                    class="text-white/60 text-[10px] font-black tracking-widest uppercase mb-1 truncate w-full px-2"
+                                    [style.color]="hoveredSegment.color">
+                                    {{ hoveredSegment.income.name }}
+                                </span>
+                                <span
+                                    class="text-white text-3xl font-black tracking-tighter mb-1 relative z-10 drop-shadow-md">
+                                    {{ hoveredSegment.income.amount | currency:'USD':'symbol':'1.0-0' }}
+                                </span>
+                                <span class="text-slate-400 font-black text-sm">({{ hoveredSegment.percentage |
+                                    number:'1.1-1' }}%)</span>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,8 +119,8 @@
                         Ingresos
                     </h3>
                     <div class="flex items-baseline gap-3 mb-8">
-                        <span class="text-white text-[64px] leading-none font-black tracking-tighter">
-                            $14,500
+                        <span class="text-white text-5xl leading-none font-black tracking-tighter">
+                            {{ totalPool | currency:'USD':'symbol':'1.0-0' }}
                         </span>
                         <span class="text-slate-500 text-2xl font-black tracking-wide">USD</span>
                     </div>
@@ -145,6 +133,12 @@
                     </p>
                 </div>
             </div>
+        </div>
+
+        <!-- Outbound Flow from Pool to Distribution Boxes -->
+        <div class="w-full max-w-[80%] mx-auto -mt-3 relative z-10">
+            <!-- Current mockup assumes 3 distribution boxes -->
+            <app-animated-flow class="w-full" [points]="3" direction="out" color="orange"></app-animated-flow>
         </div>
     </div>
 </main>

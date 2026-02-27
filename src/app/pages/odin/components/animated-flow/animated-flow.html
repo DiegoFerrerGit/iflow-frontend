@@ -1,60 +1,117 @@
-<div class="w-full relative flex justify-center py-6 h-[100px] overflow-visible">
-    <svg width="100%" height="80" class="overflow-visible absolute top-0" preserveAspectRatio="none">
+<div class="w-full h-[120px] relative">
+    <!-- SVG Viewbox mapped exactly to a 1000x120 conceptual space. 
+         This gives us high precision to manually draw the exact shapes from Stitch -->
+    <svg width="100%" height="100%" viewBox="0 0 1000 120" preserveAspectRatio="none"
+        class="absolute top-0 left-0 overflow-visible">
 
         <defs>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <filter id="af-glow" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur stdDeviation="3" result="blur" />
                 <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
                 </feMerge>
             </filter>
-            <!-- Animation for the dashes -->
             <style>
-                .animated-path {
-                    stroke-dasharray: 6 8;
-                    animation: dash-flow 3s linear infinite;
+                .flow-in {
+                    stroke-dasharray: 6 10;
+                    animation: dash-in 2s linear infinite;
                 }
 
-                .animated-path-reverse {
-                    stroke-dasharray: 6 8;
-                    animation: dash-flow-reverse 3s linear infinite;
-                }
-
-                @keyframes dash-flow {
+                @keyframes dash-in {
                     to {
                         stroke-dashoffset: -100;
                     }
                 }
 
-                @keyframes dash-flow-reverse {
+                .flow-out {
+                    stroke-dasharray: 6 10;
+                    animation: dash-out 2s linear infinite;
+                }
+
+                @keyframes dash-out {
                     to {
-                        stroke-dashoffset: 100;
+                        stroke-dashoffset: -100;
                     }
                 }
             </style>
         </defs>
 
-        <!-- Dynamic paths based on points -->
-        @for (point of getPointsArray(); track point) {
-        <!-- Helper Background path for depth -->
-        <path [attr.d]="generatePath(point, points)" fill="none" [attr.stroke]="getColorHex()" stroke-width="2"
-            opacity="0.1" stroke-linecap="round" />
+        @if (direction === 'in') {
+        <!-- 
+            GREEN INBOUND FLOW (Cards -> Pool)
+            Matches Stitch EXACTLY: 3 top dots, green sweeping parabolic curve down to a center glowing dot, dropping to a single arrow.
+            -->
 
-        <!-- Animated foreground dashed line -->
-        <path [attr.d]="generatePath(point, points)" fill="none" [attr.stroke]="getColorHex()" stroke-width="2"
-            [attr.class]="direction === 'in' ? 'animated-path' : 'animated-path-reverse'" filter="url(#glow)"
-            stroke-linecap="round" />
+        <!-- Center Vertical (Always drawn) -->
+        <!-- Note: we use 500.01 to fix an SVG rendering bug where glow filters disappear on perfectly vertical lines -->
+        <path d="M 500 0 L 500.01 80" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
+            filter="url(#af-glow)" stroke-linecap="round" />
+
+        <!-- Left Parabola -->
+        <path d="M 166 0 Q 333 80 500 80" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
+            filter="url(#af-glow)" stroke-linecap="round" />
+
+        <!-- Right Parabola -->
+        <path d="M 833 0 Q 666 80 500 80" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
+            filter="url(#af-glow)" stroke-linecap="round" />
+
+        <!-- Single drop from merge point to pool -->
+        <path d="M 500 80 L 500.01 100" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
+            filter="url(#af-glow)" stroke-linecap="round" />
+
+        <!-- Top Dots (Origins) -->
+        <circle cx="166" cy="0" r="3" fill="#10b981" /> <!-- Left -->
+        <circle cx="500" cy="0" r="3" fill="#10b981" /> <!-- Center -->
+        <circle cx="833" cy="0" r="3" fill="#10b981" /> <!-- Right -->
+
+        <!-- Merge Glowing Center Point -->
+        <circle cx="500" cy="80" r="5" fill="#10b981" filter="url(#af-glow)" />
+
+        <!-- Arrow pointing down to Pool -->
+        <polygon points="492,92 508,92 500,108" fill="#10b981" filter="url(#af-glow)" />
+
+        } @else {
+        <!-- 
+            ORANGE OUTBOUND FLOW (Pool -> Distribution)
+            Matches Stitch EXACTLY: center drop to an arc, branching into 4 horizontal lines that drop vertically.
+            -->
+
+        <!-- Main Trunk Drop -->
+        <path d="M 500 0 L 500.01 50" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+            filter="url(#af-glow)" stroke-linecap="round" />
+
+        <!-- The glowing junction node arc -->
+        <path d="M 470 45 Q 500 25 530 45" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+            filter="url(#af-glow)" stroke-linecap="round" />
+        <circle cx="500" cy="35" r="5" fill="#fb923c" filter="url(#af-glow)" />
+
+        <!-- Branch 1 (Far Left): Horizontal from center arc left to x=200, then drop to y=100 -->
+        <!-- We use Q (Quadratic Bezier) for the corner to make it rounded like Stitch -->
+        <path d="M 470 45 C 400 65, 200 65, 200 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+            filter="url(#af-glow)" stroke-linejoin="round" />
+
+        <!-- Branch 2 (Inner Left): Horizontal from center arc left to x=400, then drop to y=100 -->
+        <path d="M 485 40 C 450 55, 400 55, 400 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+            filter="url(#af-glow)" stroke-linejoin="round" />
+
+        <!-- Branch 3 (Inner Right): Horizontal from center arc right to x=600, then drop to y=100 -->
+        <path d="M 515 40 C 550 55, 600 55, 600 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+            filter="url(#af-glow)" stroke-linejoin="round" />
+
+        <!-- Branch 4 (Far Right): Horizontal from center arc right to x=800, then drop to y=100 -->
+        <path d="M 530 45 C 600 65, 800 65, 800 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+            filter="url(#af-glow)" stroke-linejoin="round" />
+
+        <!-- Top Origin Dot (Pool Base) -->
+        <circle cx="500" cy="0" r="3" fill="#fb923c" />
+
+        <!-- Arrowheads pointing down -->
+        <polygon points="194,92 206,92 200,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B1 -->
+        <polygon points="394,92 406,92 400,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B2 -->
+        <polygon points="594,92 606,92 600,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B3 -->
+        <polygon points="794,92 806,92 800,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B4 -->
         }
-
-        <!-- Target connection dots -->
-        @for (point of getPointsArray(); track point) {
-        <circle [attr.cx]="(100 / points * point) + (100 / points / 2) + '%'" [attr.cy]="direction === 'in' ? 0 : 80"
-            r="4" [attr.fill]="getColorHex()" filter="url(#glow)" />
-        }
-
-        <circle cx="50%" [attr.cy]="direction === 'in' ? 80 : 0" r="6" [attr.fill]="getColorHex()"
-            filter="url(#glow)" />
 
     </svg>
 </div>
