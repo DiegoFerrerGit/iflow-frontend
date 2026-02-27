@@ -18,6 +18,9 @@ export class IncomeFormModal implements OnInit {
 
   incomeForm!: FormGroup;
   showIconPicker = false;
+  showTagPicker = false;
+  tagSearch = '';
+  defaultTags = ['Management', 'Developer', 'Consulting'];
 
   // Curated list of popular generic and tech/finance Material Icons
   public curatedIcons = [
@@ -59,8 +62,54 @@ export class IncomeFormModal implements OnInit {
     }
   }
 
+  get availableTags(): string[] {
+    const existing = this.existingIncomes.map(i => i.category.label).filter(l => !!l);
+    const all = Array.from(new Set([...this.defaultTags, ...existing]));
+    if (!this.tagSearch) return all;
+    return all.filter(t => t.toLowerCase().includes(this.tagSearch.toLowerCase()));
+  }
+
+  get exactTagMatch(): boolean {
+    if (!this.tagSearch) return true;
+    const existing = this.existingIncomes.map(i => i.category.label).filter(l => !!l);
+    const all = Array.from(new Set([...this.defaultTags, ...existing]));
+    return all.some(t => t.toLowerCase() === this.tagSearch.toLowerCase());
+  }
+
+  toggleTagPicker() {
+    this.showTagPicker = !this.showTagPicker;
+    if (this.showTagPicker) {
+      this.showIconPicker = false;
+      this.tagSearch = '';
+    }
+  }
+
+  selectTag(tag: string) {
+    this.incomeForm.patchValue({ categoryLabel: tag });
+    this.showTagPicker = false;
+    this.tagSearch = '';
+  }
+
+  onTagSearch(event: Event) {
+    this.tagSearch = (event.target as HTMLInputElement).value;
+  }
+
+  addAndSelectTag(event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const trimmed = this.tagSearch.trim();
+    if (trimmed && !this.exactTagMatch) {
+      this.selectTag(trimmed);
+    }
+  }
+
   toggleIconPicker() {
     this.showIconPicker = !this.showIconPicker;
+    if (this.showIconPicker) {
+      this.showTagPicker = false;
+    }
   }
 
   selectIcon(icon: string) {
