@@ -12,4 +12,5 @@ import { IncomeSource } from '../../../../models/income.model';
 export class IncomeCardComponent {
   @Input({ required: true }) income!: IncomeSource;
   @Output() delete = new EventEmitter<void>();
+  @Output() edit = new EventEmitter<void>();
 }

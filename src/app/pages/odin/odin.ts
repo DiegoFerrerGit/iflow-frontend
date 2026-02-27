@@ -4,11 +4,12 @@ import { IncomeCardComponent } from './components/income-card/income-card';
 import { OdinMockService } from '../../modules/odin/services/odin-mock.service';
 import { IncomeSource } from '../../models/income.model';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
+import { IncomeFormModal } from './components/income-form-modal/income-form-modal';
 
 @Component({
   selector: 'app-odin',
   standalone: true,
-  imports: [BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag],
+  imports: [BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal],
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
 })
@@ -16,6 +17,8 @@ export class OdinPageComponent implements OnInit {
   private mockService = inject(OdinMockService);
   incomes: IncomeSource[] = [];
   incomeToDelete: IncomeSource | null = null;
+  isModalOpen = false;
+  incomeToEdit: IncomeSource | null = null;
 
   ngOnInit() {
     this.incomes = this.mockService.getIncomes();
@@ -50,5 +53,31 @@ export class OdinPageComponent implements OnInit {
 
   cancelDelete() {
     this.incomeToDelete = null;
+  }
+
+  openModal(income?: IncomeSource) {
+    this.incomeToEdit = income || null;
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+    this.incomeToEdit = null;
+  }
+
+  onSaveIncome(income: IncomeSource) {
+    if (this.incomeToEdit) {
+      // Edit existing
+      const index = this.incomes.findIndex(i => i.id === income.id);
+      if (index !== -1) {
+        this.incomes[index] = income;
+      }
+    } else {
+      // Add new
+      this.incomes.push(income);
+    }
+
+    this.sortIncomes();
+    this.closeModal();
   }
 }
