@@ -70,16 +70,43 @@
                             class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary px-4 py-3 placeholder:text-slate-600 transition-all"
                             placeholder="Ej: Management" type="text" />
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Icono
-                            (Material Symbol)</label>
+                    <div class="space-y-2 relative">
+                        <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Icono o
+                            URL Imagen</label>
                         <div class="relative">
-                            <span
-                                class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-500 text-lg">category</span>
+                            <div
+                                class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
+                                @if (isImageUrl(incomeForm.get('icon')?.value)) {
+                                <img [src]="incomeForm.get('icon')?.value" class="w-full h-full object-cover"
+                                    alt="icon preview">
+                                } @else {
+                                <span class="material-symbols-outlined text-slate-400 text-[20px]">{{
+                                    incomeForm.get('icon')?.value || 'category' }}</span>
+                                }
+                            </div>
                             <input formControlName="icon"
-                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-11 pr-4 py-3 placeholder:text-slate-600 transition-all"
-                                placeholder="work, code, stars..." type="text" />
+                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-12 pr-10 py-3 placeholder:text-slate-600 transition-all"
+                                placeholder="ID de icono o URL" type="text" />
+                            <button type="button" (click)="toggleIconPicker()"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded flex items-center justify-center text-primary hover:bg-primary/20 transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                            </button>
                         </div>
+
+                        <!-- Popover Icon Picker -->
+                        @if (showIconPicker) {
+                        <div
+                            class="absolute z-50 top-full mt-2 right-0 w-[280px] bg-[#2a2e3d] border border-white/10 rounded-xl shadow-2xl p-3 grid grid-cols-6 gap-2 max-h-[200px] overflow-y-auto custom-scrollbar">
+                            @for (icon of curatedIcons; track icon) {
+                            <button type="button" (click)="selectIcon(icon)"
+                                class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                                [class.bg-primary-20]="incomeForm.get('icon')?.value === icon"
+                                [class.text-primary]="incomeForm.get('icon')?.value === icon">
+                                <span class="material-symbols-outlined text-[20px]">{{ icon }}</span>
+                            </button>
+                            }
+                        </div>
+                        }
                     </div>
                 </div>
 

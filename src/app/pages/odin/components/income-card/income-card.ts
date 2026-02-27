@@ -13,4 +13,9 @@ export class IncomeCardComponent {
   @Input({ required: true }) income!: IncomeSource;
   @Output() delete = new EventEmitter<void>();
   @Output() edit = new EventEmitter<void>();
+
+  isImageUrl(icon: string | undefined): boolean {
+    if (!icon) return false;
+    return icon.startsWith('http://') || icon.startsWith('https://');
+  }
 }

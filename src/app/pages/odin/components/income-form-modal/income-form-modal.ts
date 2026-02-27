@@ -16,6 +16,22 @@ export class IncomeFormModal implements OnInit {
   @Output() save = new EventEmitter<IncomeSource>();
 
   incomeForm!: FormGroup;
+  showIconPicker = false;
+
+  // Curated list of popular generic and tech/finance Material Icons
+  public curatedIcons = [
+    'category', 'account_balance', 'account_balance_wallet', 'savings', 'payments',
+    'credit_card', 'request_quote', 'receipt_long', 'trending_up', 'work',
+    'business_center', 'laptop_mac', 'computer', 'code', 'data_object',
+    'database', 'terminal', 'memory', 'dns', 'public',
+    'storefront', 'shopping_cart', 'local_shipping', 'restaurant', 'directions_car',
+    'flight', 'school', 'music_note', 'movie', 'sports_esports',
+    'home', 'apartment', 'build', 'engineering', 'science',
+    'gavel', 'health_and_safety', 'monitor_heart', 'fitness_center', 'group',
+    'person', 'support_agent', 'handshake', 'verified', 'stars',
+    'bolt', 'local_fire_department', 'diamond', 'rocket_launch', 'lightbulb',
+    'pie_chart', 'bar_chart', 'monitoring', 'timeline', 'hub'
+  ];
 
   constructor(private fb: FormBuilder) { }
 
@@ -40,6 +56,20 @@ export class IncomeFormModal implements OnInit {
         effortPercentage: this.initialIncome.effortPercentage
       });
     }
+  }
+
+  toggleIconPicker() {
+    this.showIconPicker = !this.showIconPicker;
+  }
+
+  selectIcon(icon: string) {
+    this.incomeForm.patchValue({ icon });
+    this.showIconPicker = false;
+  }
+
+  isImageUrl(str: string): boolean {
+    if (!str) return false;
+    return str.startsWith('http://') || str.startsWith('https://');
   }
 
   onSubmit() {
