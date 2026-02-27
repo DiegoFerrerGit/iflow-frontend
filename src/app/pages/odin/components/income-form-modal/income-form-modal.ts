@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IncomeSource } from '../../../../models/income.model';
+import { IncomeSource, ThemeColor } from '../../../../models/income.model';
 
 @Component({
   selector: 'app-income-form-modal',
@@ -125,8 +125,28 @@ export class IncomeFormModal implements OnInit {
   onSubmit() {
     if (this.incomeForm.valid) {
       const formValue = this.incomeForm.value;
+      const availableColors: ThemeColor[] = ['primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange'];
 
-      const categoryTypeMatch = this.initialIncome?.category.type || 'primary'; // Simplification for now
+      // 1. Determine card's primary color (unique per source)
+      let cardColorMatch = this.initialIncome?.color;
+      if (!cardColorMatch) {
+        cardColorMatch = availableColors[Math.floor(Math.random() * availableColors.length)];
+      }
+
+      // 2. Determine category color (consistent across identical tags)
+      let categoryColorMatch: ThemeColor = this.initialIncome?.category.color || 'primary';
+      const typedCategory = formValue.categoryLabel?.trim().toLowerCase();
+
+      // If we're creating a new one rather than editing, or if the name changed, verify existence
+      if (!this.initialIncome || this.initialIncome.category.label.toLowerCase() !== typedCategory) {
+        const existingCategoryIndex = this.existingIncomes.findIndex(i => i.category.label.toLowerCase() === typedCategory);
+        if (existingCategoryIndex !== -1) {
+          categoryColorMatch = this.existingIncomes[existingCategoryIndex].category.color;
+        } else {
+          // It's a brand new tag, pick a random color
+          categoryColorMatch = availableColors[Math.floor(Math.random() * availableColors.length)];
+        }
+      }
 
       let finalIcon = formValue.icon?.trim();
 
@@ -148,9 +168,10 @@ export class IncomeFormModal implements OnInit {
         amount: Number(formValue.amount),
         effortPercentage: Number(formValue.effortPercentage),
         icon: finalIcon,
+        color: cardColorMatch,
         category: {
           label: formValue.categoryLabel,
-          type: categoryTypeMatch as any
+          color: categoryColorMatch
         }
       };
 

@@ -13,11 +13,12 @@ export class OdinMockService {
                 name: 'TINASOFT',
                 role: 'Engineering Manager',
                 amount: 8000,
-                effortPercentage: 60,
-                icon: 'code',
+                effortPercentage: 29,
+                icon: 'trending_up',
+                color: 'primary',
                 category: {
                     label: 'Management',
-                    type: 'primary'
+                    color: 'primary'
                 }
             },
             {
@@ -27,9 +28,10 @@ export class OdinMockService {
                 amount: 5000,
                 effortPercentage: 30,
                 icon: 'group',
+                color: 'cyan',
                 category: {
                     label: 'Consulting',
-                    type: 'cyan'
+                    color: 'cyan'
                 }
             },
             {
@@ -39,9 +41,10 @@ export class OdinMockService {
                 amount: 1500,
                 effortPercentage: 10,
                 icon: 'account_balance',
+                color: 'pink',
                 category: {
                     label: 'Advisory',
-                    type: 'pink'
+                    color: 'pink'
                 }
             }
         ];

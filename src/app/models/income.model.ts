@@ -1,3 +1,5 @@
+export type ThemeColor = 'primary' | 'cyan' | 'pink' | 'emerald' | 'amber' | 'indigo' | 'rose' | 'orange';
+
 export interface IncomeSource {
     id: string;
     name: string;
@@ -5,8 +7,9 @@ export interface IncomeSource {
     amount: number;
     effortPercentage: number;
     icon?: string;
+    color: ThemeColor;
     category: {
         label: string;
-        type: 'primary' | 'cyan' | 'pink';
+        color: ThemeColor;
     };
 }
