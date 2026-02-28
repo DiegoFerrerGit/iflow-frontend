@@ -130,7 +130,10 @@ export class IncomeFormModal implements OnInit {
       // 1. Determine card's primary color (unique per source)
       let cardColorMatch = this.initialIncome?.color;
       if (!cardColorMatch) {
-        cardColorMatch = availableColors[Math.floor(Math.random() * availableColors.length)];
+        const usedColors = new Set(this.existingIncomes.map(i => i.color));
+        const unusedColors = availableColors.filter(c => !usedColors.has(c));
+        const pool = unusedColors.length > 0 ? unusedColors : availableColors;
+        cardColorMatch = pool[Math.floor(Math.random() * pool.length)];
       }
 
       // 2. Determine category color (consistent across identical tags)

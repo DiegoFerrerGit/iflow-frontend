@@ -1,10 +1,30 @@
-<section class="h-[60vh] w-full relative flex flex-col items-center justify-center overflow-hidden hero-gradient">
+<section class="py-4 md:py-6 w-full relative flex flex-col items-center justify-center overflow-hidden hero-gradient">
     <div class="absolute inset-0 synth-grid pointer-events-none opacity-30"></div>
     <div class="relative z-10 text-center max-w-2xl mx-auto px-6">
-        <div class="inline-block mb-10 relative">
-            <div
-                class="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center neon-glow">
-                <span class="material-symbols-outlined text-5xl text-white text-center">visibility</span>
+        <!-- OJO DE ODÍN (Componente animado) -->
+        <div class="relative flex flex-col items-center -mb-4 md:-mb-6">
+            <div class="w-32 h-32 md:w-40 md:h-40">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    class="odin-eye-svg w-full h-full">
+                    <defs>
+                        <linearGradient id="odinEyeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Cola del ojo (Lateral izquierdo) -->
+                    <rect x="5" y="44" width="22" height="12" rx="6" fill="url(#odinEyeGrad)" />
+
+                    <!-- Forma exterior del Ojo (Almendra) -->
+                    <path d="M25 50 C 35 15, 75 15, 85 50 C 75 85, 35 85, 25 50 Z" fill="url(#odinEyeGrad)" />
+
+                    <!-- Iris (Círculo interno oscuro) -->
+                    <circle cx="55" cy="50" r="18" fill="#0f0a15" />
+
+                    <!-- Pupila (Barra vertical característica 'I') -->
+                    <rect x="53" y="38" width="4" height="24" rx="2" fill="#f1f5f9" class="eye-pupil-bar" />
+                </svg>
             </div>
         </div>
         <h1 class="text-7xl font-black tracking-tighter mb-2 text-white text-center leading-none">ODIN</h1>

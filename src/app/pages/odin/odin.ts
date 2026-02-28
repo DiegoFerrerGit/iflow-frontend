@@ -156,7 +156,7 @@ export class OdinPageComponent implements OnInit {
         id: income.id,
         dashArray,
         dashOffset: -currentOffset,
-        color: this.getCategoryColor(income.category.color as 'primary' | 'cyan' | 'pink'),
+        color: this.getCategoryColor(income.color),
         percentage: percentage * 100,
         icon: income.icon,
         name: income.name,

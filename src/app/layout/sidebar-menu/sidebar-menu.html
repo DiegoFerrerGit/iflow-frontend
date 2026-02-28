@@ -5,18 +5,24 @@
     <div class="burger-menu h-20 flex items-center px-4 justify-between border-b border-white/5 shrink-0">
         <div class="flex items-center gap-3">
             <span
-                class="logo-text text-primary text-xl font-black tracking-widest uppercase transition-opacity duration-300"
+                class="logo-text text-xl font-black tracking-widest uppercase transition-opacity duration-300 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-violet-400 select-none"
                 [class.opacity-100]="isExpanded" [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
                 IFLOW
             </span>
         </div>
 
-        <button (click)="toggleSidebar()"
-            class="cursor-pointer hover:text-primary transition-colors flex items-center justify-center h-8 w-8 text-white">
-            <span class="material-symbols-outlined text-2xl" *ngIf="!isExpanded">menu</span>
-            <span class="material-symbols-outlined text-2xl" *ngIf="isExpanded">keyboard_double_arrow_left</span>
+        <!-- Botón contraído (Menú Hamburguesa) - Solo visible si NO está expandido -->
+        <button *ngIf="!isExpanded" (click)="toggleSidebar()"
+            class="cursor-pointer hover:text-primary transition-colors flex items-center justify-center h-8 w-8 text-white rounded-md hover:bg-white/5">
+            <span class="material-symbols-outlined text-2xl">menu</span>
         </button>
     </div>
+
+    <!-- Botón expandido (Flechas Plegables) - Flotante a la derecha, en medio, solo si está expandido -->
+    <button *ngIf="isExpanded" (click)="toggleSidebar()"
+        class="absolute -right-4 top-1/2 -translate-y-1/2 z-50 cursor-pointer text-white bg-sidebar-bg border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center justify-center h-10 w-8 rounded-l-md hover:text-primary hover:border-primary/50 transition-all rounded-r-xl">
+        <span class="material-symbols-outlined text-[1.2rem]">keyboard_double_arrow_left</span>
+    </button>
 
     <div class="flex-1 py-8 px-4 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
         <p class="nav-title text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] px-3 mb-2 transition-opacity duration-300"

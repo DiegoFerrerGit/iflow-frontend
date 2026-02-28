@@ -1,18 +1,158 @@
+/* Component CSS Variables para el Mesh */
+:host {
+    display: block;
+    width: 100%;
+    --color-bg1: #1a0b2e;
+    /* Dark deep purple */
+    --color-bg2: #0f172a;
+    /* Slate dark */
+    --color-1: 139, 92, 246;
+    /* Violet */
+    --color-2: 236, 72, 153;
+    /* Pink */
+    --color-interactive: 56, 189, 248;
+    /* Sky Blue */
+}
+
+/* Background base container */
+.mesh-gradient-container {
+    background-color: var(--color-bg1);
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+}
+
+/* Base mesh animation SVG Filter reference */
+.mesh-gradient-container svg {
+    display: none;
+}
+
+/* Animated fluid blobs */
+.gradients-container {
+    filter: url(#goo) blur(40px);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+}
+
+.g1,
+.g2,
+.g-interactive {
+    position: absolute;
+    border-radius: 50%;
+    mix-blend-mode: hard-light;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+.g1 {
+    background: radial-gradient(circle at center, rgba(var(--color-1), 0.6) 0, rgba(var(--color-1), 0) 60%);
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    transform-origin: center center;
+    animation: moveVertical 15s ease infinite;
+}
+
+.g2 {
+    background: radial-gradient(circle at center, rgba(var(--color-2), 0.5) 0, rgba(var(--color-2), 0) 50%);
+    width: 100%;
+    height: 100%;
+    bottom: -20%;
+    right: -20%;
+    transform-origin: calc(50% - 400px);
+    animation: moveInCircle 20s reverse infinite;
+}
+
+@keyframes moveInCircle {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.2);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes moveVertical {
+    0% {
+        transform: translateY(-20%) scale(1);
+    }
+
+    50% {
+        transform: translateY(10%) scale(1.1);
+    }
+
+    100% {
+        transform: translateY(-20%) scale(1);
+    }
+}
+
 .synth-grid {
-    background-image: linear-gradient(rgba(168, 85, 247, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(168, 85, 247, 0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
 }
 
-.hero-gradient {
-    background: radial-gradient(circle at 50% 50%, #2d1b4d 0%, #16121d 100%);
+.glow-text {
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(236, 72, 153, 0.4);
 }
 
-.neon-glow {
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+.glow-subtext {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 :host {
     display: block;
     width: 100%;
+}
+
+/* Animaciones del Ojo de Odín */
+.odin-eye-svg {
+    filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.4));
+    animation: eye-float 4s ease-in-out infinite;
+}
+
+.eye-pupil-bar {
+    animation: pupil-blink 5s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes eye-float {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.4));
+    }
+
+    50% {
+        transform: translateY(-15px) scale(1.05);
+        filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.6));
+    }
+}
+
+@keyframes pupil-blink {
+
+    0%,
+    90%,
+    100% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+
+    95% {
+        transform: scaleY(0.1);
+        opacity: 0.5;
+    }
 }

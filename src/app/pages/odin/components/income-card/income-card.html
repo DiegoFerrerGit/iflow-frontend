@@ -41,32 +41,37 @@
             <div>
                 <h3 class="font-black text-white text-lg tracking-wide uppercase leading-tight">{{ income.name }}</h3>
                 <p class="text-[11px] text-slate-400 font-medium mb-1.5">{{ income.role }}</p>
-                <!-- Category Tag -->
-                <div class="inline-flex items-center px-2 py-0.5 rounded-md border bg-black/40 backdrop-blur-sm"
-                    [ngClass]="{
-                        'border-primary/50 text-primary': income.category.color === 'primary',
-                        'border-cyan-400/50 text-cyan-400': income.category.color === 'cyan',
-                        'border-pink-400/50 text-pink-400': income.category.color === 'pink',
-                        'border-emerald-400/50 text-emerald-400': income.category.color === 'emerald',
-                        'border-amber-400/50 text-amber-400': income.category.color === 'amber',
-                        'border-indigo-400/50 text-indigo-400': income.category.color === 'indigo',
-                        'border-rose-400/50 text-rose-400': income.category.color === 'rose',
-                        'border-orange-400/50 text-orange-400': income.category.color === 'orange'
-                     }">
-                    <span class="text-[9px] font-bold uppercase tracking-wider">{{ income.category.label }}</span>
-                </div>
             </div>
         </div>
-        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
+        <!-- Right Side: Category Tag & Actions -->
+        <div class="flex flex-col items-end justify-start gap-3">
+            <!-- Category Tag -->
+            <div class="inline-flex items-center px-2 py-0.5 rounded-md border bg-sidebar-bg/80 backdrop-blur-md shadow-sm"
+                [ngClass]="{
+                    'border-primary/50 text-primary': income.category.color === 'primary',
+                    'border-cyan-400/50 text-cyan-400': income.category.color === 'cyan',
+                    'border-pink-400/50 text-pink-400': income.category.color === 'pink',
+                    'border-emerald-400/50 text-emerald-400': income.category.color === 'emerald',
+                    'border-amber-400/50 text-amber-400': income.category.color === 'amber',
+                    'border-indigo-400/50 text-indigo-400': income.category.color === 'indigo',
+                    'border-rose-400/50 text-rose-400': income.category.color === 'rose',
+                    'border-orange-400/50 text-orange-400': income.category.color === 'orange'
+                    }">
+                <span class="text-[9px] font-bold uppercase tracking-wider">{{ income.category.label }}</span>
+            </div>
+
             <!-- Acciones Puras -->
-            <button (click)="edit.emit()"
-                class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/5 transition-all">
-                <span class="material-symbols-outlined text-lg">edit</span>
-            </button>
-            <button (click)="delete.emit()"
-                class="w-7 h-7 flex items-center justify-center rounded-lg bg-logout-coral/10 text-logout-coral hover:bg-logout-coral/20 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">delete</span>
-            </button>
+            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button (click)="edit.emit()"
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/5 transition-all">
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                </button>
+                <button (click)="delete.emit()"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-logout-coral/10 text-logout-coral hover:bg-logout-coral/20 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                </button>
+            </div>
         </div>
     </div>
 

@@ -17,27 +17,27 @@ export class OdinMockService {
         effortPercentage: 40,
         icon: 'work',
         color: 'primary',
-        category: { label: 'Principal', color: 'primary' }
+        category: { label: 'Management', color: 'primary' }
       },
       {
         id: '2',
         name: 'MODAK',
-        role: 'Tech Lead / Architect',
+        role: 'Frontend Lead',
         amount: 5000,
         effortPercentage: 60,
         icon: 'laptop_mac',
         color: 'cyan',
-        category: { label: 'Contractor', color: 'cyan' }
+        category: { label: 'Developer', color: 'cyan' }
       },
       {
         id: '3',
         name: 'SUNSET',
-        role: 'Consulting',
+        role: 'Engineering Advisor',
         amount: 1500,
         effortPercentage: 10,
         icon: 'lightbulb',
         color: 'pink',
-        category: { label: 'Advisory', color: 'pink' }
+        category: { label: 'Consulting', color: 'pink' }
       }
     ];
   }
