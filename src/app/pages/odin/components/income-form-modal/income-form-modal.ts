@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IncomeSource, ThemeColor } from '../../../../models/income.model';
+import { IncomeSource, ThemeColor, COLOR_MAP, THEME_COLORS } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
+import { CategoryColorService } from '../../../../core/services/category-color.service';
 
 @Component({
   selector: 'app-income-form-modal',
@@ -13,6 +14,8 @@ import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-curr
   styleUrl: './income-form-modal.scss'
 })
 export class IncomeFormModal implements OnInit {
+  private categoryColorService = inject(CategoryColorService);
+
   @Input() initialIncome: IncomeSource | null = null;
   @Input() existingIncomes: IncomeSource[] = [];
   @Output() close = new EventEmitter<void>();
@@ -22,7 +25,9 @@ export class IncomeFormModal implements OnInit {
   showIconPicker = false;
   showTagPicker = false;
   tagSearch = '';
+  activeColorMode: 'card' | 'category' = 'card';
   defaultTags = ['Management', 'Developer', 'Consulting'];
+  allThemeColors = THEME_COLORS;
 
   // Curated list of popular generic and tech/finance Material Icons
   public curatedIcons = [
@@ -49,6 +54,7 @@ export class IncomeFormModal implements OnInit {
       currency: ['USD'], // Default based on select
       categoryLabel: ['', Validators.required],
       icon: [''],
+      color: ['primary'], // Default card color
       effortPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
     });
 
@@ -58,15 +64,71 @@ export class IncomeFormModal implements OnInit {
         role: this.initialIncome.role,
         amount: this.initialIncome.amount,
         currency: this.initialIncome.currency || 'USD',
-        categoryLabel: this.initialIncome.category.label,
+        categoryLabel: this.initialIncome.category,
         icon: this.initialIncome.icon,
+        color: this.initialIncome.color || 'primary',
         effortPercentage: this.initialIncome.effortPercentage
       });
     }
   }
 
+  get tagColor(): ThemeColor {
+    return this.categoryColorService.getColor(this.incomeForm.get('categoryLabel')?.value);
+  }
+
+  get cardColor(): ThemeColor {
+    return this.incomeForm.get('color')?.value || 'primary';
+  }
+
+  getTagPreviewColorForColor(color: ThemeColor): string {
+    return COLOR_MAP[color] || COLOR_MAP['primary'];
+  }
+
+  get availableCategoryColors(): ThemeColor[] {
+    const currentCategory = this.incomeForm.get('categoryLabel')?.value;
+    const usedColors = this.categoryColorService.getUsedColors();
+    const currentColor = this.categoryColorService.getColor(currentCategory);
+    return THEME_COLORS.filter(color => !usedColors.has(color) || color === currentColor);
+  }
+
+  get availableCardColors(): ThemeColor[] {
+    const currentColor = this.incomeForm.get('color')?.value;
+    const usedColors = new Set(this.existingIncomes
+      .filter(i => i.id !== this.initialIncome?.id)
+      .map(i => i.color));
+    return THEME_COLORS.filter(color => !usedColors.has(color) || color === currentColor);
+  }
+
+  get currentAvailableColors(): ThemeColor[] {
+    return this.activeColorMode === 'card' ? this.availableCardColors : this.availableCategoryColors;
+  }
+
+  get activeColorSelection(): ThemeColor {
+    return this.activeColorMode === 'card' ? this.cardColor : this.tagColor;
+  }
+
+  selectColorMode(mode: 'card' | 'category') {
+    this.activeColorMode = mode;
+  }
+
+  selectThemeColor(color: ThemeColor) {
+    if (this.activeColorMode === 'card') {
+      this.incomeForm.patchValue({ color });
+    } else {
+      const category = this.incomeForm.get('categoryLabel')?.value;
+      if (category) {
+        this.categoryColorService.setColor(category, color);
+      }
+    }
+  }
+
+  getTagPreviewColor(tag: string): string {
+    const color = this.categoryColorService.getColor(tag);
+    return COLOR_MAP[color] || COLOR_MAP['primary'];
+  }
+
   get availableTags(): string[] {
-    const existing = this.existingIncomes.map(i => i.category.label).filter(l => !!l);
+    const existing = this.existingIncomes.map(i => i.category).filter(l => !!l);
     const all = Array.from(new Set([...this.defaultTags, ...existing]));
     if (!this.tagSearch) return all;
     return all.filter(t => t.toLowerCase().includes(this.tagSearch.toLowerCase()));
@@ -74,7 +136,7 @@ export class IncomeFormModal implements OnInit {
 
   get exactTagMatch(): boolean {
     if (!this.tagSearch) return true;
-    const existing = this.existingIncomes.map(i => i.category.label).filter(l => !!l);
+    const existing = this.existingIncomes.map(i => i.category).filter(l => !!l);
     const all = Array.from(new Set([...this.defaultTags, ...existing]));
     return all.some(t => t.toLowerCase() === this.tagSearch.toLowerCase());
   }
@@ -131,29 +193,9 @@ export class IncomeFormModal implements OnInit {
       const availableColors: ThemeColor[] = ['primary', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange'];
 
       // 1. Determine card's primary color (unique per source)
-      let cardColorMatch = this.initialIncome?.color;
-      if (!cardColorMatch) {
-        const usedColors = new Set(this.existingIncomes.map(i => i.color));
-        const unusedColors = availableColors.filter(c => !usedColors.has(c));
-        const pool = unusedColors.length > 0 ? unusedColors : availableColors;
-        cardColorMatch = pool[Math.floor(Math.random() * pool.length)];
-      }
+      const cardColorMatch = formValue.color;
 
-      // 2. Determine category color (consistent across identical tags)
-      let categoryColorMatch: ThemeColor = this.initialIncome?.category.color || 'primary';
-      const typedCategory = formValue.categoryLabel?.trim().toLowerCase();
-
-      // If we're creating a new one rather than editing, or if the name changed, verify existence
-      if (!this.initialIncome || this.initialIncome.category.label.toLowerCase() !== typedCategory) {
-        const existingCategoryIndex = this.existingIncomes.findIndex(i => i.category.label.toLowerCase() === typedCategory);
-        if (existingCategoryIndex !== -1) {
-          categoryColorMatch = this.existingIncomes[existingCategoryIndex].category.color;
-        } else {
-          // It's a brand new tag, pick a random color
-          categoryColorMatch = availableColors[Math.floor(Math.random() * availableColors.length)];
-        }
-      }
-
+      // 2. Icon determination
       let finalIcon = formValue.icon?.trim();
 
       // If empty, generate a random icon not currently in use
@@ -175,10 +217,7 @@ export class IncomeFormModal implements OnInit {
         effortPercentage: Number(formValue.effortPercentage),
         icon: finalIcon,
         color: cardColorMatch,
-        category: {
-          label: formValue.categoryLabel,
-          color: categoryColorMatch
-        },
+        category: formValue.categoryLabel,
         currency: formValue.currency
       };
 

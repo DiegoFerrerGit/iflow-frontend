@@ -8,23 +8,12 @@
 
     <!-- Glowing Background effect (visible mostly on hover) -->
     <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[50px] opacity-10 pointer-events-none transition-opacity duration-300 group-hover:opacity-40"
-        [ngClass]="{
-            'bg-primary': box.color === 'primary',
-            'bg-cyan-400': box.color === 'cyan',
-            'bg-pink-400': box.color === 'pink',
-            'bg-emerald-400': box.color === 'emerald',
-            'bg-amber-400': box.color === 'amber',
-            'bg-indigo-400': box.color === 'indigo',
-            'bg-rose-400': box.color === 'rose',
-            'bg-orange-400': box.color === 'orange',
-            'bg-blue-400': box.color === 'blue',
-            'bg-fuchsia-400': box.color === 'fuchsia'
-        }">
+        [style.backgroundColor]="getHexColor(box.color)">
     </div>
 
     <!-- Colorful top accent line -->
     <div class="absolute top-0 left-0 right-0 h-2 transition-colors duration-300 z-10"
-        [ngClass]="'bg-' + box.color + '-500'"></div>
+        [style.backgroundColor]="getHexColor(box.color)"></div>
 
     <!-- Top-center drag handle (visible on hover) -->
     <div
@@ -44,10 +33,7 @@
     <div class="p-5 pt-6 flex flex-col flex-grow z-10">
         <!-- Icon Badge -->
         <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-6 shadow-sm border border-white/5"
-            [ngClass]="[
-                 'bg-' + box.color + '-500/10',
-                 'text-' + box.color + '-400'
-             ]">
+            [style.backgroundColor]="getHexColor(box.color) + '20'" [style.color]="getHexColor(box.color)">
             <span class="material-symbols-outlined text-[22px] drop-shadow-sm">{{ box.icon }}</span>
         </div>
 
@@ -75,11 +61,11 @@
 
                 <div class="inline-flex items-center px-1.5 py-0.5 rounded border border-white/5 bg-white/5 transition-colors"
                     [ngClass]="{
-                        'text-blue-300/80': box.calculationType === 'porcentaje',
-                        'text-orange-300/80': box.calculationType !== 'porcentaje'
+                        'text-blue-300/80': box.calculationType === 'percentage',
+                        'text-orange-300/80': box.calculationType !== 'percentage'
                     }">
                     <span class="text-[9px] font-bold uppercase tracking-wider">
-                        {{ box.calculationType === 'porcentaje' ? 'PORCENTAJE' : 'ABSOLUTO' }}
+                        {{ box.calculationType === 'percentage' ? 'PORCENTAJE' : 'ABSOLUTO' }}
                     </span>
                 </div>
             </div>
@@ -87,7 +73,7 @@
             <div class="w-full h-px bg-white/5 mb-6"></div>
 
             <!-- Progress Bar Section (For Temporal or Savings) -->
-            @if (box.type === 'temporal' && box.savingsTarget && box.savedAmount !== undefined) {
+            @if (box.type === 'temporary' && box.savingsTarget && box.savedAmount !== undefined) {
             <div class="flex flex-col mb-6">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-slate-500 text-[9px] font-bold uppercase tracking-wider">PROGRESO <span
@@ -99,15 +85,10 @@
                 </div>
                 <!-- Bar -->
                 <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div class="h-full rounded-full transition-all duration-1000" [ngClass]="'bg-' + box.color + '-500'"
+                    <div class="h-full rounded-full transition-all duration-1000"
+                        [style.backgroundColor]="getHexColor(box.color)"
                         [style.width.%]="(box.savedAmount / box.savingsTarget) * 100">
                     </div>
-                </div>
-            </div>
-            } @else if (box.type === 'remanente') {
-            <div class="flex flex-col mb-6">
-                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                    <div class="h-full rounded-full bg-cyan-500 w-[10%]"></div>
                 </div>
             </div>
             }
@@ -115,7 +96,7 @@
 
         <!-- Description centered in the lower portion -->
         <div class="mt-2 mb-2">
-            <span class="text-slate-400 text-[13px] font-medium leading-tight line-clamp-2">{{ box.subCategory }}</span>
+            <span class="text-slate-400 text-[13px] font-medium leading-tight line-clamp-2">{{ box.description }}</span>
         </div>
 
         <!-- Spacer to push bottom section down -->
@@ -126,9 +107,8 @@
             <div class="flex gap-2">
                 <div class="inline-flex items-center px-2 py-1 rounded border shadow-sm backdrop-blur-sm transition-colors"
                     [ngClass]="{
-                          'border-amber-500/30 text-amber-500': box.type === 'temporal',
-                          'border-blue-500/30 text-blue-500': box.type === 'permanente',
-                          'border-yellow-500/30 text-yellow-500': box.type === 'remanente'
+                          'border-amber-500/30 text-amber-500': box.type === 'temporary',
+                          'border-blue-500/30 text-blue-500': box.type === 'permanent'
                       }">
                     <span class="text-[9px] font-black uppercase tracking-wider">{{ box.type }}</span>
                 </div>

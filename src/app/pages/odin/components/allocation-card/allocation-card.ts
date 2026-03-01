@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AllocationBox } from '../../../../models/allocation.model';
-import { ThemeColor } from '../../../../models/income.model';
+import { ThemeColor, COLOR_MAP } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 
@@ -20,7 +20,7 @@ export class AllocationCardComponent {
   get computedAmount(): number {
     if (this.totalPool === 0) return 0;
 
-    if (this.box.calculationType === 'absoluto') {
+    if (this.box.calculationType === 'absolute') {
       return this.box.targetAmount;
     } else {
       // Percentage calculation
@@ -31,11 +31,15 @@ export class AllocationCardComponent {
   get computedPercentage(): number {
     if (this.totalPool === 0) return 0;
 
-    if (this.box.calculationType === 'porcentaje') {
+    if (this.box.calculationType === 'percentage') {
       return this.box.targetAmount;
     } else {
       // Absolute calculation implies a percentage of the total pool
       return (this.box.targetAmount / this.totalPool) * 100;
     }
+  }
+
+  getHexColor(color: ThemeColor): string {
+    return COLOR_MAP[color] || COLOR_MAP['primary'];
   }
 }

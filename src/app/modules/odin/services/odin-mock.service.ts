@@ -17,7 +17,7 @@ export class OdinMockService {
         effortPercentage: 40,
         icon: 'work',
         color: 'primary',
-        category: { label: 'Management', color: 'primary' },
+        category: 'Management',
         currency: 'USD'
       },
       {
@@ -28,7 +28,7 @@ export class OdinMockService {
         effortPercentage: 60,
         icon: 'laptop_mac',
         color: 'cyan',
-        category: { label: 'Developer', color: 'cyan' },
+        category: 'Developer',
         currency: 'USD'
       },
       {
@@ -38,8 +38,8 @@ export class OdinMockService {
         amount: 2000000,
         effortPercentage: 10,
         icon: 'lightbulb',
-        color: 'pink',
-        category: { label: 'Consulting', color: 'pink' },
+        color: 'rose',
+        category: 'Consulting',
         currency: 'ARS'
       }
     ];
@@ -50,32 +50,32 @@ export class OdinMockService {
       {
         id: '1',
         name: 'Inversión',
-        subCategory: 'Patrimonio & Capital',
-        type: 'permanente',
-        calculationType: 'porcentaje',
-        targetAmount: 35, // 35%
+        description: 'Patrimonio & Capital',
+        type: 'permanent',
+        calculationType: 'percentage',
+        targetAmount: 35,
         icon: 'trending_up',
         color: 'emerald'
       },
       {
         id: '2',
         name: 'Calidad de Vida',
-        subCategory: 'Gastos Fijos Esenciales',
-        type: 'permanente',
-        calculationType: 'absoluto',
+        description: 'Gastos Fijos Esenciales',
+        type: 'permanent',
+        calculationType: 'absolute',
         targetAmount: 845,
         icon: 'home',
-        color: 'rose'
+        color: 'crimson'
       },
       {
         id: '3',
         name: 'Emergencia',
-        subCategory: 'Blindaje (3-6 meses Fijos)',
-        type: 'temporal', // In the image it says EMERGENCIA & TEMPORAL
-        calculationType: 'absoluto', // Image shows 9% / ABSOLUTE. Let's do absolute $1300
+        description: 'Blindaje (3-6 meses Fijos)',
+        type: 'temporary',
+        calculationType: 'absolute',
         targetAmount: 1300,
         icon: 'security',
-        color: 'orange',
+        color: 'gold',
         savedAmount: 4000,
         savingsTarget: 12000
       }

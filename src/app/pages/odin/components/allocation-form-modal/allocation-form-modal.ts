@@ -25,9 +25,9 @@ export class AllocationFormModalComponent implements OnInit {
   // Form Model
   formData: Partial<AllocationBox> = {
     name: '',
-    subCategory: '',
-    type: 'permanente',
-    calculationType: 'absoluto',
+    description: '',
+    type: 'permanent',
+    calculationType: 'absolute',
     targetAmount: 0,
     icon: 'category',
     color: 'emerald',
@@ -89,14 +89,14 @@ export class AllocationFormModalComponent implements OnInit {
   onAmountChange(value: number | string) {
     this.errors = {}; // reset errors
 
-    if (this.formData.calculationType === 'absoluto') {
+    if (this.formData.calculationType === 'absolute') {
       // Enforce exactly 0
       this.formData.targetAmount = 0;
       return;
     }
 
     const numValue = Number(value) || 0;
-    // It's porcentaje
+    // It's percentage
     const maxPercentage = (this.availablePool / this.totalPool) * 100;
 
     // We only enforce maximums, not minimums dynamically to avoid frustrating typing experience
@@ -115,28 +115,28 @@ export class AllocationFormModalComponent implements OnInit {
     if (!this.formData.name?.trim()) {
       this.errors['name'] = 'El nombre es requerido.';
     }
-    if (!this.formData.subCategory?.trim()) {
-      this.errors['subCategory'] = 'La descripción es requerida.';
+    if (!this.formData.description?.trim()) {
+      this.errors['description'] = 'La descripción es requerida.';
     }
 
     // For percentage, targetAmount must be > 0. For absoluto, it can be 0.
-    if (this.formData.calculationType === 'porcentaje' && (!this.formData.targetAmount || this.formData.targetAmount <= 0)) {
+    if (this.formData.calculationType === 'percentage' && (!this.formData.targetAmount || this.formData.targetAmount <= 0)) {
       this.errors['targetAmount'] = 'El porcentaje debe ser mayor a 0.';
-    } else if (this.formData.calculationType === 'absoluto' && (this.formData.targetAmount === undefined || this.formData.targetAmount < 0)) {
+    } else if (this.formData.calculationType === 'absolute' && (this.formData.targetAmount === undefined || this.formData.targetAmount < 0)) {
       this.errors['targetAmount'] = 'El monto debe ser 0 o mayor.';
     }
 
     // Cross-validate maximum one last time to be safe
-    if (this.formData.calculationType === 'absoluto' && this.formData.targetAmount! > this.availablePool) {
+    if (this.formData.calculationType === 'absolute' && this.formData.targetAmount! > this.availablePool) {
       this.errors['targetAmount'] = 'El monto excede el disponible.';
-    } else if (this.formData.calculationType === 'porcentaje') {
+    } else if (this.formData.calculationType === 'percentage') {
       const percentageAmountValue = (this.formData.targetAmount! / 100) * this.totalPool;
       if (percentageAmountValue > this.availablePool) {
         this.errors['targetAmount'] = 'El porcentaje excede el dinero disponible del pool.';
       }
     }
 
-    if (this.formData.type === 'temporal') {
+    if (this.formData.type === 'temporary') {
       if (!this.formData.savingsTarget || this.formData.savingsTarget <= 0) {
         this.errors['savingsTarget'] = 'El objetivo de ahorro es requerido para cajas temporales.';
       }
@@ -149,15 +149,15 @@ export class AllocationFormModalComponent implements OnInit {
     const newBox: AllocationBox = {
       id: crypto.randomUUID(),
       name: this.formData.name!,
-      subCategory: this.formData.subCategory!,
-      type: this.formData.type as 'permanente' | 'temporal',
-      calculationType: this.formData.calculationType as 'porcentaje' | 'absoluto',
+      description: this.formData.description!,
+      type: this.formData.type as 'permanent' | 'temporary',
+      calculationType: this.formData.calculationType as 'percentage' | 'absolute',
       targetAmount: this.formData.targetAmount!,
       icon: this.formData.icon!,
       color: this.formData.color!,
     };
 
-    if (newBox.type === 'temporal') {
+    if (newBox.type === 'temporary') {
       newBox.savingsTarget = this.formData.savingsTarget;
       newBox.savedAmount = 0; // Starts at 0
     }

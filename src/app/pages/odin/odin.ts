@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { BannerComponent } from './components/banner/banner';
 import { IncomeCardComponent } from './components/income-card/income-card';
 import { OdinMockService } from '../../modules/odin/services/odin-mock.service';
-import { IncomeSource, ThemeColor } from '../../models/income.model';
+import { IncomeSource, ThemeColor, COLOR_MAP } from '../../models/income.model';
 import { AllocationBox } from '../../models/allocation.model';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { IncomeFormModal } from './components/income-form-modal/income-form-modal';
@@ -70,7 +70,7 @@ export class OdinPageComponent implements OnInit {
     if (total === 0) return 0;
 
     return this.allocations.reduce((sum, box) => {
-      if (box.calculationType === 'absoluto') {
+      if (box.calculationType === 'absolute') {
         const convertedTarget = this.currencyState.convert(box.targetAmount, (box as any).currency || 'USD');
         return sum + convertedTarget;
       } else {
@@ -97,7 +97,7 @@ export class OdinPageComponent implements OnInit {
 
     // First map actual allocations
     const segments = this.allocations.map(box => {
-      const amount = box.calculationType === 'absoluto'
+      const amount = box.calculationType === 'absolute'
         ? this.currencyState.convert(box.targetAmount, (box as any).currency || 'USD')
         : (box.targetAmount / 100) * pool;
 
@@ -176,19 +176,7 @@ export class OdinPageComponent implements OnInit {
   }
 
   private getCategoryColor(color: ThemeColor): string {
-    const colorMap: Record<ThemeColor, string> = {
-      'primary': '#8b5cf6', // Violet-500
-      'cyan': '#06b6d4',    // Cyan-500
-      'pink': '#ec4899',    // Pink-500
-      'emerald': '#10b981', // Emerald-500
-      'amber': '#f59e0b',   // Amber-500
-      'indigo': '#6366f1',  // Indigo-500
-      'rose': '#f43f5e',    // Rose-500
-      'orange': '#f97316',  // Orange-500
-      'blue': '#3b82f6',    // Blue-500
-      'fuchsia': '#d946ef'  // Fuchsia-500
-    };
-    return colorMap[color] || colorMap['primary'];
+    return COLOR_MAP[color] || COLOR_MAP['primary'];
   }
 
   // Override to exact chart colors:
@@ -206,7 +194,7 @@ export class OdinPageComponent implements OnInit {
   sortAllocations() {
     // Determine the real amount for sorting
     const getAmount = (box: AllocationBox) => {
-      return box.calculationType === 'absoluto' ? box.targetAmount : (box.targetAmount / 100) * this.totalPool;
+      return box.calculationType === 'absolute' ? box.targetAmount : (box.targetAmount / 100) * this.totalPool;
     };
     this.allocations.sort((a, b) => getAmount(b) - getAmount(a));
   }
