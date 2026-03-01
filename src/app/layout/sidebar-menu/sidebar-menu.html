@@ -11,17 +11,17 @@
             </span>
         </div>
 
-        <!-- Botón contraído (Menú Hamburguesa) - Solo visible si NO está expandido -->
-        <button *ngIf="!isExpanded" (click)="toggleSidebar()"
-            class="cursor-pointer hover:text-primary transition-colors flex items-center justify-center h-8 w-8 text-white rounded-md hover:bg-white/5">
-            <span class="material-symbols-outlined text-2xl">menu</span>
-        </button>
+        <!-- Logo SVG - Solo visible cuando está contraído -->
+        <img *ngIf="!isExpanded" src="assets/images/iflow-logo.svg" alt="IFLOW"
+            class="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">
     </div>
 
-    <!-- Botón expandido (Flechas Plegables) - Flotante a la derecha, en medio, solo si está expandido -->
-    <button *ngIf="isExpanded" (click)="toggleSidebar()"
+    <!-- Botón flechas plegables - Siempre visible, flotante a la derecha -->
+    <button (click)="toggleSidebar()"
         class="absolute -right-4 top-1/2 -translate-y-1/2 z-50 cursor-pointer text-white bg-sidebar-bg border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center justify-center h-10 w-8 rounded-l-md hover:text-primary hover:border-primary/50 transition-all rounded-r-xl">
-        <span class="material-symbols-outlined text-[1.2rem]">keyboard_double_arrow_left</span>
+        <span class="material-symbols-outlined text-[1.2rem]"
+            [style.transform]="isExpanded ? 'rotate(0deg)' : 'rotate(180deg)'"
+            style="transition: transform 0.3s ease">keyboard_double_arrow_left</span>
     </button>
 
     <div class="flex-1 py-8 px-4 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
@@ -67,13 +67,13 @@
             </div>
         </div>
 
-        <a href="#"
-            class="flex items-center gap-4 px-3 py-3 rounded-xl text-logout-coral hover:bg-logout-coral/10 transition-all group">
+        <button (click)="logout()"
+            class="flex items-center gap-4 px-3 py-3 rounded-xl text-logout-coral hover:bg-logout-coral/10 transition-all group cursor-pointer w-full text-left">
             <span class="material-symbols-outlined text-2xl">logout</span>
             <span class="nav-label text-sm font-bold transition-opacity duration-300" [class.opacity-100]="isExpanded"
                 [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
                 Cerrar Sesión
             </span>
-        </a>
+        </button>
     </div>
 </aside>

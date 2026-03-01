@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { NgIf } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar-menu',
@@ -13,8 +13,14 @@ export class SidebarMenu {
   @Output() expandedChange = new EventEmitter<boolean>();
   isExpanded: boolean = true;
 
+  constructor(private router: Router) { }
+
   toggleSidebar(): void {
     this.isExpanded = !this.isExpanded;
     this.expandedChange.emit(this.isExpanded);
+  }
+
+  logout(): void {
+    this.router.navigate(['/login']);
   }
 }

@@ -22,7 +22,7 @@ export class LoginPage {
         // Simulate SSO delay and redirect to Home
         setTimeout(() => {
             this.isLoading.set(false);
-            this.router.navigate(['/home']);
+            this.router.navigate(['/odin']);
         }, 1500);
     }
 }

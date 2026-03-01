@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="iflow-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="50%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#f472b6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Stylized I+F flowing ribbon logo -->
+  <g filter="url(#glow)" transform="translate(256,256) scale(0.85) translate(-256,-256)">
+    <!-- Central vertical stroke (the I) -->
+    <path d="M240 100 C240 100, 235 160, 238 220 C241 280, 236 340, 240 400 C244 420, 248 430, 252 440 C256 445, 260 440, 264 430 C268 420, 272 400, 268 340 C264 280, 270 220, 272 160 C274 100, 270 80, 256 72 C242 80, 238 90, 240 100Z"
+          fill="url(#iflow-grad)" opacity="0.95"/>
+    <!-- Upper flowing ribbon (F top bar) - sweeps right -->
+    <path d="M260 130 C280 125, 310 118, 340 128 C370 138, 390 130, 400 120 C405 116, 400 108, 390 110 C375 114, 350 120, 320 112 C290 104, 265 112, 252 118 C248 120, 250 130, 260 130Z"
+          fill="url(#iflow-grad)" opacity="0.9"/>
+    <!-- Middle flowing ribbon (F middle bar) - sweeps right -->
+    <path d="M258 235 C278 228, 300 222, 330 230 C355 237, 375 232, 385 225 C390 222, 386 214, 378 216 C365 220, 340 225, 310 218 C285 212, 265 218, 252 225 C248 228, 250 236, 258 235Z"
+          fill="url(#iflow-grad)" opacity="0.85"/>
+    <!-- Lower decorative ribbon - sweeps left for balance -->
+    <path d="M252 340 C232 335, 210 330, 185 338 C165 345, 148 340, 140 334 C136 331, 139 324, 146 326 C158 330, 175 334, 200 328 C220 322, 242 328, 252 334 C256 336, 256 342, 252 340Z"
+          fill="url(#iflow-grad)" opacity="0.75"/>
+    <!-- Accent ribbon - upper left sweep for flow feeling -->
+    <path d="M248 170 C228 165, 200 158, 175 166 C155 173, 138 168, 130 162 C126 159, 129 152, 136 154 C148 158, 168 162, 190 156 C210 150, 238 156, 248 164 C252 167, 252 172, 248 170Z"
+          fill="url(#iflow-grad)" opacity="0.7"/>
+  </g>
+</svg>
