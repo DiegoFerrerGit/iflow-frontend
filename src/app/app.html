@@ -1,6 +1,7 @@
 <div class="bg-background-dark text-slate-100 min-h-screen relative flex overflow-x-hidden font-sans">
     @if (layoutService.showSidebar()) {
     <app-sidebar-menu (expandedChange)="isSidebarExpanded = $event"></app-sidebar-menu>
+    <app-currency-switcher></app-currency-switcher>
     }
 
     <div class="content-wrapper flex flex-col min-w-0 transition-all duration-300 flex-1 w-full"

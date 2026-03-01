@@ -43,19 +43,20 @@
                     <div class="space-y-2">
                         <label
                             class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Moneda</label>
-                        <select
+                        <select formControlName="currency"
                             class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary px-4 py-3 appearance-none transition-all">
-                            <option>USD ($)</option>
-                            <option>ARS ($)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="ARS">ARS ($)</option>
                         </select>
                     </div>
                     <div class="space-y-2">
                         <label
                             class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Monto</label>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{{
+                                '' | dynamicCurrencySymbol:incomeForm.get('currency')?.value }}</span>
                             <input formControlName="amount"
-                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-8 pr-4 py-3 placeholder:text-slate-600 transition-all"
+                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-10 pr-4 py-3 placeholder:text-slate-600 transition-all"
                                 placeholder="0.00" type="number" />
                         </div>
                     </div>

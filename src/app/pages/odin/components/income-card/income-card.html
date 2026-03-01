@@ -79,8 +79,9 @@
         <div>
             <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Monto Mensual</p>
             <div class="flex items-baseline gap-1">
-                <span class="text-slate-400 text-sm font-bold">$</span>
-                <span class="text-3xl font-black text-white tracking-tight">{{ income.amount | number:'1.0-0' }}</span>
+                <span class="text-slate-400 text-sm font-bold">{{ '' | dynamicCurrencySymbol }}</span>
+                <span class="text-3xl font-black text-white tracking-tight">{{ income.amount |
+                    dynamicCurrency:income.currency }}</span>
             </div>
         </div>
         <div class="text-right">

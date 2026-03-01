@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AllocationBox } from '../../../../models/allocation.model';
 import { ThemeColor } from '../../../../models/income.model';
+import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
+import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 
 @Component({
   selector: 'app-allocation-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DynamicCurrencyPipe, DynamicCurrencySymbolPipe],
   templateUrl: './allocation-form-modal.html',
   styleUrl: './allocation-form-modal.scss'
 })

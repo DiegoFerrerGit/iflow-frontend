@@ -11,16 +11,20 @@ import { AnimatedFlowComponent } from './components/animated-flow/animated-flow'
 import { AllocationCardComponent } from './components/allocation-card/allocation-card';
 import { AllocationFormModalComponent } from './components/allocation-form-modal/allocation-form-modal';
 import { DonutChartComponent, DonutChartSegment } from '../../shared/components/donut-chart/donut-chart.component';
+import { DynamicCurrencyPipe } from '../../shared/pipes/dynamic-currency-pipe';
+import { DynamicCurrencySymbolPipe } from '../../shared/pipes/dynamic-currency-symbol.pipe';
+import { CurrencyState } from '../../core/services/currency-state';
 
 @Component({
   selector: 'app-odin',
   standalone: true,
-  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent, DonutChartComponent],
+  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent, DonutChartComponent, DynamicCurrencyPipe, DynamicCurrencySymbolPipe],
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
 })
 export class OdinPageComponent implements OnInit {
   private mockService = inject(OdinMockService);
+  private currencyState = inject(CurrencyState);
 
   // Incomes State
   incomes: IncomeSource[] = [];
@@ -58,7 +62,7 @@ export class OdinPageComponent implements OnInit {
 
 
   get totalPool(): number {
-    return this.incomes.reduce((sum, income) => sum + income.amount, 0);
+    return this.incomes.reduce((sum, income) => sum + this.currencyState.convert(income.amount, income.currency || 'USD'), 0);
   }
 
   get totalAllocated(): number {
@@ -67,7 +71,8 @@ export class OdinPageComponent implements OnInit {
 
     return this.allocations.reduce((sum, box) => {
       if (box.calculationType === 'absoluto') {
-        return sum + box.targetAmount;
+        const convertedTarget = this.currencyState.convert(box.targetAmount, (box as any).currency || 'USD');
+        return sum + convertedTarget;
       } else {
         return sum + ((box.targetAmount / 100) * total);
       }
@@ -93,7 +98,7 @@ export class OdinPageComponent implements OnInit {
     // First map actual allocations
     const segments = this.allocations.map(box => {
       const amount = box.calculationType === 'absoluto'
-        ? box.targetAmount
+        ? this.currencyState.convert(box.targetAmount, (box as any).currency || 'USD')
         : (box.targetAmount / 100) * pool;
 
       const percentage = amount / pool; // relative to entire pool to fit with free money
@@ -148,7 +153,8 @@ export class OdinPageComponent implements OnInit {
     const circumference = 2 * Math.PI * r;
 
     return this.incomes.map(income => {
-      const percentage = (income.amount / total);
+      const convertedAmount = this.currencyState.convert(income.amount, income.currency || 'USD');
+      const percentage = (convertedAmount / total);
       const strokeLength = percentage * circumference;
       const dashArray = `${strokeLength} ${circumference}`;
 
@@ -160,7 +166,7 @@ export class OdinPageComponent implements OnInit {
         percentage: percentage * 100,
         icon: income.icon,
         name: income.name,
-        amount: income.amount,
+        amount: convertedAmount,
         amountColorClass: 'text-white'
       };
 

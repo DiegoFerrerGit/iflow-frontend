@@ -17,7 +17,8 @@ export class OdinMockService {
         effortPercentage: 40,
         icon: 'work',
         color: 'primary',
-        category: { label: 'Management', color: 'primary' }
+        category: { label: 'Management', color: 'primary' },
+        currency: 'USD'
       },
       {
         id: '2',
@@ -27,17 +28,19 @@ export class OdinMockService {
         effortPercentage: 60,
         icon: 'laptop_mac',
         color: 'cyan',
-        category: { label: 'Developer', color: 'cyan' }
+        category: { label: 'Developer', color: 'cyan' },
+        currency: 'USD'
       },
       {
         id: '3',
         name: 'SUNSET',
         role: 'Engineering Advisor',
-        amount: 1500,
+        amount: 2000000,
         effortPercentage: 10,
         icon: 'lightbulb',
         color: 'pink',
-        category: { label: 'Consulting', color: 'pink' }
+        category: { label: 'Consulting', color: 'pink' },
+        currency: 'ARS'
       }
     ];
   }

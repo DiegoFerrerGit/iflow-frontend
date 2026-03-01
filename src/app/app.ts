@@ -2,12 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map, mergeMap } from 'rxjs';
 import { SidebarMenu } from './layout/sidebar-menu/sidebar-menu';
+import { CurrencySwitcherComponent } from './layout/currency-switcher/currency-switcher';
 import { LayoutService } from './core/services/layout';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarMenu],
+  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

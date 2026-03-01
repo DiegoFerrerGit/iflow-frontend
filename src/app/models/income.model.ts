@@ -12,4 +12,5 @@ export interface IncomeSource {
         label: string;
         color: ThemeColor;
     };
+    currency?: 'USD' | 'ARS';
 }

@@ -2,11 +2,13 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IncomeSource, ThemeColor } from '../../../../models/income.model';
+import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
+import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 
 @Component({
   selector: 'app-income-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DynamicCurrencySymbolPipe],
   templateUrl: './income-form-modal.html',
   styleUrl: './income-form-modal.scss'
 })
@@ -44,7 +46,7 @@ export class IncomeFormModal implements OnInit {
       name: ['', [Validators.required, Validators.minLength(2)]],
       role: ['', Validators.required],
       amount: [null, [Validators.required, Validators.min(0)]],
-      currency: ['USD ($)'], // Default based on select
+      currency: ['USD'], // Default based on select
       categoryLabel: ['', Validators.required],
       icon: [''],
       effortPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
@@ -55,6 +57,7 @@ export class IncomeFormModal implements OnInit {
         name: this.initialIncome.name,
         role: this.initialIncome.role,
         amount: this.initialIncome.amount,
+        currency: this.initialIncome.currency || 'USD',
         categoryLabel: this.initialIncome.category.label,
         icon: this.initialIncome.icon,
         effortPercentage: this.initialIncome.effortPercentage
@@ -175,7 +178,8 @@ export class IncomeFormModal implements OnInit {
         category: {
           label: formValue.categoryLabel,
           color: categoryColorMatch
-        }
+        },
+        currency: formValue.currency
       };
 
       this.save.emit(result);

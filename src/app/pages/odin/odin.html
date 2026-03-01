@@ -71,7 +71,7 @@
                     </h3>
                     <div class="flex items-baseline gap-3 mb-8">
                         <span class="text-emerald-400 text-5xl leading-none font-black tracking-tighter drop-shadow-md">
-                            {{ totalPool | currency:'USD':'symbol':'1.0-0' }}
+                            {{ '' | dynamicCurrencySymbol }}{{ totalPool | dynamicCurrency }}
                         </span>
                     </div>
 

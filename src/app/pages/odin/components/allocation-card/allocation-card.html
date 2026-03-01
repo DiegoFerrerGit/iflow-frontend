@@ -57,10 +57,12 @@
                 }}</h3>
 
             <!-- Amount -->
-            <div class="flex items-start gap-1 mb-3">
-                <span class="text-slate-500 text-lg font-bold mt-1">$</span>
-                <span class="text-white text-4xl font-black tracking-tighter drop-shadow-md">
-                    {{ computedAmount | number:'1.0-0' }}
+            <div class="flex items-start gap-1 mb-3 w-full min-w-0">
+                <span class="text-slate-500 text-lg font-bold mt-1 shrink-0">{{ '' | dynamicCurrencySymbol }}</span>
+                <span
+                    class="text-white text-3xl font-black tracking-tighter drop-shadow-md truncate group-hover:overflow-visible group-hover:whitespace-normal group-hover:text-clip transition-all duration-300"
+                    title="{{ computedAmount | dynamicCurrency }}">
+                    {{ computedAmount | dynamicCurrency }}
                 </span>
             </div>
 
@@ -89,8 +91,9 @@
             <div class="flex flex-col mb-6">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-slate-500 text-[9px] font-bold uppercase tracking-wider">PROGRESO <span
-                            class="text-slate-400">(SAVED: ${{ box.savedAmount | number:'1.0-0' }} / TARGET: ${{
-                            box.savingsTarget | number:'1.0-0' }})</span></span>
+                            class="text-slate-400">(SAVED: {{ '' | dynamicCurrencySymbol }}{{ box.savedAmount |
+                            dynamicCurrency }} / TARGET: {{ '' | dynamicCurrencySymbol }}{{
+                            box.savingsTarget | dynamicCurrency }})</span></span>
                     <span class="text-slate-400 text-[10px] font-bold">{{ (box.savedAmount / box.savingsTarget * 100) |
                         number:'1.0-0' }}%</span>
                 </div>
