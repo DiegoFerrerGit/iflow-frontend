@@ -1,50 +1,44 @@
 <div class="loader-container" [ngClass]="{
-    'global-overlay fixed inset-0 z-[9999] bg-[#0b0e14]/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300': fullScreen,
+    'global-overlay absolute inset-0 z-[9999] bg-[#0b0e14]/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300': fullScreen,
     'inline-flex items-center justify-center': !fullScreen
   }">
 
-    <!-- Outer wrapper for scale -->
-    <div class="relative flex items-center justify-center"
-        [ngClass]="fullScreen ? 'w-24 h-24 sm:w-32 sm:h-32' : 'w-full h-full min-w-[20px] min-h-[20px]'">
+    @if (fullScreen) {
+    <!-- Global Loader: Animated IFLOW text -->
+    <div class="relative flex flex-col items-center justify-center">
+        <!-- Pulsing background glow -->
+        <div class="absolute inset-0 bg-primary/20 rounded-full blur-[60px] scale-150 animate-pulse"></div>
 
-        <!-- Outer spinning ring (cyan -> fuchsia gradient) -->
-        <svg class="absolute inset-0 w-full h-full animate-spin-slow drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]"
-            viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#22d3ee" /> <!-- Cyan 400 -->
-                    <stop offset="50%" stop-color="#a855f7" /> <!-- Purple 500 -->
-                    <stop offset="100%" stop-color="#f472b6" /> <!-- Pink 400 -->
-                </linearGradient>
-            </defs>
-            <!-- Dashed outer ring -->
-            <circle cx="50" cy="50" r="45" stroke="url(#glow-grad)" stroke-width="4" stroke-dasharray="70 200"
+        <h1 class="text-4xl md:text-6xl font-black tracking-widest relative z-10 animate-pulse">
+            <span
+                class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-fuchsia-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                IFLOW
+            </span>
+        </h1>
+
+        <span
+            class="mt-6 text-white/80 font-bold tracking-[0.3em] uppercase text-xs sm:text-sm flex items-center gap-2">
+            Sincronizando
+            <span class="flex gap-1">
+                <span class="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                <span class="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                <span class="w-1 h-1 bg-primary rounded-full animate-bounce"></span>
+            </span>
+        </span>
+    </div>
+    } @else {
+    <!-- Inline Loader: Animated Logo -->
+    <div class="relative flex items-center justify-center w-full h-full min-w-[20px] min-h-[20px]">
+        <!-- Subtle spinning ring behind logo -->
+        <svg class="absolute inset-0 w-full h-full animate-spin-slow drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]"
+            viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="45" stroke="#a855f7" stroke-width="4" stroke-dasharray="70 200"
                 stroke-linecap="round" />
         </svg>
-
-        <!-- Inner pulsing/spinning core -->
-        <svg class="absolute inset-0 w-full h-full animate-spin-reverse delay-150" viewBox="0 0 100 100" fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="30" stroke="#a855f7" stroke-width="3" stroke-dasharray="40 100"
-                stroke-linecap="round" class="opacity-80" />
-        </svg>
-
-        <!-- Center dot (pulse) -->
-        <div
-            class="absolute w-[15%] h-[15%] rounded-full bg-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse">
-        </div>
+        <!-- Logo pulsing -->
+        <img src="assets/images/iflow-logo.svg" alt="Loading"
+            class="w-[60%] h-[60%] object-contain animate-pulse drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
     </div>
-
-    @if (fullScreen) {
-    <!-- Optional text mapping context, if needed later -->
-    <span
-        class="mt-8 text-white/80 font-black tracking-[0.3em] uppercase text-xs sm:text-sm animate-pulse flex items-center gap-2">
-        Sincronizando
-        <span class="flex gap-1">
-            <span class="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-            <span class="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-            <span class="w-1 h-1 bg-primary rounded-full animate-bounce"></span>
-        </span>
-    </span>
     }
+
 </div>

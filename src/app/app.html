@@ -14,12 +14,12 @@
 
         <main class="relative z-10 w-full flex flex-col flex-1">
             <router-outlet></router-outlet>
+
+            <!-- Global Full Screen Loader -->
+            @if (loaderService.isLoading()) {
+            <app-loader [fullScreen]="true"></app-loader>
+            }
         </main>
 
     </div>
-
-    <!-- Global Full Screen Loader -->
-    @if (loaderService.isLoading()) {
-    <app-loader [fullScreen]="true"></app-loader>
-    }
 </div>
