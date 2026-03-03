@@ -61,7 +61,7 @@
                     <button (click)="signInWithGoogle()" [disabled]="isLoading()"
                         class="google-btn w-full py-4 px-6 rounded-xl flex items-center justify-center gap-4 group">
                         <ng-container *ngIf="isLoading()">
-                            <app-loader class="w-6 h-6 mr-2"></app-loader>
+                            <app-loader></app-loader>
                             <span class="text-slate-300 font-semibold text-base">Conectando...</span>
                         </ng-container>
                         <ng-container *ngIf="!isLoading()">

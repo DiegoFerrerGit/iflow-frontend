@@ -12,14 +12,20 @@
         [class.w-[calc(100%-80px)]]="layoutService.showSidebar() && !isSidebarExpanded"
         [class.w-full]="!layoutService.showSidebar()">
 
-        <main class="relative z-10 w-full flex flex-col flex-1">
+        <main class="z-10 w-full flex flex-col flex-1">
             <router-outlet></router-outlet>
-
-            <!-- Global Full Screen Loader -->
-            @if (loaderService.isLoading()) {
-            <app-loader [fullScreen]="true"></app-loader>
-            }
         </main>
 
     </div>
+
+    <!-- Global Full Screen Loader mapped to content area -->
+    @if (loaderService.isLoading()) {
+    <div class="fixed inset-y-0 right-0 z-[9999] transition-all duration-300 pointer-events-none"
+        [class.left-[256px]]="layoutService.showSidebar() && isSidebarExpanded"
+        [class.left-[80px]]="layoutService.showSidebar() && !isSidebarExpanded"
+        [class.left-0]="!layoutService.showSidebar()">
+        <!-- The app-loader child overrides pointer-events to catch clicks within the content area only -->
+        <app-loader [fullScreen]="true" class="pointer-events-auto"></app-loader>
+    </div>
+    }
 </div>
