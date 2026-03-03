@@ -20,12 +20,12 @@
 
     <!-- Global Full Screen Loader mapped to content area -->
     @if (loaderService.isLoading()) {
-    <div class="fixed inset-y-0 right-0 z-[9999] transition-all duration-300 pointer-events-none"
+    <div class="fixed inset-y-0 right-0 z-[9999] transition-all duration-300 pointer-events-none flex flex-col"
         [class.left-[256px]]="layoutService.showSidebar() && isSidebarExpanded"
         [class.left-[80px]]="layoutService.showSidebar() && !isSidebarExpanded"
         [class.left-0]="!layoutService.showSidebar()">
         <!-- The app-loader child overrides pointer-events to catch clicks within the content area only -->
-        <app-loader [fullScreen]="true" class="pointer-events-auto"></app-loader>
+        <app-loader [fullScreen]="true" class="pointer-events-auto h-full w-full"></app-loader>
     </div>
     }
 </div>

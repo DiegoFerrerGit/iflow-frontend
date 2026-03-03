@@ -1,6 +1,6 @@
 <div class="loader-container" [ngClass]="{
-    'global-overlay absolute inset-0 bg-[#0b0e14]/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300': fullScreen,
-    'relative inline-flex items-center justify-center w-[1.5em] h-[1.5em] shrink-0': !fullScreen
+    'global-overlay absolute inset-0 h-full bg-[#0b0e14]/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300': fullScreen,
+    'relative inline-flex items-center justify-center w-[1.7em] h-[1.7em] shrink-0': !fullScreen
   }">
 
     @if (fullScreen) {
@@ -28,7 +28,7 @@
         </svg>
         <!-- Logo pulsing -->
         <img src="assets/images/iflow-logo.svg" alt="Loading"
-            class="relative w-[55%] h-[55%] object-contain animate-pulse drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
+            class="relative w-[65%] h-[65%] object-contain animate-pulse drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
     </div>
     }
 </div>
