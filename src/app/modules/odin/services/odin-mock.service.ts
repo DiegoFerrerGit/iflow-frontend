@@ -81,4 +81,78 @@ export class OdinMockService {
       }
     ];
   }
+
+  getAllocationBoxLevel2(id: string): any {
+    if (id === '1') {
+      // Inversión
+      return {
+        availableAmountToAssign: 500, // USD
+        parentBoxType: 'percentage',
+        subCategories: [
+          {
+            id: '1',
+            allocationBoxId: id,
+            name: 'Cripto',
+            type: 'sum_items',
+            icon: 'currency_bitcoin',
+            color: 'amber',
+            displayAmount: { amount: 200, currency: 'USD' }
+          },
+          {
+            id: '2',
+            allocationBoxId: id,
+            name: 'Cash',
+            type: 'fixed_amount',
+            icon: 'payments',
+            color: 'emerald',
+            displayAmount: { amount: 150, currency: 'USD' }
+          },
+          {
+            id: '3',
+            allocationBoxId: id,
+            name: 'Bolsa',
+            type: 'sum_items',
+            icon: 'trending_up',
+            color: 'indigo',
+            displayAmount: { amount: 100, currency: 'USD' }
+          }
+        ]
+      };
+    }
+
+    // Default to 'Calidad de vida' (id === '2')
+    return {
+      availableAmountToAssign: 4383, // en USD (según Stitch ~$2922 + extras)
+      parentBoxType: 'absolute', // Now absolute for Calidad de Vida
+      subCategories: [
+        {
+          id: '1',
+          allocationBoxId: id,
+          name: 'Gastos Fijos',
+          type: 'sum_items',
+          icon: 'home',
+          color: 'crimson',
+          displayAmount: { amount: 2922, currency: 'USD' }
+        },
+        {
+          id: '2',
+          allocationBoxId: id,
+          name: 'Ocio',
+          type: 'fixed_amount',
+          icon: 'sports_esports',
+          color: 'emerald',
+          displayAmount: { amount: 500, currency: 'USD' }
+        },
+        {
+          id: '3',
+          allocationBoxId: id,
+          name: 'Ingles',
+          type: 'fixed_amount',
+          icon: 'language',
+          color: 'amber',
+          displayAmount: { amount: 172, currency: 'USD' }
+        }
+      ]
+    };
+  }
 }

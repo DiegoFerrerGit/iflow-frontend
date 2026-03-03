@@ -1,0 +1,59 @@
+<div class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <!-- Backdrop with blur -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" (click)="cancel.emit()"></div>
+
+    <!-- Modal Content -->
+    <div
+        class="relative w-full max-w-md bg-[#1b202c] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+
+        <!-- Top bar with warning icon if applicable -->
+        <div class="h-2 w-full" [ngClass]="isSumItems ? 'bg-amber-500' : 'bg-rose-500'"></div>
+
+        <div class="p-8">
+            <div class="flex flex-col items-center text-center space-y-6">
+
+                <!-- Icon Container -->
+                <div class="w-20 h-20 rounded-full flex items-center justify-center border-2"
+                    [ngClass]="isSumItems ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-rose-500/10 border-rose-500/20 text-rose-500'">
+                    <span class="material-symbols-outlined text-4xl">
+                        {{ isSumItems ? 'warning' : 'delete_forever' }}
+                    </span>
+                </div>
+
+                <!-- Text Content -->
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-black text-white tracking-tight uppercase">¿Confirmar Eliminación?</h2>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Estás a punto de eliminar <span class="text-white font-bold">{{ item.name }}</span> de esta
+                        caja.
+                    </p>
+                </div>
+
+                <!-- Conditional Warning for Sum of Items -->
+                @if (isSumItems) {
+                <div
+                    class="w-full p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-3 text-left">
+                    <span class="material-symbols-outlined text-amber-500 text-xl shrink-0">info</span>
+                    <p class="text-xs text-amber-200/70 font-medium leading-relaxed uppercase tracking-wider">
+                        <strong class="text-amber-500 font-black">IMPORTANTE:</strong> Esta categoría contiene ítems
+                        internos. Al eliminarla, también se perderán todos sus registros asociados.
+                    </p>
+                </div>
+                }
+
+                <!-- Actions -->
+                <div class="flex gap-3 w-full pt-4">
+                    <button (click)="cancel.emit()"
+                        class="flex-1 py-4 rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                        Cancelar
+                    </button>
+                    <button (click)="confirm.emit()"
+                        class="flex-1 py-4 rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase transition-all shadow-lg"
+                        [ngClass]="isSumItems ? 'bg-amber-600 text-white hover:bg-amber-500 shadow-amber-500/20' : 'bg-rose-600 text-white hover:bg-rose-500 shadow-rose-500/20'">
+                        Sí, Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

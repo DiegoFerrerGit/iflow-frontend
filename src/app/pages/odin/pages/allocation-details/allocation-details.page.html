@@ -1,0 +1,209 @@
+<div class="h-full flex flex-col p-4 sm:p-6 md:p-8 lg:p-12 mb-32 max-w-[1600px] mx-auto overflow-y-auto">
+
+    @if (allocationData() === null) {
+    <div class="flex items-center justify-center py-20">
+        <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+    } @else {
+    <!-- Breadcrumbs -->
+    <div class="flex items-center gap-2 mb-2">
+        <button (click)="goBack()"
+            class="text-slate-500 hover:text-white transition-colors text-xs font-black tracking-widest uppercase">DASHBOARD</button>
+        <span class="text-slate-500 text-xs font-black tracking-widest uppercase">&gt;</span>
+        <span class="text-indigo-400 text-xs font-black tracking-widest uppercase">{{ getBoxName() }}</span>
+    </div>
+
+    <!-- Header: Title & Amount -->
+    <div class="flex items-end justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <app-back-button></app-back-button>
+            <h1 class="text-5xl font-extrabold text-white tracking-tight">{{ getBoxName() }}</h1>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="flex flex-col items-end">
+                <span class="text-[10px] text-slate-400 font-black tracking-widest uppercase mb-1">
+                    @if (parentBoxType() === 'percentage') {
+                    <span class="text-indigo-400">{{ getCalculationType() }}</span> DEL POOL DESTINADO A ESTA CAJA
+                    } @else {
+                    MONTO <span class="text-indigo-400">ABSOLUTO</span> POR SUMA DE CATEGORÍAS
+                    }
+                </span>
+                <div class="flex items-start gap-1">
+                    <span class="text-emerald-400 text-3xl font-bold mt-1">{{ '' | dynamicCurrencySymbol }}</span>
+                    <span
+                        class="text-emerald-400 text-5xl font-black tracking-tighter drop-shadow-lg text-center leading-none">
+                        @if (parentBoxType() === 'percentage') {
+                        {{ totalAvailableAmountForDonut() | dynamicCurrency:currencyState.currentCurrency() }}
+                        } @else {
+                        {{ assignedTotal() | dynamicCurrency:currencyState.currentCurrency() }}
+                        }
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flex Layout: Left Donut Sidebar + Right Categories Grid -->
+    <div class="flex flex-col xl:flex-row gap-6 lg:gap-8 items-start w-full">
+
+        <!-- Left Sidebar (Donut Chart) -->
+        <div
+            class="w-[280px] xl:w-[280px] 2xl:w-[300px] shrink-0 border border-[rgba(225,29,72,0.15)] bg-[#0d1017] rounded-[32px] p-4 lg:p-6 relative overflow-hidden shadow-[0_0_80px_rgba(225,29,72,0.1)] flex flex-col items-center justify-center gap-6">
+            <!-- Background subtle glow -->
+            <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-rose-500/5 rounded-full blur-[80px] pointer-events-none">
+            </div>
+
+            <!-- Top: Donut Chart -->
+            <div class="donut-chart-wrapper relative w-[220px] h-[220px] shrink-0 z-10">
+                @if (donutSegments().length > 0) {
+                @if (parentBoxType() === 'percentage') {
+                <app-donut-chart [segments]="donutSegments()" title="ASIGNADO"
+                    [subtitle]="(getAssignedPercentage() | number:'1.0-1') + '%'"></app-donut-chart>
+                } @else {
+                <app-donut-chart [segments]="donutSegments()" title="SUMA TOTAL"
+                    [subtitle]="('' | dynamicCurrencySymbol) + (assignedTotal() | dynamicCurrency:currencyState.currentCurrency())"></app-donut-chart>
+                }
+                }
+            </div>
+
+            <!-- Bottom: Summary -->
+            @if (parentBoxType() === 'percentage') {
+            <div class="flex flex-col items-center justify-center gap-2 z-10 w-full border-t border-white/10 pt-8 mt-2">
+                <span class="text-[10px] text-slate-400 font-black tracking-widest uppercase text-center">DINERO
+                    ASIGNADO</span>
+                <span class="text-white text-3xl font-black tracking-tighter leading-none text-center">{{ '' |
+                    dynamicCurrencySymbol }}{{ assignedTotal() | dynamicCurrency:currencyState.currentCurrency()
+                    }}</span>
+
+                @if (getMissingAmount() !== null) {
+                <div class="px-4 py-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mt-2">
+                    <span class="text-xs font-bold tracking-widest uppercase text-center whitespace-nowrap">{{ '' |
+                        dynamicCurrencySymbol }}{{
+                        getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }} SIN ASIGNAR</span>
+                </div>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Main Container (Categories Grid) -->
+        <div
+            class="flex-grow w-full border border-[rgba(225,29,72,0.15)] bg-[#0d1017] rounded-[32px] p-6 lg:p-8 relative overflow-hidden shadow-[0_0_80px_rgba(225,29,72,0.1)]">
+
+            <!-- Background subtle glow -->
+            <div
+                class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-[120px] pointer-events-none">
+            </div>
+
+            <!-- Add Button (when ALL rows are full) - positioned top-right ABOVE the grid -->
+            @if (subCategoryCount() % 4 === 0) {
+            <div class="flex justify-end mb-4 relative z-10">
+                <button (click)="openSubCategoryModal()"
+                    class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors group">
+                    <span
+                        class="material-symbols-outlined text-[20px] font-light transition-transform group-hover:rotate-90">add_circle</span>
+                    <span class="text-xs font-black tracking-widest uppercase">Añadir Sub-categoría</span>
+                </button>
+            </div>
+            }
+
+            <!-- Subcategories Grid -->
+            <!-- Adjusted column counts slightly since container is narrrower alongside the sidebar -->
+            <div
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 relative z-10 lg:mt-4">
+                @for (segment of donutSegments(); track segment.id) {
+                @if (segment.id !== 'unassigned') {
+                <div class="bg-[#141722] border border-white/5 rounded-2xl p-6 hover:bg-[#1a1e2d] hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(168,85,247,0.1)] transition-all duration-300 relative flex flex-col justify-between min-h-[160px] group"
+                    [class.cursor-pointer]="segment.type === 'sum_items'">
+
+                    <!-- Actions (visible on hover) -->
+                    <div
+                        class="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                        <button (click)="openSubCategoryModal(segment); $event.stopPropagation()"
+                            class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                        <button (click)="deleteSubCategory(segment.id); $event.stopPropagation()"
+                            class="w-8 h-8 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 flex items-center justify-center text-rose-500 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="material-symbols-outlined text-[20px]" [ngClass]="segment.amountColorClass">
+                                {{ segment.icon || 'category' }}
+                            </span>
+                            <h3 class="font-black text-[13px] tracking-[0.1em] uppercase"
+                                [ngClass]="segment.amountColorClass">
+                                {{ segment.name }}
+                            </h3>
+                        </div>
+                        <div
+                            class="inline-flex items-center px-3 py-1 rounded-md bg-white/5 border border-white/5 mb-4 max-w-fit">
+                            <span class="text-[10px] font-bold tracking-widest uppercase"
+                                [ngClass]="segment.amountColorClass">
+                                {{ segment.type === 'sum_items' ? 'Suma de Ítems' : 'Monto Único' }}
+                            </span>
+                        </div>
+
+                        <!-- Click to see items legend (Middle position, Hover only) -->
+                        @if (segment.type === 'sum_items') {
+                        <div
+                            class="flex items-center gap-2 mb-4 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 ease-out">
+                            <span class="text-[9px] font-black tracking-[0.2em] uppercase text-primary/90">Click para
+                                ver
+                                ítems</span>
+                            <span
+                                class="material-symbols-outlined text-[14px] text-primary/70 animate-pulse">chevron_right</span>
+                        </div>
+                        }
+                    </div>
+
+                    <div>
+                        <div class="flex items-start gap-1">
+                            <span class="text-white text-3xl font-black tracking-tighter">
+                                {{ '' | dynamicCurrencySymbol }}{{ segment.amount |
+                                dynamicCurrency:currencyState.currentCurrency() }}
+                            </span>
+                        </div>
+                        <p class="text-slate-500 text-[10px] sm:text-xs font-medium mt-1">{{ segment.percentage |
+                            number:'1.0-1' }}% de esta caja</p>
+                    </div>
+                </div>
+                }
+                }
+
+                <!-- Dashed Add Card (when last row has empty space) -->
+                @if (subCategoryCount() % 4 !== 0) {
+                <button (click)="openSubCategoryModal()"
+                    class="bg-transparent border-2 border-dashed border-white/10 rounded-2xl p-6 hover:bg-white/5 hover:border-white/20 transition-all flex flex-col items-center justify-center min-h-[160px] text-slate-400 hover:text-white group gap-4 relative">
+                    <div
+                        class="w-12 h-12 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-2xl font-light">add</span>
+                    </div>
+                    <span
+                        class="text-xs font-bold tracking-[0.1em] uppercase group-hover:text-white transition-colors delay-75">Nueva
+                        Sub-categoría</span>
+                </button>
+                }
+            </div>
+        </div>
+    </div>
+    }
+
+    @if (isSubCategoryModalOpen()) {
+    <app-sub-category-form-modal [allocationBoxId]="boxId()!" [initialSubCategory]="subCategoryToEdit()"
+        [usedColors]="usedColors()" (close)="closeSubCategoryModal()" (save)="handleSaveSubCategory($event)">
+    </app-sub-category-form-modal>
+    }
+
+    <!-- Delete Confirmation Modal -->
+    @if (isDeleteModalOpen() && subCategoryToDelete()) {
+    <app-delete-confirmation-modal [item]="subCategoryToDelete()!" (confirm)="confirmDeleteSubCategory()"
+        (cancel)="cancelDeleteSubCategory()">
+    </app-delete-confirmation-modal>
+    }
+</div>

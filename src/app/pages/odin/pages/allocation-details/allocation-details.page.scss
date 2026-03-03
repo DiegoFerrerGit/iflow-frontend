@@ -1,0 +1,12 @@
+// Override the donut chart component's internal sizing for this page
+.donut-chart-wrapper {
+  ::ng-deep app-donut-chart>div {
+    width: 220px !important;
+    height: 220px !important;
+  }
+
+  ::ng-deep app-donut-chart>div>svg {
+    width: 220px !important;
+    height: 220px !important;
+  }
+}

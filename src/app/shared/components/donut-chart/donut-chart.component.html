@@ -1,5 +1,5 @@
 <div class="relative w-80 h-80 md:w-[340px] md:h-[340px] flex shrink-0 items-center justify-center">
-    <svg class="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 120 120">
+    <svg class="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 120 120" overflow="visible">
         <!-- Background Track -->
         <circle cx="60" cy="60" r="50" fill="none" class="stroke-slate-800" stroke-width="12" />
 
@@ -13,15 +13,6 @@
             (mouseleave)="hoveredSegment = null" />
         }
 
-        <!-- Linecap overlap fix for the first segment -->
-        @if (segments.length > 1) {
-        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segments[0].color"
-            [attr.stroke-width]="hoveredSegment?.id === segments[0].id ? 20 : 16" stroke-linecap="round"
-            stroke-dasharray="0 314.159" [attr.stroke-dashoffset]="segments[0].dashOffset"
-            class="pointer-events-none transition-all duration-200 ease-out"
-            [class.brightness-125]="hoveredSegment?.id === segments[0].id" />
-        }
-
         <!-- Hover Z-Index Overlays -->
         @for (segment of segments; track segment.id) {
         <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
@@ -31,18 +22,38 @@
             [class.brightness-125]="hoveredSegment?.id === segment.id"
             [style.opacity]="hoveredSegment?.id === segment.id ? '1' : '0'" />
         }
+
+        <!-- Linecap overlap fix for the first segment (drawn LAST to stay on top) -->
+        @if (segments.length > 1) {
+        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segments[0].color"
+            [attr.stroke-width]="hoveredSegment?.id === segments[0].id ? 20 : 16" stroke-linecap="round"
+            stroke-dasharray="0 314.159" [attr.stroke-dashoffset]="segments[0].dashOffset"
+            class="pointer-events-none transition-all duration-200 ease-out"
+            [class.brightness-125]="hoveredSegment?.id === segments[0].id"
+            [style.opacity]="hoveredSegment && hoveredSegment.id !== segments[0].id ? '0' : '1'" />
+        }
     </svg>
 
     <!-- Center Information Display -->
     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30">
 
-        <!-- Idle State (Title) -->
+        <!-- Idle State (Title + Subtitle) -->
         <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
             [class.opacity-100]="!hoveredSegment" [class.scale-100]="!hoveredSegment" [class.opacity-0]="hoveredSegment"
             [class.scale-95]="hoveredSegment">
             @if (title) {
-            <span class="text-slate-400 text-xs font-black tracking-[0.2em] uppercase text-center px-6 leading-relaxed">
+            <span
+                class="text-slate-400 text-[8px] font-black tracking-[0.2em] uppercase text-center px-4 leading-relaxed">
                 {{ title }}
+            </span>
+            }
+            @if (subtitle) {
+            <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none mt-0.5" [ngClass]="{
+                    'text-2xl': subtitle.length <= 11,
+                    'text-xl': subtitle.length > 11 && subtitle.length <= 15,
+                    'text-base': subtitle.length > 15
+                }">
+                {{ subtitle }}
             </span>
             }
         </div>
@@ -52,23 +63,19 @@
             [class.opacity-100]="hoveredSegment" [class.scale-100]="hoveredSegment" [class.opacity-0]="!hoveredSegment"
             [class.scale-95]="!hoveredSegment">
 
-            <div class="flex flex-col items-center text-center mt-2 w-full">
+            <div class="flex flex-col items-center text-center w-full">
                 @if (hoveredSegment) {
-                <span class="material-symbols-outlined text-[28px] mb-2 drop-shadow-sm transition-colors"
-                    [style.color]="hoveredSegment.color">
-                    {{ hoveredSegment.icon || 'work' }}
-                </span>
                 <span
-                    class="text-white/60 text-[10px] font-black tracking-widest uppercase mb-1 truncate w-full px-2 transition-colors"
+                    class="text-white/60 text-[8px] font-black tracking-widest uppercase mb-0.5 truncate w-full px-2 transition-colors"
                     [style.color]="hoveredSegment.color">
                     {{ hoveredSegment.name }}
                 </span>
-                <!-- Defaulting to class text-white if missing the specified class property -->
-                <span class="text-4xl font-black tracking-tighter drop-shadow-md transition-colors mt-1 mb-1"
+                <span class="text-xl font-black tracking-tighter drop-shadow-md transition-colors mb-0.5"
                     [ngClass]="hoveredSegment.amountColorClass || 'text-white'">
-                    {{ hoveredSegment.amount | currency:'USD':'symbol':'1.0-0' }}
+                    {{ '' | dynamicCurrencySymbol }}{{ hoveredSegment.amount |
+                    dynamicCurrency:currencyState.currentCurrency() }}
                 </span>
-                <span class="text-slate-400 font-black text-sm">({{ hoveredSegment.percentage | number:'1.1-1'
+                <span class="text-slate-400 font-black text-[10px]">({{ hoveredSegment.percentage | number:'1.1-1'
                     }}%)</span>
                 }
             </div>

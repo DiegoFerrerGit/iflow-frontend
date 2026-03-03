@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AllocationBox } from '../../../../models/allocation.model';
 import { ThemeColor, COLOR_MAP } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
@@ -8,7 +9,7 @@ import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-curr
 @Component({
   selector: 'app-allocation-card',
   standalone: true,
-  imports: [CommonModule, DynamicCurrencyPipe, DynamicCurrencySymbolPipe],
+  imports: [CommonModule, RouterModule, DynamicCurrencyPipe, DynamicCurrencySymbolPipe],
   templateUrl: './allocation-card.html',
   styleUrl: './allocation-card.scss'
 })
