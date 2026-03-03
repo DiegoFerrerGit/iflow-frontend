@@ -203,7 +203,7 @@
     </div>
 </main>
 
-<!-- Delete Confirmation Modal -->
+<!-- Income Delete Confirmation Modal -->
 @if (incomeToDelete) {
 <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div
@@ -221,6 +221,33 @@
                 Cancelar
             </button>
             <button (click)="confirmDelete()"
+                class="flex-1 px-4 py-3 rounded-xl bg-logout-coral/90 hover:bg-logout-coral text-white font-bold transition-colors shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Allocation Delete Confirmation Modal -->
+@if (allocationToDelete) {
+<div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+        class="bg-sidebar-bg border border-white/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full bg-logout-coral/10 text-logout-coral flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-3xl">delete_forever</span>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Eliminar Caja de Gasto</h3>
+        <p class="text-slate-400 text-sm mb-8">¿Estás seguro de que deseas eliminar la caja <span
+                class="text-white font-bold">"{{ allocationToDelete.name }}"</span>? Esta acción no se puede deshacer.
+        </p>
+
+        <div class="flex gap-4 w-full">
+            <button (click)="cancelDeleteAllocation()"
+                class="flex-1 px-4 py-3 rounded-xl border border-white/10 text-slate-300 font-bold hover:bg-white/5 transition-colors">
+                Cancelar
+            </button>
+            <button (click)="confirmDeleteAllocation()"
                 class="flex-1 px-4 py-3 rounded-xl bg-logout-coral/90 hover:bg-logout-coral text-white font-bold transition-colors shadow-[0_0_15px_rgba(239,68,68,0.2)]">
                 Eliminar
             </button>

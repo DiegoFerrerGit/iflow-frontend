@@ -35,6 +35,7 @@ export class OdinPageComponent implements OnInit {
   // Allocations State
   allocations: AllocationBox[] = [];
   isAllocationModalOpen = false;
+  allocationToDelete: AllocationBox | null = null;
 
   // Donut chart hover state -- moved mostly into the donut chart component internally
   // These are kept here just in case they are needed for cross-component interactions
@@ -239,7 +240,18 @@ export class OdinPageComponent implements OnInit {
   }
 
   deleteAllocation(box: AllocationBox) {
-    this.allocations = this.allocations.filter(a => a.id !== box.id);
+    this.allocationToDelete = box;
+  }
+
+  confirmDeleteAllocation() {
+    if (this.allocationToDelete) {
+      this.allocations = this.allocations.filter(a => a.id !== this.allocationToDelete!.id);
+      this.allocationToDelete = null;
+    }
+  }
+
+  cancelDeleteAllocation() {
+    this.allocationToDelete = null;
   }
 
   cancelDelete() {
