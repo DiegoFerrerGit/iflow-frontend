@@ -14,6 +14,7 @@ import { DonutChartComponent, DonutChartSegment } from '../../shared/components/
 import { DynamicCurrencyPipe } from '../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../shared/pipes/dynamic-currency-symbol.pipe';
 import { CurrencyState } from '../../core/services/currency-state';
+import { LoaderService } from '../../core/services/loader.service';
 
 @Component({
   selector: 'app-odin',
@@ -25,6 +26,7 @@ import { CurrencyState } from '../../core/services/currency-state';
 export class OdinPageComponent implements OnInit {
   private mockService = inject(OdinMockService);
   private currencyState = inject(CurrencyState);
+  private loaderService = inject(LoaderService);
 
   // Incomes State
   incomes: IncomeSource[] = [];
@@ -43,8 +45,20 @@ export class OdinPageComponent implements OnInit {
   hoveredAllocationSegment: DonutChartSegment | null = null;
 
   ngOnInit() {
+    this.loaderService.show();
+    setTimeout(() => {
+      this.loadData();
+      this.loaderService.hide();
+    }, 1500); // Simulate 1.5s API delay
+  }
+
+  loadData() {
     this.incomes = this.mockService.getIncomes();
     this.allocations = this.mockService.getAllocations();
+    this.updateCharts();
+  }
+
+  updateCharts() {
     this.sortIncomes();
     this.sortAllocations();
   }

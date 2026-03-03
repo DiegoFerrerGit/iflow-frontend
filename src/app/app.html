@@ -17,4 +17,9 @@
         </main>
 
     </div>
+
+    <!-- Global Full Screen Loader -->
+    @if (loaderService.isLoading()) {
+    <app-loader [fullScreen]="true"></app-loader>
+    }
 </div>

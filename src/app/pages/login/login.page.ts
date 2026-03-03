@@ -1,11 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { LoaderComponent } from '../../shared/components/loader/loader.component';
 
 @Component({
     selector: 'app-login-page',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, LoaderComponent],
     templateUrl: './login.page.html',
     styleUrls: [
         './styles/login.page.mobile.scss',

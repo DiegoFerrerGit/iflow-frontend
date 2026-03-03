@@ -9,6 +9,7 @@ import { BackButtonComponent } from '../../../../shared/components/back-button/b
 import { AmountWithCurrency, OdinAllocationBoxResponse, AllocationSubCategoryDto } from '../../../../../../mock/odin-nivel2.endpoints';
 import { ThemeColor, COLOR_MAP } from '../../../../models/income.model';
 import { CurrencyState } from '../../../../core/services/currency-state';
+import { LoaderService } from '../../../../core/services/loader.service';
 import { SubCategoryFormModal } from '../../components/sub-category-form-modal/sub-category-form-modal';
 import { DeleteConfirmationModal } from '../../components/delete-confirmation-modal/delete-confirmation-modal';
 
@@ -59,6 +60,7 @@ export class AllocationDetailsPage implements OnInit {
   private router = inject(Router);
   private mockService = inject(OdinMockService);
   public currencyState = inject(CurrencyState);
+  private loaderService = inject(LoaderService);
 
   boxId = signal<string | null>(null);
   allocationData = signal<AllocationDetailsData | null>(null);
@@ -200,8 +202,12 @@ export class AllocationDetailsPage implements OnInit {
   }
 
   loadDetails(id: string) {
-    const data = this.mockService.getAllocationBoxLevel2(id);
-    this.allocationData.set(data);
+    this.loaderService.show();
+    setTimeout(() => {
+      const data = this.mockService.getAllocationBoxLevel2(id);
+      this.allocationData.set(data);
+      this.loaderService.hide();
+    }, 1500); // Simulate API latency
   }
 
   goBack() {
