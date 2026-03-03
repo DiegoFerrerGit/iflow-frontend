@@ -1,34 +1,32 @@
-<div class="loader-container h-full w-full" [ngClass]="{
-    'global-overlay absolute inset-0 h-full w-full bg-[#0b0e14]/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300': fullScreen,
-    'relative inline-flex items-center justify-center w-[2.2em] h-[2.2em] shrink-0': !fullScreen
-  }">
-
-    @if (fullScreen) {
-    <!-- Global Loader: Elegant Animated IFLOW Text -->
-    <div class="relative flex flex-col items-center justify-center">
-        <!-- Pulsing background aura -->
-        <div class="absolute inset-0 bg-primary/20 rounded-full blur-[60px] scale-[2.5] animate-pulse"></div>
-
-        <div class="flex text-4xl md:text-6xl font-black tracking-[0.2em] relative z-10">
-            <span class="animate-wave-glow" style="animation-delay: 0.0s;">I</span>
-            <span class="animate-wave-glow" style="animation-delay: 0.15s;">F</span>
-            <span class="animate-wave-glow" style="animation-delay: 0.3s;">L</span>
-            <span class="animate-wave-glow" style="animation-delay: 0.45s;">O</span>
-            <span class="animate-wave-glow pr-0 tracking-normal" style="animation-delay: 0.6s;">W</span>
-        </div>
+@if (fullScreen) {
+<!-- Global Overlay Mode -->
+<div
+    class="absolute inset-0 bg-[#0b0e14]/80 backdrop-blur-md flex items-center justify-center transition-opacity duration-300">
+    <!-- Pulsing background aura (center aligned) -->
+    <div
+        class="absolute bg-primary/20 rounded-full w-[30vh] h-[30vh] blur-[80px] scale-[1.5] animate-pulse pointer-events-none">
     </div>
-    } @else {
-    <!-- Inline Loader: Adaptive Logo -->
-    <div class="absolute inset-0 flex items-center justify-center">
-        <!-- Subtle spinning ring behind logo -->
-        <svg class="absolute inset-0 w-full h-full animate-spin-slow drop-shadow-[0_0_8px_rgba(168,85,247,0.4)] pointer-events-none"
-            viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="45" stroke="#a855f7" stroke-width="6" stroke-dasharray="70 200"
-                stroke-linecap="round" />
-        </svg>
-        <!-- Logo pulsing -->
-        <img src="assets/images/iflow-logo.svg" alt="Loading"
-            class="relative w-[65%] h-[65%] object-contain animate-pulse drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
+
+    <!-- Text Logo -->
+    <div class="flex items-center text-4xl md:text-6xl font-black tracking-[0.2em] relative z-10 w-full justify-center">
+        <span class="animate-wave-glow" style="animation-delay: 0.0s;">I</span>
+        <span class="animate-wave-glow" style="animation-delay: 0.15s;">F</span>
+        <span class="animate-wave-glow" style="animation-delay: 0.3s;">L</span>
+        <span class="animate-wave-glow" style="animation-delay: 0.45s;">O</span>
+        <span class="animate-wave-glow pr-0 tracking-normal" style="animation-delay: 0.6s;">W</span>
     </div>
-    }
 </div>
+} @else {
+<!-- Inline Loader Mode -->
+<div class="relative inline-flex items-center justify-center w-[3em] h-[3em] shrink-0">
+    <!-- Subtle spinning ring behind logo -->
+    <svg class="absolute inset-0 w-full h-full animate-spin-slow drop-shadow-[0_0_8px_rgba(168,85,247,0.4)] pointer-events-none"
+        viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="45" stroke="#a855f7" stroke-width="6" stroke-dasharray="70 200"
+            stroke-linecap="round" />
+    </svg>
+    <!-- Logo pulsing -->
+    <img src="assets/images/iflow-logo.svg" alt="Loading"
+        class="relative w-[75%] h-[75%] object-contain animate-pulse drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
+</div>
+}
