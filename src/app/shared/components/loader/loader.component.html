@@ -1,6 +1,6 @@
-<div class="loader-container" [ngClass]="{
-    'global-overlay absolute inset-0 h-full bg-[#0b0e14]/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300': fullScreen,
-    'relative inline-flex items-center justify-center w-[1.7em] h-[1.7em] shrink-0': !fullScreen
+<div class="loader-container h-full w-full" [ngClass]="{
+    'global-overlay absolute inset-0 h-full w-full bg-[#0b0e14]/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300': fullScreen,
+    'relative inline-flex items-center justify-center w-[2.2em] h-[2.2em] shrink-0': !fullScreen
   }">
 
     @if (fullScreen) {
