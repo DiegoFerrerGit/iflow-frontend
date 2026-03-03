@@ -42,17 +42,14 @@
             [class.opacity-100]="!hoveredSegment" [class.scale-100]="!hoveredSegment" [class.opacity-0]="hoveredSegment"
             [class.scale-95]="hoveredSegment">
             @if (title) {
-            <span
-                class="text-slate-400 text-[8px] font-black tracking-[0.2em] uppercase text-center px-4 leading-relaxed">
+            <span class="text-slate-400 font-black tracking-[0.2em] uppercase text-center px-4 leading-relaxed"
+                [ngClass]="titleClass">
                 {{ title }}
             </span>
             }
             @if (subtitle) {
-            <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none mt-0.5" [ngClass]="{
-                    'text-2xl': subtitle.length <= 11,
-                    'text-xl': subtitle.length > 11 && subtitle.length <= 15,
-                    'text-base': subtitle.length > 15
-                }">
+            <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none mt-0.5"
+                [ngClass]="subtitleClass">
                 {{ subtitle }}
             </span>
             }
@@ -66,16 +63,17 @@
             <div class="flex flex-col items-center text-center w-full">
                 @if (hoveredSegment) {
                 <span
-                    class="text-white/60 text-[8px] font-black tracking-widest uppercase mb-0.5 truncate w-full px-2 transition-colors"
-                    [style.color]="hoveredSegment.color">
+                    class="text-white/60 font-black tracking-widest uppercase mb-0.5 truncate w-full px-2 transition-colors"
+                    [ngClass]="hoverNameClass" [style.color]="hoveredSegment.color">
                     {{ hoveredSegment.name }}
                 </span>
-                <span class="text-xl font-black tracking-tighter drop-shadow-md transition-colors mb-0.5"
-                    [ngClass]="hoveredSegment.amountColorClass || 'text-white'">
+                <span class="font-black tracking-tighter drop-shadow-md transition-colors mb-0.5"
+                    [ngClass]="hoverAmountClass + ' ' + (hoveredSegment.amountColorClass || 'text-white')">
                     {{ '' | dynamicCurrencySymbol }}{{ hoveredSegment.amount |
                     dynamicCurrency:currencyState.currentCurrency() }}
                 </span>
-                <span class="text-slate-400 font-black text-[10px]">({{ hoveredSegment.percentage | number:'1.1-1'
+                <span class="text-slate-400 font-black" [ngClass]="hoverPercentageClass">({{ hoveredSegment.percentage |
+                    number:'1.1-1'
                     }}%)</span>
                 }
             </div>
