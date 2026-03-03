@@ -49,7 +49,7 @@ export class OdinPageComponent implements OnInit {
     setTimeout(() => {
       this.loadData();
       this.loaderService.hide();
-    }, 500); // Simulate API delay
+    }, 1000); // Simulate API delay
   }
 
   loadData() {

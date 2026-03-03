@@ -207,7 +207,7 @@ export class AllocationDetailsPage implements OnInit {
       const data = this.mockService.getAllocationBoxLevel2(id);
       this.allocationData.set(data);
       this.loaderService.hide();
-    }, 500); // Simulate API latency
+    }, 1000); // Simulate API latency
   }
 
   goBack() {
