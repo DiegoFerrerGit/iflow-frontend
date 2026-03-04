@@ -41,7 +41,8 @@
     </div>
 
     <!-- Flex Layout: Left Donut Sidebar + Right Categories Grid -->
-    <div class="flex flex-col xl:flex-row gap-6 lg:gap-8 items-start w-full">
+    <div class="flex flex-col xl:flex-row gap-6 lg:gap-8 w-full" [class.items-start]="parentBoxType() === 'percentage'"
+        [class.items-stretch]="parentBoxType() !== 'percentage'">
 
         <!-- Left Sidebar (Donut Chart) -->
         <div
