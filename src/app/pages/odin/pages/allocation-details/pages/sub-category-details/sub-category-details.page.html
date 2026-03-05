@@ -1,0 +1,234 @@
+<div class="h-full flex flex-col p-4 sm:p-6 md:p-8 lg:p-12 mb-32 max-w-[1600px] mx-auto overflow-y-auto">
+
+    @if (pageData() !== null) {
+    <!-- Breadcrumbs -->
+    <div class="flex items-center gap-2 mb-2">
+        <button [routerLink]="['/odin']"
+            class="text-slate-500 hover:text-white transition-colors text-xs font-black tracking-widest uppercase truncate">DASHBOARD</button>
+        <span class="text-slate-500 text-xs font-black tracking-widest uppercase">&gt;</span>
+        <button (click)="goBack()"
+            class="text-slate-500 hover:text-white transition-colors text-xs font-black tracking-widest uppercase truncate">{{
+            boxName() }}</button>
+        <span class="text-slate-500 text-xs font-black tracking-widest uppercase">&gt;</span>
+        <span class="text-indigo-400 text-xs font-black tracking-widest uppercase truncate">{{ subCategoryName()
+            }}</span>
+    </div>
+
+    <!-- Header: Title & Amount -->
+    <div class="flex items-start justify-between mb-4 mt-2">
+        <div class="flex items-center gap-4 mt-2">
+            <app-back-button></app-back-button>
+            <h1 class="text-5xl font-black text-white tracking-tight uppercase">{{ subCategoryName() }}</h1>
+        </div>
+
+        <div class="flex items-center gap-8">
+            @if (parentBoxType() === 'percentage' && (pageData()?.availableAmountToAssign ?? 0) > 0) {
+            <div class="flex flex-col items-end gap-1 border-r border-white/10 pr-8">
+                <span class="text-cyan-400/80 text-[10px] font-bold uppercase tracking-[0.2em]">Sin Asignar:</span>
+                <span class="text-cyan-400 font-bold text-xl tabular-nums tracking-tighter">{{ '' |
+                    dynamicCurrencySymbol }}{{ pageData()!.availableAmountToAssign |
+                    dynamicCurrency:currencyState.currentCurrency() }} <span class="text-sm ml-1">{{
+                        currencyState.currentCurrency() }}</span></span>
+            </div>
+            }
+
+            <div class="flex flex-col items-end gap-1">
+                <span class="text-slate-500 text-sm font-medium uppercase tracking-[0.2em]">Total Acumulado:</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-emerald-400 text-3xl font-bold mt-1">{{ '' | dynamicCurrencySymbol }}</span>
+                    <span
+                        class="text-emerald-400 text-5xl font-black tabular-nums tracking-tighter drop-shadow-lg leading-none">
+                        {{ accumulatedTotal() | dynamicCurrency:currencyState.currentCurrency() }}
+                    </span>
+                    <span class="text-emerald-400/80 text-sm font-bold ml-1">{{ currencyState.currentCurrency()
+                        }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proportion Bar Chart Section -->
+    <section class="mb-5 w-full">
+        <div
+            class="border border-[rgba(225,29,72,0.15)] bg-[#0d1017] rounded-[24px] p-4 lg:p-5 relative overflow-hidden shadow-[0_0_80px_rgba(225,29,72,0.1)] w-full">
+            <div class="flex justify-between items-end mb-4 flex-wrap gap-4">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em]">Proporción de Ítems
+                </p>
+                <div class="flex gap-4 flex-wrap">
+                    @for (item of itemsWithDetails(); track item.id) {
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full" [ngClass]="item.bgColorClass"></div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">{{ item.name }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Custom Stacked Bar -->
+            <div
+                class="h-6 w-full flex rounded-full overflow-hidden bg-black/40 border border-white/5 p-1 relative z-10">
+                @for (item of itemsWithDetails(); track item.id; let isFirst = $first; let isLast = $last) {
+                <div class="h-full relative border-l border-[#0d1017] cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:scale-y-110 z-10 hover:z-20 origin-bottom"
+                    [ngClass]="[item.bgColorClass, isFirst ? 'rounded-l-full' : '', isLast ? 'rounded-r-full' : '']"
+                    [style.color]="'var(--tw-colors-' + item.color + '-400)'" [style.width.%]="item.percentage"
+                    (mouseenter)="hoveredItem.set(item.id)" (mouseleave)="hoveredItem.set(null)">
+                </div>
+                }
+            </div>
+
+            <!-- Dynamic Hover Legend -->
+            <div class="flex justify-center mt-3 h-6 items-center transition-all duration-200 relative z-0">
+                @if (hoveredItemDetails()) {
+                <div
+                    class="flex items-center gap-2 animate-fade-in-up bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
+                    <div class="w-3 h-3 rounded-full" [ngClass]="hoveredItemDetails()?.bgColorClass"></div>
+                    <span [ngClass]="hoveredItemDetails()?.textColorClass"
+                        class="text-xs font-black tracking-widest uppercase">
+                        {{ hoveredItemDetails()?.name }}
+                        <span class="text-white ml-1">({{ hoveredItemDetails()?.percentage | number:'1.0-1' }}%)</span>
+                    </span>
+                </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Items List Section -->
+    <section class="pb-12 flex-1 w-full mt-4">
+        <div class="flex items-center justify-between mb-8 pb-2 border-b border-white/5 flex-wrap gap-4">
+            <div class="flex items-center gap-4">
+                <h3 class="text-2xl font-black text-white uppercase tracking-tighter">Detalle de Gastos</h3>
+                <span
+                    class="text-[10px] font-bold bg-indigo-500/10 px-2.5 py-1 rounded-full text-indigo-400 border border-indigo-500/20 tracking-widest uppercase">
+                    {{ itemsWithDetails().length }} ITEMS ACTIVOS
+                </span>
+            </div>
+
+            @if ((pageData()?.availableAmountToAssign ?? 1) > 0) {
+            <button (click)="openItemModal()"
+                class="group relative inline-flex items-center justify-center bg-white/5 border border-white/10 px-6 py-2.5 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                <span
+                    class="material-symbols-outlined mr-2 text-white/70 group-hover:text-white transition-colors">add</span>
+                <span class="text-white font-bold tracking-wide text-sm">AÑADIR ÍTEM</span>
+            </button>
+            } @else {
+            <div class="px-5 py-2.5 rounded-full bg-rose-500/10 border border-rose-500/20">
+                <span class="text-[10px] text-rose-400 font-black uppercase tracking-widest">Todo el dinero disponible
+                    ha sido asignado</span>
+            </div>
+            }
+        </div>
+
+        <div class="flex flex-col gap-2">
+            @for (item of itemsWithDetails(); track item.id) {
+            <!-- Item Row -->
+            <div class="group border border-transparent hover:border-white/10 transition-all duration-300 relative flex items-center justify-between py-5 px-4 rounded-2xl bg-transparent hover:bg-white/[0.02]"
+                [class.pointer-events-none]="loadingItemId() === item.id">
+
+                <!-- Element Loader Overlay -->
+                @if (loadingItemId() === item.id) {
+                <div
+                    class="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-[#0b0e14]/70 backdrop-blur-sm">
+                    <app-loader></app-loader>
+                </div>
+                }
+
+                <!-- Left Details -->
+                <div class="flex items-center gap-6">
+                    <div class="w-[52px] h-[52px] rounded-[18px] flex items-center justify-center bg-[#11131a] relative overflow-hidden"
+                        style="box-shadow: 0 4px 10px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.02);">
+                        <div class="absolute inset-0 opacity-10" [ngClass]="item.bgColorClass"></div>
+                        <span class="material-symbols-outlined text-[26px] relative z-10"
+                            [ngClass]="item.textColorClass" style="font-variation-settings: 'FILL' 1, 'wght' 300">{{
+                            item.icon || 'category' }}</span>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-black text-xl leading-tight">{{ item.name }}</h4>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{
+                                item.description || 'Detalle' }}</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                            <span class="text-[10px] font-black uppercase tracking-widest"
+                                [ngClass]="item.textColorClass">{{
+                                item.percentage | number:'1.0-0' }}% de {{ subCategoryName() }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Details & Actions -->
+                <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-4">
+                        @if (item.paid) {
+                        <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest pt-1">PAGADO</p>
+                        } @else {
+                        <p class="text-[10px] text-red-400 font-black uppercase tracking-widest pt-1">FALTA PAGAR</p>
+                        }
+                        <div class="text-right">
+                            <div class="flex items-baseline gap-2 justify-end">
+                                <span class="text-white text-3xl font-black tabular-nums">
+                                    {{ '' | dynamicCurrencySymbol }}{{ item.calculatedAmount |
+                                    dynamicCurrency:currencyState.currentCurrency() }}
+                                </span>
+                                <span class="text-sm font-bold text-slate-500">{{ currencyState.currentCurrency()
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        @if (item.paid) {
+                        <button (click)="togglePaidStatus(item.id); $event.stopPropagation()"
+                            class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-400 text-[#0f0d15] transition-all hover:bg-emerald-500 shadow-[0_0_15px_rgba(52,211,153,0.15)] hover:shadow-[0_0_20px_rgba(52,211,153,0.3)]">
+                            <span class="material-symbols-outlined text-[18px] font-bold leading-none"
+                                style="font-variation-settings: 'FILL' 1, 'wght' 700">check</span>
+                        </button>
+                        } @else {
+                        <button (click)="togglePaidStatus(item.id); $event.stopPropagation()"
+                            class="w-9 h-9 flex items-center justify-center rounded-full bg-[#1a1e2d] text-slate-500 hover:bg-emerald-400 hover:text-[#0f0d15] transition-all hover:shadow-[0_0_15px_rgba(52,211,153,0.3)] group/check">
+                            <span
+                                class="material-symbols-outlined text-[18px] font-bold leading-none group-hover/check:scale-110 transition-transform">check</span>
+                        </button>
+                        }
+
+                        <button (click)="openItemModal(item); $event.stopPropagation()"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-[#1a1e2d] hover:bg-white/10 text-slate-500 hover:text-white transition-colors ml-2">
+                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                        <button (click)="openDeleteModal(item); $event.stopPropagation()"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-[#1a1e2d] hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            }
+
+            @if (itemsWithDetails().length === 0) {
+            <div
+                class="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-white/5 rounded-2xl w-full">
+                <span class="material-symbols-outlined text-4xl text-slate-600 mb-2">receipt_long</span>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">No hay ítems registrados.</p>
+                <p class="text-slate-500 text-[10px] mt-1">Usa el botón "Añadir ítem" para registrar un gasto o
+                    detalle.</p>
+            </div>
+            }
+
+        </div>
+    </section>
+    }
+</div>
+
+<!-- Modals -->
+@if (isItemFormModalOpen()) {
+<app-item-form-modal [initialItem]="itemToEdit()" [subCategoryId]="subCategoryId()!"
+    [availableAmountToAssign]="pageData()?.availableAmountToAssign || 0" [usedColors]="usedColors()"
+    [currentCurrency]="currencyState.currentCurrency() === 'USD' ? 'USD' : 'ARS'" (save)="handleSaveItem($event)"
+    (close)="closeItemModal()">
+</app-item-form-modal>
+}
+
+@if (isDeleteModalOpen() && itemToDelete()) {
+<app-delete-confirmation-modal [item]="itemToDelete()" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+</app-delete-confirmation-modal>
+}

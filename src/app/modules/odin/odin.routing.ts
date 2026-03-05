@@ -9,6 +9,10 @@ const routes: Routes = [
   {
     path: 'allocation-details/:id',
     loadComponent: () => import('../../pages/odin/pages/allocation-details/allocation-details.page').then(m => m.AllocationDetailsPage)
+  },
+  {
+    path: 'allocation-details/:id/subcategories/:subCategoryId',
+    loadComponent: () => import('../../pages/odin/pages/allocation-details/pages/sub-category-details/sub-category-details.page').then(m => m.SubCategoryDetailsPage)
   }
 ];
 

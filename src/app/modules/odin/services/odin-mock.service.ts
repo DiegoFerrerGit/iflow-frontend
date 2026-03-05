@@ -155,4 +155,43 @@ export class OdinMockService {
       ]
     };
   }
+
+  getSubCategoryItems(subCategoryId: string): any {
+    // Simple mock according to the endpoints specs
+    return {
+      availableAmountToAssign: 1250,
+      items: [
+        {
+          id: 'item_1',
+          subCategoryId: subCategoryId,
+          name: 'Alquiler',
+          description: 'Vivienda',
+          icon: 'home',
+          color: 'violet',
+          amountWithCurrency: { amount: 1350, currency: 'USD' },
+          paid: true
+        },
+        {
+          id: 'item_2',
+          subCategoryId: subCategoryId,
+          name: 'Expensas',
+          description: 'Mantenimiento',
+          icon: 'receipt',
+          color: 'pink',
+          amountWithCurrency: { amount: 735, currency: 'USD' },
+          paid: false
+        },
+        {
+          id: 'item_3',
+          subCategoryId: subCategoryId,
+          name: 'ABL & Servicios',
+          description: 'Impuestos',
+          icon: 'bolt',
+          color: 'cyan',
+          amountWithCurrency: { amount: 365, currency: 'USD' },
+          paid: false
+        }
+      ]
+    };
+  }
 }

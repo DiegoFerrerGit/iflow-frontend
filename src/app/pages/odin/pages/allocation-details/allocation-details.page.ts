@@ -329,4 +329,15 @@ export class AllocationDetailsPage implements OnInit {
     this.allocationData.set({ ...data }); // Trigger reactivity
     this.cancelDeleteSubCategory();
   }
+
+  navigateToSubCategory(subCategoryId: string) {
+    const boxId = this.boxId();
+    if (!boxId) return;
+
+    const type = this.parentBoxType();
+    this.router.navigate(['/odin/allocation-details', boxId, 'subcategories', subCategoryId], {
+      state: { parentBoxType: type }
+    });
+    sessionStorage.setItem(`odin_box_type_${boxId}`, type);
+  }
 }

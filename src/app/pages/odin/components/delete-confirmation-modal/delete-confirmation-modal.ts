@@ -10,7 +10,7 @@ import { AllocationSubCategoryDto } from '../../../../../../mock/odin-nivel2.end
     styleUrl: './delete-confirmation-modal.scss'
 })
 export class DeleteConfirmationModal {
-    @Input({ required: true }) item!: AllocationSubCategoryDto;
+    @Input({ required: true }) item!: any;
     @Output() confirm = new EventEmitter<void>();
     @Output() cancel = new EventEmitter<void>();
 
