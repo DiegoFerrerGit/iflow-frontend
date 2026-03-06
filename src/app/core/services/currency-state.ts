@@ -1,5 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { CurrencyApi } from '../apis/currency.api';
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { selectDisplayCurrency, selectUsdToArsRate } from '../../modules/authentication/state/authentication.selectors';
 
 export type CurrencyType = 'USD' | 'ARS';
 
@@ -7,13 +9,33 @@ export type CurrencyType = 'USD' | 'ARS';
   providedIn: 'root',
 })
 export class CurrencyState {
-  // Global signals
+  private store = inject(Store);
+
+  /** The currently selected currency (user can toggle) */
   readonly currentCurrency = signal<CurrencyType>('USD');
-  readonly exchangeRate = signal<number>(1450); // Default fallback
+
+  /** Exchange rate from the NgRx store (set by profile response) */
+  private storeRate = toSignal(this.store.select(selectUsdToArsRate), { initialValue: null });
+
+  /** Computed exchange rate with fallback */
+  readonly exchangeRate = computed(() => this.storeRate() ?? 1450);
+
   readonly isLoadingRate = signal<boolean>(false);
 
-  constructor(private currencyApi: CurrencyApi) {
-    this.fetchExchangeRate();
+  /** Display currency preference from user profile */
+  private storeDisplayCurrency = toSignal(
+    this.store.select(selectDisplayCurrency),
+    { initialValue: null },
+  );
+
+  constructor() {
+    // Sync display currency preference from store
+    effect(() => {
+      const preferred = this.storeDisplayCurrency();
+      if (preferred) {
+        this.currentCurrency.set(preferred);
+      }
+    });
   }
 
   toggleCurrency(): void {
@@ -24,7 +46,6 @@ export class CurrencyState {
     this.currentCurrency.set(currency);
   }
 
-  // Convert a given amount from a source currency to the currently selected currency
   convert(amount: number, sourceCurrency: CurrencyType = 'USD'): number {
     const current = this.currentCurrency();
     const rate = this.exchangeRate();
@@ -38,19 +59,5 @@ export class CurrencyState {
       return amount / rate;
     }
     return amount;
-  }
-
-  private fetchExchangeRate(): void {
-    this.isLoadingRate.set(true);
-    this.currencyApi.getExchangeRate().subscribe({
-      next: (response) => {
-        this.exchangeRate.set(response.rate);
-        this.isLoadingRate.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to fetch exchange rate', err);
-        this.isLoadingRate.set(false);
-      }
-    });
   }
 }

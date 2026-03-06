@@ -12,8 +12,10 @@
         </div>
 
         <!-- Logo SVG - Solo visible cuando está contraído -->
-        <img *ngIf="!isExpanded" src="assets/images/iflow-logo.svg" alt="IFLOW"
+        @if (!isExpanded) {
+        <img src="assets/images/iflow-logo.svg" alt="IFLOW"
             class="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">
+        }
     </div>
 
     <!-- Botón flechas plegables - Siempre visible, flotante a la derecha -->
@@ -26,21 +28,7 @@
 
     <div class="flex-1 py-8 px-4 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
 
-        <nav class="flex flex-col gap-1">
-            <!-- Item: Home -->
-            <a routerLink="/home" routerLinkActive="bg-[#2d1b4e] text-fuchsia-300 shadow-sm"
-                [routerLinkActiveOptions]="{exact: false}"
-                class="flex items-center gap-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-white/5 hover:text-white"
-                [class.px-3]="isExpanded" [class.justify-start]="isExpanded" [class.px-0]="!isExpanded"
-                [class.justify-center]="!isExpanded">
-                <span class="material-symbols-outlined text-2xl">home</span>
-                <span class="nav-label text-sm font-bold transition-opacity duration-300"
-                    [class.opacity-100]="isExpanded" [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
-                    Inicio
-                </span>
-            </a>
-
-            <!-- Item: ODIN -->
+        <nav class="flex flex-col gap-1"> <!-- Item: ODIN -->
             <a routerLink="/odin" routerLinkActive="bg-[#2d1b4e] text-fuchsia-300 shadow-sm"
                 [routerLinkActiveOptions]="{exact: false}"
                 class="flex items-center gap-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-white/5 hover:text-white"
@@ -69,13 +57,20 @@
     <div class="mt-auto p-4 flex flex-col gap-4 border-t border-white/5">
         <div class="flex items-center gap-3 py-2 w-full" [class.px-2]="isExpanded" [class.justify-start]="isExpanded"
             [class.px-0]="!isExpanded" [class.justify-center]="!isExpanded">
+            <!-- Avatar Image (if available) -->
+            @if (userAvatarUrl()) {
+            <img [src]="userAvatarUrl()" alt="Avatar" referrerpolicy="no-referrer"
+                class="w-10 h-10 min-w-[40px] rounded-full object-cover shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-white/10" />
+            } @else {
+            <!-- Initials Fallback (if no avatar) -->
             <div
                 class="w-10 h-10 min-w-[40px] bg-primary rounded-full flex items-center justify-center text-[#16121d] font-bold text-sm shadow-[0_0_15px_rgba(168,85,247,0.4)]">
-                DF
+                {{ userInitials() }}
             </div>
+            }
             <div class="user-label overflow-hidden transition-opacity duration-300" [class.opacity-100]="isExpanded"
                 [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
-                <p class="text-xs font-bold text-white truncate">Diego Ferrer</p>
+                <p class="text-xs font-bold text-white truncate">{{ userFullName() || 'Usuario' }}</p>
             </div>
         </div>
 

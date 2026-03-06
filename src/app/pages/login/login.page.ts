@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { GoogleAuthService } from '../../modules/authentication/google-auth.service';
 
 @Component({
     selector: 'app-login-page',
@@ -13,17 +15,28 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
         './styles/login.page.desktop.scss'
     ]
 })
-export class LoginPage {
+export class LoginPage implements OnInit, OnDestroy {
     isLoading = signal(false);
 
-    constructor(private router: Router) { }
+    private subscriptions: Subscription[] = [];
+
+    constructor(
+        private store: Store,
+        private googleAuthService: GoogleAuthService,
+    ) { }
+
+    ngOnInit(): void {
+        this.googleAuthService.initialize();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach((s) => s.unsubscribe());
+    }
 
     signInWithGoogle(): void {
+        // Set local loading state while Google API loads
         this.isLoading.set(true);
-        // Simulate SSO delay and redirect to Home
-        setTimeout(() => {
-            this.isLoading.set(false);
-            this.router.navigate(['/odin']);
-        }, 1500);
+        setTimeout(() => this.isLoading.set(false), 3000); // fallback reset
+        this.googleAuthService.signIn();
     }
 }
