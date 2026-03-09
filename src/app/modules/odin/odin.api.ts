@@ -134,6 +134,8 @@ export class OdinApiService {
         );
     }
 
+    // #endregion
+
     // #region ITEMS of SUB CATEGORIES
 
     public createItem(allocationId: string, subCategoryId: string, request: IAllocationItemRequestApi): Observable<IAllocationItemDto> {
