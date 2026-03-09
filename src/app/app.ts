@@ -8,11 +8,13 @@ import { LoaderComponent } from './shared/components/loader/loader.component';
 import { Store } from '@ngrx/store';
 import { selectLoader } from './core/loader-manager/state/loader.selectors';
 import { AsyncPipe } from '@angular/common';
+import { ToastComponent } from './shared/components/toast/toast.component';
+import { ToastService } from './shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe],
+  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -24,6 +26,7 @@ export class AppComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   readonly layoutService = inject(LayoutService);
   private store = inject(Store);
+  public readonly toastService = inject(ToastService);
 
   public inProgress$!: Observable<boolean>;
 

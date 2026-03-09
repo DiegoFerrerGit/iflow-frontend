@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, OnDestroy, SimpleChanges, ChangeDetectorRef, inject } from '@angular/core';
 
 @Component({
     selector: 'app-toast',
@@ -132,6 +132,7 @@ export class ToastComponent implements OnChanges, OnDestroy {
 
     isVisible = false;
     private autoCloseTimer: ReturnType<typeof setTimeout> | null = null;
+    private cdr = inject(ChangeDetectorRef);
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['show']) {
@@ -139,6 +140,7 @@ export class ToastComponent implements OnChanges, OnDestroy {
                 this.open();
             } else {
                 this.isVisible = false;
+                this.cdr.detectChanges();
             }
         }
     }
@@ -149,6 +151,7 @@ export class ToastComponent implements OnChanges, OnDestroy {
 
     dismiss(): void {
         this.isVisible = false;
+        this.cdr.detectChanges();
         this.clearTimer();
         setTimeout(() => this.closed.emit(), 400);
     }
@@ -158,6 +161,7 @@ export class ToastComponent implements OnChanges, OnDestroy {
         // Trigger in next tick so Angular renders the hidden state first
         setTimeout(() => {
             this.isVisible = true;
+            this.cdr.detectChanges();
         }, 20);
         this.autoCloseTimer = setTimeout(() => this.dismiss(), this.duration);
     }

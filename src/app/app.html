@@ -30,3 +30,8 @@
     }
 
 </div>
+
+<!-- Global Error System Toast. Now positioned completely outside the layout container to override z-indices correctly -->
+<app-toast [show]="toastService.state().show" [message]="toastService.state().message"
+    [type]="toastService.state().type" [duration]="toastService.state().duration" (closed)="toastService.hide()">
+</app-toast>

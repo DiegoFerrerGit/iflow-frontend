@@ -3,7 +3,7 @@
     [class.w-[256px]]="isExpanded" [class.w-[80px]]="!isExpanded">
 
     <div class="burger-menu h-20 flex items-center px-4 justify-between border-b border-white/5 shrink-0">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 cursor-pointer" routerLink="/odin">
             <span
                 class="logo-text text-xl font-black tracking-widest uppercase transition-opacity duration-300 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-violet-400 select-none"
                 [class.opacity-100]="isExpanded" [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
@@ -13,8 +13,8 @@
 
         <!-- Logo SVG - Solo visible cuando está contraído -->
         @if (!isExpanded) {
-        <img src="assets/images/iflow-logo.svg" alt="IFLOW"
-            class="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">
+        <img src="assets/images/iflow-logo.svg" alt="IFLOW" routerLink="/odin"
+            class="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] cursor-pointer">
         }
     </div>
 
