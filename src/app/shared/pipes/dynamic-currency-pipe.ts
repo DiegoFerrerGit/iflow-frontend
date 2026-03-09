@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
-import { CurrencyState } from '../../core/services/currency-state';
+import { CurrencyState } from '../../core/currency-manager/currency-state';
 
 @Pipe({
   name: 'dynamicCurrency',

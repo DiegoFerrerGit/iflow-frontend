@@ -6,7 +6,7 @@ import { ThemeColor, THEME_COLORS } from '../../../../models/income.model';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
-import { CurrencyState } from '../../../../core/services/currency-state';
+import { CurrencyState } from '../../../../core/currency-manager/currency-state';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -17,10 +17,10 @@ import { Subscription } from 'rxjs';
     styleUrl: './sub-category-form-modal.scss'
 })
 export class SubCategoryFormModal implements OnInit {
-    private fb = inject(FormBuilder);
-    private currencyState = inject(CurrencyState);
-    private cdr = inject(ChangeDetectorRef);
-    private subs = new Subscription();
+    private readonly fb = inject(FormBuilder);
+    private readonly currencyState = inject(CurrencyState);
+    private readonly cdr = inject(ChangeDetectorRef);
+    private readonly subs = new Subscription();
 
     @Input() initialSubCategory: IAllocationSubCategoryDto | null = null;
     @Input() allocationBoxId!: string;
@@ -30,24 +30,24 @@ export class SubCategoryFormModal implements OnInit {
     @Output() close = new EventEmitter<void>();
     @Output() save = new EventEmitter<IAllocationSubCategoryDto>();
 
-    form!: FormGroup;
-    allThemeColors = THEME_COLORS;
-    displayedAvailableAmount: number = 0;
-    formattedAvailableAmount: string = '0';
-    maxAllowedAmount: number = 0;
-    totalAvailableInBase: number = 0;
+    public form!: FormGroup;
+    public allThemeColors = THEME_COLORS;
+    public displayedAvailableAmount: number = 0;
+    public formattedAvailableAmount: string = '0';
+    public maxAllowedAmount: number = 0;
+    public totalAvailableInBase: number = 0;
 
-    typeOptions: ToggleOption[] = [
+    public typeOptions: ToggleOption[] = [
         { label: 'Monto Único', value: 'fixed_amount', icon: 'payments' },
         { label: 'Suma de Ítems', value: 'sum_items', icon: 'list_alt' }
     ];
 
-    currencyOptions: ToggleOption[] = [
+    public currencyOptions: ToggleOption[] = [
         { label: 'USD', value: 'USD' },
         { label: 'ARS', value: 'ARS' }
     ];
 
-    iconsList = [
+    public iconsList = [
         'category', 'payments', 'home', 'shopping_cart', 'restaurant', 'directions_car',
         'flight', 'school', 'health_and_safety', 'pets', 'fitness_center',
         'redeem', 'savings', 'paid', 'credit_card', 'receipt',
@@ -57,7 +57,7 @@ export class SubCategoryFormModal implements OnInit {
         'currency_bitcoin', 'currency_exchange', 'account_balance_wallet', 'monetization_on', 'token'
     ];
 
-    ngOnInit(): void {
+    public ngOnInit(): void {
         const initialAmountInOriginalCurrency = this.initialSubCategory?.display_amount?.amount || 0;
         const initialCurrency = this.initialSubCategory?.display_amount?.currency || 'USD';
 
@@ -106,30 +106,30 @@ export class SubCategoryFormModal implements OnInit {
         );
     }
 
-    get amountType(): 'fixed_amount' | 'sum_items' {
+    public get amountType(): 'fixed_amount' | 'sum_items' {
         return this.form.get('type')?.value;
     }
 
-    get isEditMode(): boolean {
+    public get isEditMode(): boolean {
         return !!this.initialSubCategory;
     }
 
-    get isTypeLocked(): boolean {
+    public get isTypeLocked(): boolean {
         return this.isEditMode && this.initialSubCategory?.type === 'sum_items';
     }
 
-    isColorUsed(color: string): boolean {
+    public isColorUsed(color: string): boolean {
         if (this.initialSubCategory && this.initialSubCategory.color === color) {
             return false;
         }
         return this.usedColors.includes(color as ThemeColor);
     }
 
-    onTypeChange(type: any) {
+    public onTypeChange(type: 'fixed_amount' | 'sum_items'): void {
         this.form.patchValue({ type });
     }
 
-    onCurrencyChange(currency: any) {
+    public onCurrencyChange(currency: 'USD' | 'ARS'): void {
         this.form.get('currency')?.setValue(currency);
     }
 
@@ -143,7 +143,7 @@ export class SubCategoryFormModal implements OnInit {
         return amount * this.currencyState.exchangeRate();
     }
 
-    private updateMaxValidator() {
+    private updateMaxValidator(): void {
         const type = this.form.get('type')?.value;
         const currentCurrency = this.form.get('currency')?.value as 'USD' | 'ARS';
 
@@ -164,20 +164,20 @@ export class SubCategoryFormModal implements OnInit {
         amountControl?.updateValueAndValidity();
     }
 
-    ngOnDestroy() {
+    public ngOnDestroy(): void {
         this.subs.unsubscribe();
     }
 
-    selectIcon(icon: string) {
+    public selectIcon(icon: string): void {
         this.form.patchValue({ icon });
     }
 
-    selectColor(color: ThemeColor) {
+    public selectColor(color: ThemeColor): void {
         if (this.isColorUsed(color)) return;
         this.form.patchValue({ color });
     }
 
-    onSubmit() {
+    public onSubmit(): void {
         if (this.form.valid) {
             const val = this.form.getRawValue();
             const result: IAllocationSubCategoryDto = {

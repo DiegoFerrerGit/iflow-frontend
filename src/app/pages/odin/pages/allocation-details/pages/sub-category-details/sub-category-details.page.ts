@@ -7,7 +7,7 @@ import { IAllocationItemRequestApi } from '../../../../../../modules/odin/models
 import { DynamicCurrencyPipe } from '../../../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { BackButtonComponent } from '../../../../../../shared/components/back-button/back-button';
-import { CurrencyState } from '../../../../../../core/services/currency-state';
+import { CurrencyState } from '../../../../../../core/currency-manager/currency-state';
 import { LoaderService } from '../../../../../../core/loader-manager/loader.service';
 import { ThemeColor } from '../../../../../../models/income.model';
 import { DeleteConfirmationModal } from '../../../../components/delete-confirmation-modal/delete-confirmation-modal';

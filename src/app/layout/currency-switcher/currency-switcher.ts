@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CurrencyState, CurrencyType } from '../../core/services/currency-state';
+import { CurrencyState, CurrencyType } from '../../core/currency-manager/currency-state';
 
 @Component({
   selector: 'app-currency-switcher',

@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { IncomeSource, ThemeColor, COLOR_MAP, THEME_COLORS } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
-import { CategoryColorService } from '../../../../core/services/category-color.service';
+import { CategoryColorService } from '../../../../shared/services/category-color.service';
 
 @Component({
   selector: 'app-income-form-modal',

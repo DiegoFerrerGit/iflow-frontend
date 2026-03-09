@@ -7,7 +7,6 @@ import { AllocationBox } from '../../models/allocation.model';
 import { OdinApiService } from '../../modules/odin/odin.api';
 import { IOdinResponse, IIncomeSourceApi, IAllocationBoxApi } from '../../modules/odin/models/interfaces/api.response.interfaces';
 import { IIncomeSourceRequesApi, IAllocationBoxRequestApi } from '../../modules/odin/models/interfaces/api.request.interfaces';
-import { Subscription } from 'rxjs';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { IncomeFormModal } from './components/income-form-modal/income-form-modal';
 import { AnimatedFlowComponent } from './components/animated-flow/animated-flow';
@@ -16,7 +15,7 @@ import { AllocationFormModalComponent } from './components/allocation-form-modal
 import { DonutChartComponent, DonutChartSegment } from '../../shared/components/donut-chart/donut-chart.component';
 import { DynamicCurrencyPipe } from '../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../shared/pipes/dynamic-currency-symbol.pipe';
-import { CurrencyState } from '../../core/services/currency-state';
+import { CurrencyState } from '../../core/currency-manager/currency-state';
 import { LoaderService } from '../../core/loader-manager/loader.service';
 
 @Component({
@@ -26,51 +25,49 @@ import { LoaderService } from '../../core/loader-manager/loader.service';
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
 })
-export class OdinPageComponent implements OnInit, OnDestroy {
-  private odinApiService = inject(OdinApiService);
-  private currencyState = inject(CurrencyState);
-  private loaderService = inject(LoaderService);
-  private cdr = inject(ChangeDetectorRef);
+export class OdinPageComponent implements OnInit {
+  private readonly odinApiService = inject(OdinApiService);
+  public readonly currencyState = inject(CurrencyState);
+  private readonly loaderService = inject(LoaderService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   // #region STATE
-  private odinSub?: Subscription;
 
   // Incomes State
-  incomes: IncomeSource[] = [];
-  incomeToDelete: IncomeSource | null = null;
-  isModalOpen = false;
-  incomeToEdit: IncomeSource | null = null;
-  isModalSaving = false;
-  updatingIncomeId: string | null = null;
-  isDeletingIncome = false;
+  public incomes: IncomeSource[] = [];
+  public incomeToDelete: IncomeSource | null = null;
+  public isModalOpen: boolean = false;
+  public incomeToEdit: IncomeSource | null = null;
+  public isModalSaving: boolean = false;
+  public updatingIncomeId: string | null = null;
+  public isDeletingIncome: boolean = false;
 
   // Allocations State
-  allocations: AllocationBox[] = [];
-  isAllocationModalOpen = false;
-  allocationToEdit: AllocationBox | null = null;
-  isAllocationModalSaving = false;
-  updatingAllocationId: string | null = null;
-  allocationToDelete: AllocationBox | null = null;
-  isDeletingAllocation = false;
+  public allocations: AllocationBox[] = [];
+  public isAllocationModalOpen: boolean = false;
+  public allocationToEdit: AllocationBox | null = null;
+  public isAllocationModalSaving: boolean = false;
+  public updatingAllocationId: string | null = null;
+  public allocationToDelete: AllocationBox | null = null;
+  public isDeletingAllocation: boolean = false;
 
   // Dashboard Summary State (API sourced)
   public totalPool: number = 0;
   public totalAllocated: number = 0;
   public freeMoney: number = 0;
 
-  // Donut chart hover state -- moved mostly into the donut chart component internally
-  // These are kept here just in case they are needed for cross-component interactions
-  hoveredSegment: DonutChartSegment | null = null;
-  hoveredAllocationSegment: DonutChartSegment | null = null;
+  // Donut chart hover state
+  public hoveredSegment: DonutChartSegment | null = null;
+  public hoveredAllocationSegment: DonutChartSegment | null = null;
   // #endregion
 
   // #region LIFECYCLE
-  public ngOnInit() {
+  public ngOnInit(): void {
     this.loadData();
   }
 
-  public loadData() {
-    this.odinSub = this.odinApiService.getOdin().subscribe({
+  private loadData(): void {
+    this.odinApiService.getOdin().subscribe({
       next: (response: IOdinResponse) => {
         this.totalPool = response.pool_summary.total_amount_in_usd;
         this.totalAllocated = response.pool_summary.assigned_amount_in_usd;
@@ -79,16 +76,10 @@ export class OdinPageComponent implements OnInit, OnDestroy {
         this.allocations = this.mapAllocations(response.allocation_boxes);
         this.updateCharts();
       },
-      error: (error) => {
-        console.error('Error fetching Odin data', error);
+      error: () => {
+        // Errors are globally handled by ErrorsManager
       }
     });
-  }
-
-  public ngOnDestroy() {
-    if (this.odinSub) {
-      this.odinSub.unsubscribe();
-    }
   }
   // #endregion
 
@@ -134,6 +125,28 @@ export class OdinPageComponent implements OnInit, OnDestroy {
   }
 
   private sortIncomes() {
+    const savedOrderJson = localStorage.getItem('odin_incomes_order');
+    if (savedOrderJson) {
+      try {
+        const orderIds: string[] = JSON.parse(savedOrderJson);
+        this.incomes.sort((a, b) => {
+          let indexA = orderIds.indexOf(a.id);
+          let indexB = orderIds.indexOf(b.id);
+          if (indexA === -1) indexA = Number.MAX_SAFE_INTEGER;
+          if (indexB === -1) indexB = Number.MAX_SAFE_INTEGER;
+
+          if (indexA !== indexB) {
+            return indexA - indexB;
+          }
+          if (b.amount !== a.amount) return b.amount - a.amount;
+          return a.effortPercentage - b.effortPercentage;
+        });
+        return;
+      } catch (e) {
+        // Silently skip if localStorage is corrupted
+      }
+    }
+
     this.incomes.sort((a, b) => {
       // 1. Highest monthly amount first
       if (b.amount !== a.amount) {
@@ -277,22 +290,50 @@ export class OdinPageComponent implements OnInit, OnDestroy {
 
   // #region DRAG & DROP
   public dropIncome(event: CdkDragDrop<IncomeSource[]>) {
-    moveItemInArray(this.incomes, event.previousIndex, event.currentIndex);
+    if (event.previousIndex !== event.currentIndex) {
+      moveItemInArray(this.incomes, event.previousIndex, event.currentIndex);
+      const orderIds = this.incomes.map(i => i.id);
+      localStorage.setItem('odin_incomes_order', JSON.stringify(orderIds));
+    }
   }
 
   public dropAllocation(event: CdkDragDrop<AllocationBox[]>) {
     if (event.previousIndex !== event.currentIndex) {
       moveItemInArray(this.allocations, event.previousIndex, event.currentIndex);
+      const orderIds = this.allocations.map(a => a.id);
+      localStorage.setItem('odin_allocations_order', JSON.stringify(orderIds));
     }
   }
   // #endregion
 
   // #region ALLOCATION ACTIONS
   public sortAllocations() {
-    // Determine the real amount for sorting
     const getAmount = (box: AllocationBox) => {
       return box.calculationType === 'absolute' ? box.targetAmount : (box.targetAmount / 100) * this.totalPool;
     };
+
+    const savedOrderJson = localStorage.getItem('odin_allocations_order');
+    if (savedOrderJson) {
+      try {
+        const orderIds: string[] = JSON.parse(savedOrderJson);
+        this.allocations.sort((a, b) => {
+          let indexA = orderIds.indexOf(a.id);
+          let indexB = orderIds.indexOf(b.id);
+          if (indexA === -1) indexA = Number.MAX_SAFE_INTEGER;
+          if (indexB === -1) indexB = Number.MAX_SAFE_INTEGER;
+
+          if (indexA !== indexB) {
+            return indexA - indexB;
+          }
+          return getAmount(b) - getAmount(a);
+        });
+        return;
+      } catch (e) {
+        // Silently skip if localStorage is corrupted
+      }
+    }
+
+    // Determine the real amount for sorting
     this.allocations.sort((a, b) => getAmount(b) - getAmount(a));
   }
 
@@ -340,8 +381,7 @@ export class OdinPageComponent implements OnInit, OnDestroy {
           this.updatingAllocationId = null;
           this.closeAllocationModal();
         },
-        error: (err) => {
-          console.error('Error updating allocation', err);
+        error: () => {
           this.isAllocationModalSaving = false;
           this.updatingAllocationId = null;
         }
@@ -356,19 +396,18 @@ export class OdinPageComponent implements OnInit, OnDestroy {
           this.isAllocationModalSaving = false;
           this.closeAllocationModal();
         },
-        error: (err) => {
-          console.error('Error creating allocation', err);
+        error: () => {
           this.isAllocationModalSaving = false;
         }
       });
     }
   }
 
-  public deleteAllocation(box: AllocationBox) {
+  public deleteAllocation(box: AllocationBox): void {
     this.allocationToDelete = box;
   }
 
-  public confirmDeleteAllocation() {
+  public confirmDeleteAllocation(): void {
     if (this.allocationToDelete) {
       this.isDeletingAllocation = true;
       this.odinApiService.deleteAllocationBox(this.allocationToDelete.id).subscribe({
@@ -378,8 +417,7 @@ export class OdinPageComponent implements OnInit, OnDestroy {
           this.allocationToDelete = null;
           this.updateCharts();
         },
-        error: (err) => {
-          console.error('Error deleting allocation', err);
+        error: () => {
           this.isDeletingAllocation = false;
         }
       });
@@ -434,8 +472,7 @@ export class OdinPageComponent implements OnInit, OnDestroy {
           this.updatingIncomeId = null;
           this.closeModal();
         },
-        error: (err) => {
-          console.error('Error updating income', err);
+        error: () => {
           this.updatingIncomeId = null;
           this.isModalSaving = false;
         }
@@ -451,19 +488,18 @@ export class OdinPageComponent implements OnInit, OnDestroy {
           this.isModalSaving = false;
           this.closeModal();
         },
-        error: (err) => {
-          console.error('Error creating income', err);
+        error: () => {
           this.isModalSaving = false;
         }
       });
     }
   }
 
-  public promptDelete(income: IncomeSource) {
+  public promptDelete(income: IncomeSource): void {
     this.incomeToDelete = income;
   }
 
-  public confirmDelete() {
+  public confirmDelete(): void {
     if (this.incomeToDelete) {
       this.isDeletingIncome = true;
       this.odinApiService.deleteIncomeSource(this.incomeToDelete.id).subscribe({
@@ -473,8 +509,7 @@ export class OdinPageComponent implements OnInit, OnDestroy {
           this.incomeToDelete = null;
           this.updateCharts();
         },
-        error: (err) => {
-          console.error('Error deleting income', err);
+        error: () => {
           this.isDeletingIncome = false;
           this.incomeToDelete = null;
         }
@@ -482,7 +517,7 @@ export class OdinPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  public cancelDelete() {
+  public cancelDelete(): void {
     this.incomeToDelete = null;
   }
   // #endregion

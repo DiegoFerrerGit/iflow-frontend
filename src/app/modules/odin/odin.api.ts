@@ -146,7 +146,7 @@ export class OdinApiService {
     }
 
     public updateItem(allocationId: string, subCategoryId: string, itemId: string, request: IAllocationItemRequestApi): Observable<IAllocationItemDto> {
-        return this.http.put<IAllocationItemDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}2`, request, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.put<IAllocationItemDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}`, request, HIDE_SPINNER_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_UPDATE_ITEM);
                 return throwError(() => error);

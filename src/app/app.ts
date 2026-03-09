@@ -3,7 +3,7 @@ import { RouterOutlet, Router, NavigationEnd, ActivatedRoute } from '@angular/ro
 import { delay, filter, map, mergeMap, Observable, Subscription, tap } from 'rxjs';
 import { SidebarMenu } from './layout/sidebar-menu/sidebar-menu';
 import { CurrencySwitcherComponent } from './layout/currency-switcher/currency-switcher';
-import { LayoutService } from './core/services/layout';
+import { LayoutService } from './layout/layout';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { Store } from '@ngrx/store';
 import { selectLoader } from './core/loader-manager/state/loader.selectors';

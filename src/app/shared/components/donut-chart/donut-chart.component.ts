@@ -2,7 +2,7 @@ import { Component, Input, inject } from '@angular/core';
 import { CommonModule, DecimalPipe, CurrencyPipe } from '@angular/common';
 import { DynamicCurrencyPipe } from '../../pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../pipes/dynamic-currency-symbol.pipe';
-import { CurrencyState } from '../../../core/services/currency-state';
+import { CurrencyState } from '../../../core/currency-manager/currency-state';
 
 export interface DonutChartSegment {
     id: string;

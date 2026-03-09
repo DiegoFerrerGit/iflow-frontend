@@ -7,7 +7,7 @@ import { THEME_COLORS } from '../../../../models/income.model';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
-import { CurrencyState } from '../../../../core/services/currency-state';
+import { CurrencyState } from '../../../../core/currency-manager/currency-state';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -18,9 +18,9 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./item-form-modal.scss']
 })
 export class ItemFormModalComponent implements OnInit {
-    private fb = inject(FormBuilder);
-    private currencyState = inject(CurrencyState);
-    private subs = new Subscription();
+    private readonly fb = inject(FormBuilder);
+    private readonly currencyState = inject(CurrencyState);
+    private readonly subs = new Subscription();
 
     @Input() initialItem: IAllocationItemDto | null = null;
     @Input() subCategoryId!: string;
@@ -32,20 +32,20 @@ export class ItemFormModalComponent implements OnInit {
     @Output() close = new EventEmitter<void>();
     @Output() save = new EventEmitter<IAllocationItemDto>();
 
-    form!: FormGroup;
-    allThemeColors = THEME_COLORS;
+    public form!: FormGroup;
+    public allThemeColors = THEME_COLORS;
 
-    currencyOptions: ToggleOption[] = [
+    public currencyOptions: ToggleOption[] = [
         { label: 'USD', value: 'USD' },
         { label: 'ARS', value: 'ARS' }
     ];
 
-    paymentTrackingOptions: ToggleOption[] = [
+    public paymentTrackingOptions: ToggleOption[] = [
         { label: 'NO', value: false },
         { label: 'SI', value: true }
     ];
 
-    iconsList = [
+    public iconsList = [
         'category', 'payments', 'home', 'shopping_cart', 'restaurant', 'directions_car',
         'flight', 'school', 'health_and_safety', 'pets', 'fitness_center',
         'redeem', 'savings', 'paid', 'credit_card', 'receipt',
@@ -55,9 +55,9 @@ export class ItemFormModalComponent implements OnInit {
         'currency_bitcoin', 'currency_exchange', 'account_balance_wallet', 'monetization_on', 'token'
     ];
 
-    maxAllowedAmount: number = 0;
+    public maxAllowedAmount: number = 0;
 
-    ngOnInit(): void {
+    public ngOnInit(): void {
         const initialAmountInOriginalCurrency = this.initialItem ? this.initialItem.amount_with_currency.amount : 0;
         const initialCurrency = this.initialItem?.amount_with_currency.currency || 'USD';
 
@@ -97,22 +97,22 @@ export class ItemFormModalComponent implements OnInit {
         }
     }
 
-    get isEditMode(): boolean {
+    public get isEditMode(): boolean {
         return !!this.initialItem;
     }
 
-    get isAmountMaxedOut(): boolean {
+    public get isAmountMaxedOut(): boolean {
         return this.availableAmountToAssign <= 0;
     }
 
-    isColorUsed(color: string): boolean {
+    public isColorUsed(color: string): boolean {
         if (this.initialItem && this.initialItem.color === color) {
             return false;
         }
         return this.usedColors.includes(color as ThemeColor);
     }
 
-    onCurrencyChange(currency: any) {
+    public onCurrencyChange(currency: 'USD' | 'ARS'): void {
         this.form.get('currency')?.setValue(currency);
     }
 
@@ -126,7 +126,7 @@ export class ItemFormModalComponent implements OnInit {
         return amount * this.currencyState.exchangeRate();
     }
 
-    private updateMaxValidator(totalAvailableInBase: number) {
+    private updateMaxValidator(totalAvailableInBase: number): void {
         const currentCurrency = this.form.get('currency')?.value as 'USD' | 'ARS';
         this.maxAllowedAmount = this.convertFromBase(totalAvailableInBase, currentCurrency);
 
@@ -135,20 +135,20 @@ export class ItemFormModalComponent implements OnInit {
         amountControl?.updateValueAndValidity();
     }
 
-    ngOnDestroy() {
+    public ngOnDestroy(): void {
         this.subs.unsubscribe();
     }
 
-    selectIcon(icon: string) {
+    public selectIcon(icon: string): void {
         this.form.patchValue({ icon });
     }
 
-    selectColor(color: ThemeColor) {
+    public selectColor(color: ThemeColor): void {
         if (this.isColorUsed(color)) return;
         this.form.patchValue({ color });
     }
 
-    onSubmit() {
+    public onSubmit(): void {
         if (this.form.valid) {
             const val = this.form.getRawValue();
             const result: IAllocationItemDto = {
