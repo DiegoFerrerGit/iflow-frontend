@@ -18,6 +18,7 @@ export class IncomeFormModal implements OnInit {
 
   @Input() initialIncome: IncomeSource | null = null;
   @Input() existingIncomes: IncomeSource[] = [];
+  @Input() isLoading = false;
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<IncomeSource>();
 

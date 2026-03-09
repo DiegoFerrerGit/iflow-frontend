@@ -7,16 +7,17 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { isDevMode } from '@angular/core';
 
 import { routes } from './app.routes';
-import { appReducers } from './core/state/global.state';
+import { appReducers, metaReducers } from './core/state/global.state';
 import { AuthenticationEffects } from './modules/authentication/state/authentication.effects';
-import { authInterceptor } from './modules/authentication/interceptors/auth.interceptor';
+import { authInterceptor } from './modules/authentication/interceptors/authentication.interceptor';
+import { loaderInterceptor } from './core/interceptors/loader.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
-    provideStore(appReducers),
+    provideHttpClient(withInterceptors([authInterceptor, loaderInterceptor])),
+    provideStore(appReducers, { metaReducers }),
     provideEffects([AuthenticationEffects]),
     provideStoreDevtools({
       maxAge: 25,

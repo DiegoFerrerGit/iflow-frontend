@@ -1,3 +1,7 @@
 :host {
     display: block;
+
+    svg circle:not(.stroke-slate-800) {
+        // No per-segment shadow to avoid overlap artifacts
+    }
 }

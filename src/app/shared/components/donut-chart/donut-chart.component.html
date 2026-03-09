@@ -1,37 +1,44 @@
 <div class="relative w-80 h-80 md:w-[340px] md:h-[340px] flex shrink-0 items-center justify-center">
-    <svg class="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 120 120" overflow="visible">
+    <svg class="w-full h-full transform -rotate-90 scale-x-[-1] drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+        viewBox="0 0 120 120" overflow="visible">
         <!-- Background Track -->
         <circle cx="60" cy="60" r="50" fill="none" class="stroke-slate-800" stroke-width="12" />
 
-        <!-- Dynamic Segments -->
-        @for (segment of segments; track segment.id) {
+        <!-- Hit Areas (REVERSE Order for Z-indexing) -->
+        @for (segment of segments.slice().reverse(); track segment.id + '_hit') {
+        <circle cx="60" cy="60" r="50" fill="none" stroke="transparent" stroke-width="32" stroke-linecap="butt"
+            [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
+            class="cursor-pointer" (mouseenter)="hoveredSegment = segment" (mouseleave)="hoveredSegment = null" />
+        }
+
+        <!-- Dynamic Segments (REVERSE Order: S1 on top of S2) -->
+        <!-- Each segment has stroke-linecap="round" at its end, covering the NEXT segment's start -->
+        @for (segment of segments.slice().reverse(); track segment.id) {
         <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
             [attr.stroke-width]="hoveredSegment?.id === segment.id ? 20 : 16" stroke-linecap="round"
             [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
-            class="transition-all duration-200 ease-out cursor-pointer"
-            [class.brightness-125]="hoveredSegment?.id === segment.id" (mouseenter)="hoveredSegment = segment"
-            (mouseleave)="hoveredSegment = null" />
+            class="transition-all duration-200 ease-out pointer-events-none"
+            [class.brightness-125]="hoveredSegment?.id === segment.id" />
         }
 
-        <!-- Hover Z-Index Overlays -->
-        @for (segment of segments; track segment.id) {
-        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
-            [attr.stroke-width]="hoveredSegment?.id === segment.id ? 20 : 16" stroke-linecap="round"
-            [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
-            class="pointer-events-none transition-all duration-200 ease-out"
-            [class.brightness-125]="hoveredSegment?.id === segment.id"
-            [style.opacity]="hoveredSegment?.id === segment.id ? '1' : '0'" />
+        <!-- The "Final Loop Closer" Overlay (S3 on top of S1) -->
+        <!-- We use a larger piece of the last segment (Celeste) to ensure it blends perfectly -->
+        @if (lastSegment) {
+        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="lastSegment.color"
+            [attr.stroke-width]="hoveredSegment?.id === lastSegment.id ? 20 : 16" stroke-linecap="round"
+            [attr.stroke-dasharray]="lastSegment.dashArray" [attr.stroke-dashoffset]="lastSegment.dashOffset"
+            class="transition-all duration-200 ease-out pointer-events-none"
+            [class.brightness-125]="hoveredSegment?.id === lastSegment.id" />
         }
 
-        <!-- Linecap overlap fix for the first segment (drawn LAST to stay on top) -->
-        @if (segments.length > 1) {
-        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segments[0].color"
-            [attr.stroke-width]="hoveredSegment?.id === segments[0].id ? 20 : 16" stroke-linecap="round"
-            stroke-dasharray="0 314.159" [attr.stroke-dashoffset]="segments[0].dashOffset"
-            class="pointer-events-none transition-all duration-200 ease-out"
-            [class.brightness-125]="hoveredSegment?.id === segments[0].id"
-            [style.opacity]="hoveredSegment && hoveredSegment.id !== segments[0].id ? '0' : '1'" />
+        <!-- Hover Top Overlay -->
+        @if (hoveredSegment) {
+        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="hoveredSegment.color" stroke-width="20"
+            stroke-linecap="round" [attr.stroke-dasharray]="hoveredSegment.dashArray"
+            [attr.stroke-dashoffset]="hoveredSegment.dashOffset"
+            class="pointer-events-none transition-all duration-200 ease-out brightness-125" />
         }
+
     </svg>
 
     <!-- Center Information Display -->

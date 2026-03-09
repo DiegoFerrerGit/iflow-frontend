@@ -1,23 +1,21 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { OdinMockService } from '../../../../modules/odin/services/odin-mock.service';
+import { forkJoin } from 'rxjs';
+import { OdinApiService } from '../../../../modules/odin/odin.api';
+import { IAllocationBoxDetailResponse, IAllocationSubCategoryDto, IOdinResponse } from '../../../../modules/odin/models/interfaces/api.response.interfaces';
+import { IAllocationSubCategoryRequestApi } from '../../../../modules/odin/models/interfaces/api.request.interfaces';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { DonutChartComponent, DonutChartSegment } from '../../../../shared/components/donut-chart/donut-chart.component';
 import { BackButtonComponent } from '../../../../shared/components/back-button/back-button';
-import { AmountWithCurrency, OdinAllocationBoxResponse, AllocationSubCategoryDto } from '../../../../../../mock/odin-nivel2.endpoints';
 import { ThemeColor, COLOR_MAP } from '../../../../models/income.model';
 import { CurrencyState } from '../../../../core/services/currency-state';
-import { LoaderService } from '../../../../core/services/loader.service';
+import { LoaderService } from '../../../../core/loader-manager/loader.service';
 import { SubCategoryFormModal } from '../../components/sub-category-form-modal/sub-category-form-modal';
 import { DeleteConfirmationModal } from '../../components/delete-confirmation-modal/delete-confirmation-modal';
 
-export interface AllocationDetailsData extends OdinAllocationBoxResponse {
-  parentBoxType?: 'percentage' | 'absolute';
-}
-
-// Map ThemeColor to valid Tailwind text class (some colors like 'crimson' don't have Tailwind equivalents)
+// Map ThemeColor to valid Tailwind text class
 const TEXT_CLASS_MAP: Record<string, string> = {
   'primary': 'text-purple-400',
   'cyan': 'text-cyan-400',
@@ -58,78 +56,83 @@ const TEXT_CLASS_MAP: Record<string, string> = {
 export class AllocationDetailsPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private mockService = inject(OdinMockService);
+  private odinApi = inject(OdinApiService);
   public currencyState = inject(CurrencyState);
   private loaderService = inject(LoaderService);
 
-  boxId = signal<string | null>(null);
-  allocationData = signal<AllocationDetailsData | null>(null);
+  trueBoxCapacity = signal<number | null>(null);
+  boxPercentage = signal<number | null>(null);
 
-  // Modal State
+  // #region STATE
+
+  boxId = signal<string | null>(null);
+  allocationData = signal<IAllocationBoxDetailResponse | null>(null);
+  initialName = signal<string | null>(null);
+  initialType = signal<string | null>(null);
+
+  // Modal Loading State
   isSubCategoryModalOpen = signal(false);
-  subCategoryToEdit = signal<AllocationSubCategoryDto | null>(null);
+  isSubCategoryModalSaving = signal(false);
+  subCategoryToEdit = signal<IAllocationSubCategoryDto | null>(null);
 
   // Delete Modal State
   isDeleteModalOpen = signal(false);
-  subCategoryToDelete = signal<AllocationSubCategoryDto | null>(null);
+  isDeletingSubCategory = signal(false);
+  subCategoryToDelete = signal<IAllocationSubCategoryDto | null>(null);
 
   // Computed helper for box type
-  parentBoxType = computed(() => this.allocationData()?.parentBoxType || 'absolute');
+  parentBoxType = computed(() => this.allocationData()?.calculation_type || this.initialType() || 'absolute');
 
   assignedTotal = computed(() => {
     const data = this.allocationData();
-    if (!data || !data.subCategories) return 0;
+    if (!data || !data.sub_categories) return 0;
 
-    return data.subCategories.reduce((sum: number, sub: AllocationSubCategoryDto) => {
-      const isFixedArs = sub.displayAmount.currency === 'ARS';
+    return data.sub_categories.reduce((sum: number, sub: IAllocationSubCategoryDto) => {
+      const isFixedArs = sub.display_amount.currency === 'ARS';
       const parsedAmount = (isFixedArs && this.currencyState.currentCurrency() === 'USD')
-        ? sub.displayAmount.amount / this.currencyState.exchangeRate()
-        : (sub.displayAmount.currency === 'USD' && this.currencyState.currentCurrency() === 'ARS')
-          ? sub.displayAmount.amount * this.currencyState.exchangeRate()
-          : sub.displayAmount.amount;
+        ? sub.display_amount.amount / this.currencyState.exchangeRate()
+        : (sub.display_amount.currency === 'USD' && this.currencyState.currentCurrency() === 'ARS')
+          ? sub.display_amount.amount * this.currencyState.exchangeRate()
+          : sub.display_amount.amount;
       return sum + parsedAmount;
     }, 0);
   });
 
-  // How many actual subcategories (excluding 'unassigned' donut segment)
   subCategoryCount = computed(() => {
     const data = this.allocationData();
-    return data?.subCategories?.length ?? 0;
+    return data?.sub_categories?.length ?? 0;
   });
 
-  // Computed signal to feed the Donut Chart
   donutSegments = computed<DonutChartSegment[]>(() => {
     const data = this.allocationData();
-    if (!data || !data.subCategories) return [];
+    if (!data || !data.sub_categories) return [];
 
-    // 1. Map amounts and calculate category total
-    const mappedCategories = data.subCategories.map((sub: AllocationSubCategoryDto) => {
-      const isFixedArs = sub.displayAmount.currency === 'ARS';
+    const mappedCategories = data.sub_categories.map((sub: IAllocationSubCategoryDto) => {
+      const isFixedArs = sub.display_amount.currency === 'ARS';
       const parsedAmount = (isFixedArs && this.currencyState.currentCurrency() === 'USD')
-        ? sub.displayAmount.amount / this.currencyState.exchangeRate()
-        : (sub.displayAmount.currency === 'USD' && this.currencyState.currentCurrency() === 'ARS')
-          ? sub.displayAmount.amount * this.currencyState.exchangeRate()
-          : sub.displayAmount.amount;
+        ? sub.display_amount.amount / this.currencyState.exchangeRate()
+        : (sub.display_amount.currency === 'USD' && this.currencyState.currentCurrency() === 'ARS')
+          ? sub.display_amount.amount * this.currencyState.exchangeRate()
+          : sub.display_amount.amount;
 
       return { ...sub, calculatedAmount: parsedAmount };
     });
 
     const totalCalculatedAmount = mappedCategories.reduce((sum, sub) => sum + sub.calculatedAmount, 0);
     const parsedAvailableAmount = this.parentBoxType() === 'absolute' ? totalCalculatedAmount : this.totalAvailableAmountForDonut();
-    const unassigned = Math.max(0, parsedAvailableAmount - totalCalculatedAmount);
+    const unassigned = this.parentBoxType() === 'absolute' ? 0 : Math.max(0, parsedAvailableAmount - totalCalculatedAmount);
 
-    // 2. Setup visual constants
-    const circumference = 2 * Math.PI * 50; // Donut r=50
-    const gap = 2.5; // Visual gap in pixels
+    const circumference = 2 * Math.PI * 50;
+    const totalSegmentsCount = mappedCategories.length + (unassigned > 0 ? 1 : 0);
+    const gap = 0;
     let currentOffset = 0;
 
-    const totalSegments = mappedCategories.length + (unassigned > 0 ? 1 : 0);
-
-    // 3. Map to Donut segments
-    let segments = mappedCategories.map((sub: AllocationSubCategoryDto & { calculatedAmount: number }) => {
+    let segments = mappedCategories.map((sub) => {
       const percentage = parsedAvailableAmount > 0 ? (sub.calculatedAmount / parsedAvailableAmount) * 100 : 0;
       const strokeLength = (percentage / 100) * circumference;
-      const visualStrokeLength = totalSegments > 1 ? Math.max(0, strokeLength - gap) : strokeLength;
+      // Ensure at least 3px length if percent > 0 so it's visible and interactive
+      const minShowableLength = (percentage > 0 && percentage < 1) ? 3 : 1;
+      const visualStrokeLength = totalSegmentsCount > 1 ? Math.max(minShowableLength, strokeLength) : strokeLength;
       const initialOffset = currentOffset;
       currentOffset += strokeLength;
 
@@ -142,29 +145,28 @@ export class AllocationDetailsPage implements OnInit {
         percentage: percentage,
         dashArray: `${visualStrokeLength} ${circumference - visualStrokeLength}`,
         dashOffset: -initialOffset,
-        type: sub.type as string,
+        type: sub.type,
         icon: sub.icon,
         colorName: sub.color
       };
     });
 
-    // Remanente ("Sin Asignar") Segment
     if (unassigned > 0) {
       const percentage = (unassigned / parsedAvailableAmount) * 100;
       const strokeLength = (percentage / 100) * circumference;
-      const visualStrokeLength = totalSegments > 1 ? Math.max(0, strokeLength - gap) : strokeLength;
+      const visualStrokeLength = totalSegmentsCount > 1 ? Math.max(1, strokeLength) : strokeLength;
       const initialOffset = currentOffset;
 
       segments.push({
         id: 'unassigned',
         name: 'Sin Asignar',
         amount: unassigned,
-        color: '#22d3ee', // cyan-400
+        color: '#22d3ee',
         amountColorClass: 'text-cyan-400',
         percentage: percentage,
         dashArray: `${visualStrokeLength} ${circumference - visualStrokeLength}`,
         dashOffset: -initialOffset,
-        type: 'fixed_amount', // Since it's a calculated remainder
+        type: 'fixed_amount',
         icon: 'help_outline',
         colorName: 'cyan'
       });
@@ -173,10 +175,14 @@ export class AllocationDetailsPage implements OnInit {
     return segments;
   });
 
+  donutChartSegments = computed(() => {
+    return this.donutSegments().filter(segment => segment.amount > 0);
+  });
+
   usedColors = computed(() => {
     const data = this.allocationData();
-    if (!data || !data.subCategories) return [];
-    return data.subCategories
+    if (!data || !data.sub_categories) return [];
+    return data.sub_categories
       .map(s => s.color)
       .filter((c): c is ThemeColor => !!c);
   });
@@ -184,14 +190,34 @@ export class AllocationDetailsPage implements OnInit {
   totalAvailableAmountForDonut = computed<number>(() => {
     const data = this.allocationData();
     if (!data) return 0;
-    // Base amount is always USD, apply conversion if needed
-    if (this.currencyState.currentCurrency() === 'ARS') {
-      return data.availableAmountToAssign * this.currencyState.exchangeRate();
+
+    if (this.parentBoxType() === 'absolute') {
+      return this.assignedTotal();
     }
-    return data.availableAmountToAssign;
+
+    // For percentage boxes, Capacity = Assigned + Unassigned
+    // available_amount_to_assign from detail is the REMAINDER (unassigned) for this specific box.
+    const unassignedInUsd = data.available_amount_to_assign;
+    const assignedInUsd = data.sub_categories.reduce((sum, sub) => {
+      const isArs = sub.display_amount.currency === 'ARS';
+      const val = isArs ? sub.display_amount.amount / this.currencyState.exchangeRate() : sub.display_amount.amount;
+      return sum + val;
+    }, 0);
+
+    const totalUsd = assignedInUsd + unassignedInUsd;
+    return this.currencyState.currentCurrency() === 'ARS' ? totalUsd * this.currencyState.exchangeRate() : totalUsd;
   });
 
+  getAssignedAmountFromPool(): number {
+    return this.totalAvailableAmountForDonut();
+  }
+
   ngOnInit() {
+    // Attempt to get name and type from navigation state to avoid "Cargando..."
+    const state = history.state;
+    if (state?.name) this.initialName.set(state.name);
+    if (state?.type) this.initialType.set(state.type);
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -203,11 +229,35 @@ export class AllocationDetailsPage implements OnInit {
 
   loadDetails(id: string) {
     this.loaderService.show();
-    setTimeout(() => {
-      const data = this.mockService.getAllocationBoxLevel2(id);
-      this.allocationData.set(data);
-      this.loaderService.hide();
-    }, 1000); // Simulate API latency
+
+    forkJoin({
+      detail: this.odinApi.getAllocationBoxDetail(id),
+      odin: this.odinApi.getOdin()
+    }).subscribe({
+      next: ({ detail, odin }) => {
+        this.allocationData.set(detail);
+
+        // Find the box in the summary to get its calculated capacity/percentage
+        const box = odin.allocation_boxes.find(b => b.id === id);
+        if (box) {
+          if (box.calculation_type === 'percentage') {
+            this.boxPercentage.set(box.percentage_of_pool || null);
+
+            // Prefer the backend's calculated amount if available
+            if (box.calculated_amount_in_usd) {
+              this.trueBoxCapacity.set(box.calculated_amount_in_usd);
+            } else if (box.percentage_of_pool) {
+              const totalPool = odin.pool_summary.total_amount_in_usd;
+              const capacity = (box.percentage_of_pool / 100) * totalPool;
+              this.trueBoxCapacity.set(capacity);
+            }
+          }
+        }
+
+        this.loaderService.hide();
+      },
+      error: () => this.loaderService.hide()
+    });
   }
 
   goBack() {
@@ -215,17 +265,11 @@ export class AllocationDetailsPage implements OnInit {
   }
 
   getBoxName(): string {
-    const id = this.boxId();
-    if (!id) return 'Categoría Principal';
-    const boxes = this.mockService.getAllocations();
-    const box = boxes.find((b: any) => b.id === id);
-    return box ? box.name : 'Categoría Principal';
+    return this.allocationData()?.name || this.initialName() || 'Cargando...';
   }
 
-  // Helper function to safely apply dynamic currency inline if needed
-  getConvertedAmount(amountData: AmountWithCurrency): number {
+  getConvertedAmount(amount: number, currency: string): number {
     const targetCurrency = this.currencyState.currentCurrency();
-    const { amount, currency } = amountData;
 
     if (currency === targetCurrency) return amount;
 
@@ -246,17 +290,45 @@ export class AllocationDetailsPage implements OnInit {
 
     const available = this.totalAvailableAmountForDonut();
     let totalAssigned = 0;
-    data.subCategories.forEach(sub => {
-      totalAssigned += this.getConvertedAmount(sub.displayAmount);
+    data.sub_categories.forEach(sub => {
+      totalAssigned += this.getConvertedAmount(sub.display_amount.amount, sub.display_amount.currency);
     });
     return Math.max(0, available - totalAssigned);
+  }
+
+  getUnassignedAmountInBase(): number {
+    const data = this.allocationData();
+    if (!data) return 0;
+
+    const capacityInBase = this.trueBoxCapacity();
+    if (capacityInBase !== null) {
+      let totalAssignedInBase = 0;
+      data.sub_categories.forEach(sub => {
+        if (sub.display_amount.currency === 'USD') {
+          totalAssignedInBase += sub.display_amount.amount;
+        } else {
+          totalAssignedInBase += sub.display_amount.amount / this.currencyState.exchangeRate();
+        }
+      });
+      return Math.max(0, capacityInBase - totalAssignedInBase);
+    }
+
+    // Fallback: If we don't have the capacity yet, trust the remainder sent by the backend.
+    return data.available_amount_to_assign;
   }
 
   getAssignedPercentage(): number {
     const data = this.allocationData();
     if (!data) return 0;
+
+    // For absolute boxes, percentage doesn't make sense the same way, return 0 or 100
+    if (this.parentBoxType() === 'absolute') {
+      return 100;
+    }
+
     const available = this.totalAvailableAmountForDonut();
     if (available === 0) return 0;
+
     const unassigned = this.getUnassignedAmount();
     return ((available - unassigned) / available) * 100;
   }
@@ -276,7 +348,7 @@ export class AllocationDetailsPage implements OnInit {
   openSubCategoryModal(segment?: DonutChartSegment) {
     if (segment && segment.id !== 'unassigned') {
       const data = this.allocationData();
-      const sub = data?.subCategories.find(s => s.id === segment.id);
+      const sub = data?.sub_categories.find(s => s.id === segment.id);
       this.subCategoryToEdit.set(sub || null);
     } else {
       this.subCategoryToEdit.set(null);
@@ -287,28 +359,64 @@ export class AllocationDetailsPage implements OnInit {
   closeSubCategoryModal() {
     this.isSubCategoryModalOpen.set(false);
     this.subCategoryToEdit.set(null);
+    this.isSubCategoryModalSaving.set(false);
   }
 
-  handleSaveSubCategory(subCategory: AllocationSubCategoryDto) {
-    const data = this.allocationData();
-    if (!data) return;
+  handleSaveSubCategory(subCategory: IAllocationSubCategoryDto) {
+    const boxId = this.boxId();
+    if (!boxId) return;
 
-    const existingIndex = data.subCategories.findIndex(s => s.id === subCategory.id);
-    if (existingIndex !== -1) {
-      data.subCategories[existingIndex] = subCategory;
+    this.isSubCategoryModalSaving.set(true);
+
+    const request: IAllocationSubCategoryRequestApi = {
+      name: subCategory.name,
+      type: subCategory.type,
+      icon: subCategory.icon || 'category',
+      color: subCategory.color || 'primary',
+      fixed_amount: subCategory.type === 'fixed_amount' ? subCategory.display_amount.amount : undefined,
+      fixed_currency: subCategory.type === 'fixed_amount' ? subCategory.display_amount.currency : undefined
+    };
+
+    const isEdit = this.allocationData()?.sub_categories.some(s => s.id === subCategory.id);
+
+    if (isEdit) {
+      this.odinApi.updateSubCategory(boxId, subCategory.id, request).subscribe({
+        next: () => {
+          this.allocationData.update(data => {
+            if (!data) return null;
+            return {
+              ...data,
+              sub_categories: data.sub_categories.map(s => s.id === subCategory.id ? { ...s, ...subCategory } : s)
+            };
+          });
+          this.isSubCategoryModalSaving.set(false);
+          this.closeSubCategoryModal();
+        },
+        error: () => this.isSubCategoryModalSaving.set(false)
+      });
     } else {
-      data.subCategories.push(subCategory);
+      this.odinApi.createSubCategory(boxId, request).subscribe({
+        next: (newSub) => {
+          this.allocationData.update(data => {
+            if (!data) return null;
+            return {
+              ...data,
+              sub_categories: [...data.sub_categories, newSub]
+            };
+          });
+          this.isSubCategoryModalSaving.set(false);
+          this.closeSubCategoryModal();
+        },
+        error: () => this.isSubCategoryModalSaving.set(false)
+      });
     }
-
-    this.allocationData.set({ ...data }); // Trigger reactivity
-    this.closeSubCategoryModal();
   }
 
   deleteSubCategory(id: string) {
     const data = this.allocationData();
     if (!data) return;
 
-    const sub = data.subCategories.find(s => s.id === id);
+    const sub = data.sub_categories.find(s => s.id === id);
     if (sub) {
       this.subCategoryToDelete.set(sub);
       this.isDeleteModalOpen.set(true);
@@ -318,25 +426,45 @@ export class AllocationDetailsPage implements OnInit {
   cancelDeleteSubCategory() {
     this.isDeleteModalOpen.set(false);
     this.subCategoryToDelete.set(null);
+    this.isDeletingSubCategory.set(false);
   }
 
   confirmDeleteSubCategory() {
-    const data = this.allocationData();
+    const boxId = this.boxId();
     const sub = this.subCategoryToDelete();
-    if (!data || !sub) return;
+    if (!boxId || !sub) return;
 
-    data.subCategories = data.subCategories.filter(s => s.id !== sub.id);
-    this.allocationData.set({ ...data }); // Trigger reactivity
-    this.cancelDeleteSubCategory();
+    this.isDeletingSubCategory.set(true);
+    this.odinApi.deleteSubCategory(boxId, sub.id).subscribe({
+      next: () => {
+        this.allocationData.update(data => {
+          if (!data) return null;
+          return {
+            ...data,
+            sub_categories: data.sub_categories.filter(s => s.id !== sub.id)
+          };
+        });
+        this.isDeletingSubCategory.set(false);
+        this.cancelDeleteSubCategory();
+      },
+      error: () => this.isDeletingSubCategory.set(false)
+    });
   }
 
   navigateToSubCategory(subCategoryId: string) {
     const boxId = this.boxId();
     if (!boxId) return;
 
+    const data = this.allocationData();
+    const sub = data?.sub_categories.find(s => s.id === subCategoryId);
+
     const type = this.parentBoxType();
     this.router.navigate(['/odin/allocation-details', boxId, 'subcategories', subCategoryId], {
-      state: { parentBoxType: type }
+      state: {
+        parentBoxType: type,
+        boxName: this.getBoxName(),
+        subCategoryName: sub?.name
+      }
     });
     sessionStorage.setItem(`odin_box_type_${boxId}`, type);
   }

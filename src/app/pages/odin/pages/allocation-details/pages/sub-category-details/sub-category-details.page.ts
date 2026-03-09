@@ -1,13 +1,15 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { OdinMockService } from '../../../../../../modules/odin/services/odin-mock.service';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { OdinApiService } from '../../../../../../modules/odin/odin.api';
+import { ISubCategoryDetailResponse, IAllocationItemDto, IAmountWithCurrency } from '../../../../../../modules/odin/models/interfaces/api.response.interfaces';
+import { IAllocationItemRequestApi } from '../../../../../../modules/odin/models/interfaces/api.request.interfaces';
 import { DynamicCurrencyPipe } from '../../../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { BackButtonComponent } from '../../../../../../shared/components/back-button/back-button';
 import { CurrencyState } from '../../../../../../core/services/currency-state';
-import { LoaderService } from '../../../../../../core/services/loader.service';
-import { AllocationItemDto, OdinSubCategoryItemsResponse, ThemeColor } from '../../../../models/odin-nivel3.model';
+import { LoaderService } from '../../../../../../core/loader-manager/loader.service';
+import { ThemeColor } from '../../../../../../models/income.model';
 import { DeleteConfirmationModal } from '../../../../components/delete-confirmation-modal/delete-confirmation-modal';
 import { ItemFormModalComponent } from '../../../../components/item-form-modal/item-form-modal.component';
 import { LoaderComponent } from '../../../../../../shared/components/loader/loader.component';
@@ -72,50 +74,44 @@ const BG_CLASS_MAP: Record<string, string> = {
 export class SubCategoryDetailsPage implements OnInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
-    private mockService = inject(OdinMockService);
+    private odinApi = inject(OdinApiService);
     public currencyState = inject(CurrencyState);
     private loaderService = inject(LoaderService);
 
     boxId = signal<string | null>(null);
     subCategoryId = signal<string | null>(null);
 
-    pageData = signal<OdinSubCategoryItemsResponse | null>(null);
+    // Fallbacks for breadcrumbs
+    initialBoxName = signal<string | null>(null);
+    initialSubCategoryName = signal<string | null>(null);
+
+    pageData = signal<ISubCategoryDetailResponse | null>(null);
     hoveredItem = signal<string | null>(null);
     parentBoxType = signal<'percentage' | 'absolute'>('percentage');
 
     // Form Modal
     isItemFormModalOpen = signal<boolean>(false);
-    itemToEdit = signal<AllocationItemDto | null>(null);
+    itemToEdit = signal<IAllocationItemDto | null>(null);
 
     // Delete Modal
     isDeleteModalOpen = signal<boolean>(false);
-    itemToDelete = signal<AllocationItemDto | null>(null);
+    itemToDelete = signal<IAllocationItemDto | null>(null);
 
     // Element loader per item
     loadingItemId = signal<string | null>(null);
 
-    // Gets the box name from the allocation list
+    // Modal Loading States
+    isItemModalSaving = signal<boolean>(false);
+    isDeletingItem = signal<boolean>(false);
+
+    // Gets the box name from signal or fallback
     boxName = computed(() => {
-        const id = this.boxId();
-        if (!id) return 'Categoría';
-        const boxes = this.mockService.getAllocations();
-        const box = boxes.find((b: any) => b.id === id);
-        return box ? box.name : 'Categoría';
+        return this.initialBoxName() || 'Cargando...';
     });
 
-    // Since we don't have a direct endpoint yet to just get the subcategory name,
-    // we could find it from the level 2 mock for the breadcrumbs.
+    // Gets the subcategory name from signal or fallback
     subCategoryName = computed(() => {
-        const bId = this.boxId();
-        const subId = this.subCategoryId();
-        if (!bId || !subId) return 'Detalle';
-
-        const l2 = this.mockService.getAllocationBoxLevel2(bId);
-        if (l2 && l2.subCategories) {
-            const sub = l2.subCategories.find((s: any) => s.id === subId);
-            if (sub) return sub.name;
-        }
-        return 'Detalle';
+        return this.initialSubCategoryName() || 'Cargando...';
     });
 
     // Calculate accumulated total based on the items and currency conversion
@@ -123,7 +119,7 @@ export class SubCategoryDetailsPage implements OnInit {
         const data = this.pageData();
         if (!data || !data.items) return 0;
 
-        return data.items.reduce((sum, item) => sum + this.getConvertedAmount(item.amountWithCurrency.amount, item.amountWithCurrency.currency), 0);
+        return data.items.reduce((sum, item) => sum + this.getConvertedAmount(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS'), 0);
     });
 
     // Expose items with calculated percentages
@@ -135,7 +131,7 @@ export class SubCategoryDetailsPage implements OnInit {
 
         return data.items
             .map(item => {
-                const convertedAmt = this.getConvertedAmount(item.amountWithCurrency.amount, item.amountWithCurrency.currency);
+                const convertedAmt = this.getConvertedAmount(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS');
                 const percentage = total > 0 ? (convertedAmt / total) * 100 : 0;
                 return {
                     ...item,
@@ -153,6 +149,10 @@ export class SubCategoryDetailsPage implements OnInit {
                 }
                 return a.paid ? 1 : -1;
             });
+    });
+
+    proportionBarItems = computed(() => {
+        return this.itemsWithDetails().filter(item => item.calculatedAmount > 0);
     });
 
     hoveredItemDetails = computed(() => {
@@ -175,27 +175,32 @@ export class SubCategoryDetailsPage implements OnInit {
                 this.boxId.set(id);
                 this.subCategoryId.set(subId);
 
-                // Recover parent box type from navigation state or session storage
-                const nav = this.router.getCurrentNavigation();
-                let typeStr = nav?.extras?.state?.['parentBoxType'] || history.state?.['parentBoxType'] || sessionStorage.getItem(`odin_box_type_${id}`);
+                // Recover state for breadcrumbs
+                const state = history.state;
+                if (state?.boxName) this.initialBoxName.set(state.boxName);
+                if (state?.subCategoryName) this.initialSubCategoryName.set(state.subCategoryName);
+
+                let typeStr = state?.['parentBoxType'] || sessionStorage.getItem(`odin_box_type_${id}`);
 
                 if (typeStr === 'percentage' || typeStr === 'absolute') {
                     this.parentBoxType.set(typeStr as 'percentage' | 'absolute');
                     sessionStorage.setItem(`odin_box_type_${id}`, typeStr);
                 }
 
-                this.loadItems(subId);
+                this.loadItems(id, subId);
             }
         });
     }
 
-    loadItems(subId: string) {
+    loadItems(boxId: string, subId: string) {
         this.loaderService.show();
-        setTimeout(() => {
-            const data = this.mockService.getSubCategoryItems(subId);
-            this.pageData.set(data);
-            this.loaderService.hide();
-        }, 1000);
+        this.odinApi.getSubCategoryDetails(boxId, subId).subscribe({
+            next: (data: ISubCategoryDetailResponse) => {
+                this.pageData.set(data);
+                this.loaderService.hide();
+            },
+            error: () => this.loaderService.hide()
+        });
     }
 
     goBack() {
@@ -208,17 +213,24 @@ export class SubCategoryDetailsPage implements OnInit {
     }
 
     togglePaidStatus(id: string) {
+        const boxId = this.boxId();
+        const subId = this.subCategoryId();
+        if (!boxId || !subId) return;
+
         this.loadingItemId.set(id);
-        setTimeout(() => {
-            this.pageData.update(data => {
-                if (!data) return data;
-                const updatedItems = data.items.map(item =>
-                    item.id === id ? { ...item, paid: !item.paid } : item
-                );
-                return { ...data, items: updatedItems };
-            });
-            this.loadingItemId.set(null);
-        }, 800);
+        this.odinApi.togglePaidItem(boxId, subId, id).subscribe({
+            next: () => {
+                this.pageData.update(data => {
+                    if (!data) return data;
+                    const updatedItems = data.items.map(item =>
+                        item.id === id ? { ...item, paid: !item.paid } : item
+                    );
+                    return { ...data, items: updatedItems };
+                });
+                this.loadingItemId.set(null);
+            },
+            error: () => this.loadingItemId.set(null)
+        });
     }
 
     getConvertedAmount(amount: number, currency: 'USD' | 'ARS'): number {
@@ -233,7 +245,7 @@ export class SubCategoryDetailsPage implements OnInit {
 
     // --- Modals ---
 
-    openItemModal(item?: AllocationItemDto) {
+    openItemModal(item?: IAllocationItemDto) {
         if (item) {
             this.itemToEdit.set(item);
         } else {
@@ -245,37 +257,74 @@ export class SubCategoryDetailsPage implements OnInit {
     closeItemModal() {
         this.isItemFormModalOpen.set(false);
         this.itemToEdit.set(null);
+        this.isItemModalSaving.set(false);
     }
 
-    handleSaveItem(item: AllocationItemDto) {
-        this.closeItemModal();
-        this.loadingItemId.set(item.id);
-        setTimeout(() => {
-            const data = this.pageData();
-            if (!data) { this.loadingItemId.set(null); return; }
+    handleSaveItem(item: IAllocationItemDto) {
+        const boxId = this.boxId();
+        const subId = this.subCategoryId();
+        if (!boxId || !subId) return;
 
-            const existingIndex = data.items.findIndex(i => i.id === item.id);
+        this.isItemModalSaving.set(true);
+
+        const request: IAllocationItemRequestApi = {
+            name: item.name,
+            description: item.description,
+            icon: item.icon,
+            color: item.color,
+            amount_with_currency: item.amount_with_currency,
+            has_payment_control: item.has_payment_control
+        };
+
+        const isEdit = this.itemToEdit() !== null;
+
+        if (isEdit) {
+            this.odinApi.updateItem(boxId, subId, item.id, request).subscribe({
+                next: (updatedItem) => {
+                    this.updateLocalItem(updatedItem, true);
+                    this.closeItemModal();
+                },
+                error: () => this.isItemModalSaving.set(false)
+            });
+        } else {
+            this.odinApi.createItem(boxId, subId, request).subscribe({
+                next: (newItem) => {
+                    this.updateLocalItem(newItem, false);
+                    this.closeItemModal();
+                },
+                error: () => this.isItemModalSaving.set(false)
+            });
+        }
+    }
+
+    private updateLocalItem(item: IAllocationItemDto, isEdit: boolean) {
+        this.pageData.update(data => {
+            if (!data) return null;
 
             let amountChange = 0;
-            const incomingAmountUsd = this.getConvertedAmount(item.amountWithCurrency.amount, item.amountWithCurrency.currency);
+            const incomingAmountUsd = this.getConvertedAmount(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS');
 
-            if (existingIndex >= 0) {
-                const oldItem = data.items[existingIndex];
-                const oldAmountUsd = this.getConvertedAmount(oldItem.amountWithCurrency.amount, oldItem.amountWithCurrency.currency);
-                data.items[existingIndex] = item;
-                amountChange = incomingAmountUsd - oldAmountUsd;
+            if (isEdit) {
+                const oldItem = data.items.find(i => i.id === item.id);
+                if (oldItem) {
+                    const oldAmountUsd = this.getConvertedAmount(oldItem.amount_with_currency.amount, oldItem.amount_with_currency.currency as 'USD' | 'ARS');
+                    amountChange = incomingAmountUsd - oldAmountUsd;
+                    data.items = data.items.map(i => i.id === item.id ? item : i);
+                }
             } else {
-                data.items.push(item);
+                data.items = [...data.items, item];
                 amountChange = incomingAmountUsd;
             }
 
-            data.availableAmountToAssign -= amountChange;
-            this.pageData.set({ ...data });
-            this.loadingItemId.set(null);
-        }, 800);
+            return {
+                ...data,
+                available_amount_to_assign: data.available_amount_to_assign - amountChange,
+                items: data.items
+            };
+        });
     }
 
-    openDeleteModal(item: AllocationItemDto) {
+    openDeleteModal(item: IAllocationItemDto) {
         this.itemToDelete.set(item);
         this.isDeleteModalOpen.set(true);
     }
@@ -283,21 +332,30 @@ export class SubCategoryDetailsPage implements OnInit {
     cancelDelete() {
         this.isDeleteModalOpen.set(false);
         this.itemToDelete.set(null);
+        this.isDeletingItem.set(false);
     }
 
     confirmDelete() {
-        const data = this.pageData();
+        const boxId = this.boxId();
+        const subId = this.subCategoryId();
         const item = this.itemToDelete();
-        if (!data || !item) return;
+        if (!boxId || !subId || !item) return;
 
-        this.cancelDelete();
-        this.loadingItemId.set(item.id);
-        setTimeout(() => {
-            const itemAmountUsd = this.getConvertedAmount(item.amountWithCurrency.amount, item.amountWithCurrency.currency);
-            data.availableAmountToAssign += itemAmountUsd;
-            data.items = data.items.filter(i => i.id !== item.id);
-            this.pageData.set({ ...data });
-            this.loadingItemId.set(null);
-        }, 800);
+        this.isDeletingItem.set(true);
+        this.odinApi.deleteItem(boxId, subId, item.id).subscribe({
+            next: () => {
+                this.pageData.update(data => {
+                    if (!data) return null;
+                    const itemAmountUsd = this.getConvertedAmount(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS');
+                    return {
+                        ...data,
+                        available_amount_to_assign: data.available_amount_to_assign + itemAmountUsd,
+                        items: data.items.filter(i => i.id !== item.id)
+                    };
+                });
+                this.cancelDelete();
+            },
+            error: () => this.isDeletingItem.set(false)
+        });
     }
 }

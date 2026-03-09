@@ -1,4 +1,4 @@
-<div [routerLink]="['/odin/allocation-details', box.id]"
+<div [routerLink]="['/odin/allocation-details', box.id]" [state]="{ name: box.name, type: box.calculationType }"
     class="allocation-card w-full bg-[#1b202c] rounded-2xl relative group transition-all duration-300 hover:-translate-y-1 flex flex-col overflow-hidden hover:shadow-[0_8px_30px_rgba(168,85,247,0.25)] h-full min-h-[260px] cursor-pointer">
 
     <!-- Safelist for dynamic Tailwind colors -->
@@ -21,14 +21,27 @@
         <span class="material-symbols-outlined text-[16px]">drag_indicator</span>
     </div>
 
-    <!-- Action Buttons (Delete) -->
     <div class="absolute top-4 right-4 flex items-center gap-2 z-20">
+        <!-- Edit Button (Visible on hover) -->
+        <button (click)="edit.emit(); $event.stopPropagation()"
+            class="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">edit</span>
+        </button>
         <!-- Delete Button (Visible on hover) -->
         <button (click)="delete.emit(); $event.stopPropagation()"
-            class="w-7 h-7 flex items-center justify-center rounded-lg bg-logout-coral/10 text-logout-coral hover:bg-logout-coral/20 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer">
+            class="w-7 h-7 flex items-center justify-center rounded-lg bg-logout-coral/10 text-logout-coral hover:bg-logout-coral/20 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shadow-sm">
             <span class="material-symbols-outlined text-[16px]">delete</span>
         </button>
     </div>
+
+    <!-- Loading Overlay -->
+    @if (isLoading) {
+    <div
+        class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center rounded-2xl animate-in fade-in duration-300">
+        <div class="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin mb-2"></div>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest animate-pulse">Procesando...</span>
+    </div>
+    }
 
     <div class="p-5 pt-6 flex flex-col flex-grow z-10">
         <!-- Icon Badge -->

@@ -37,7 +37,7 @@
                         <label class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1">Nombre
                             <span class="text-red-400">*</span></label>
                         <input type="text" formControlName="name"
-                            class="w-full bg-[#151821] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-bold uppercase tracking-widest"
+                            class="w-full bg-[#151821] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-bold tracking-widest"
                             placeholder="EJ: EXPENSAS">
                     </div>
 
@@ -48,7 +48,7 @@
                             <span class="text-[9px] text-slate-500 font-bold tracking-widest">(Opcional)</span>
                         </label>
                         <input type="text" formControlName="description"
-                            class="w-full bg-[#151821]/50 border border-white/5 rounded-xl px-4 py-2.5 text-white/80 placeholder:text-slate-600/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all text-xs font-medium uppercase tracking-widest flex items-center"
+                            class="w-full bg-[#151821]/50 border border-white/5 rounded-xl px-4 py-2.5 text-white/80 placeholder:text-slate-600/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all text-xs font-medium tracking-widest flex items-center"
                             placeholder="Ej: Mantenimiento mensual">
                     </div>
                 </div>
@@ -76,8 +76,8 @@
                                     Dinero disponible:
                                 </span>
                                 <span class="text-[10px] font-black tabular-nums tracking-widest text-cyan-400">
-                                    {{ '' | dynamicCurrencySymbol }}{{ maxAllowedAmount |
-                                    dynamicCurrency:currentCurrency }}
+                                    {{ form.get('currency')?.value | dynamicCurrencySymbol }}{{ maxAllowedAmount |
+                                    dynamicCurrency:form.get('currency')?.value }}
                                 </span>
                             </div>
 
@@ -107,6 +107,21 @@
                             <span class="material-symbols-outlined text-[20px]">{{ icon }}</span>
                         </button>
                         }
+                    </div>
+                </div>
+
+                <!-- Payment Tracking -->
+                <div class="space-y-4 pt-2">
+                    <h3
+                        class="text-white/80 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 pb-2">
+                        Configuración de Seguimiento
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <app-toggle label="Control de Pago" [options]="paymentTrackingOptions"
+                            [selectedValue]="form.get('has_payment_control')?.value"
+                            (selectionChange)="form.get('has_payment_control')?.setValue($event)">
+                        </app-toggle>
                     </div>
                 </div>
 
@@ -149,9 +164,14 @@
                     class="flex-1 py-3.5 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase bg-[#151821] text-slate-500 hover:text-white transition-all">
                     Cancelar
                 </button>
-                <button type="submit" [disabled]="form.invalid"
-                    class="flex-1 py-3.5 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase bg-primary text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed">
+                <button type="submit" [disabled]="form.invalid || isLoading"
+                    class="flex-1 py-3.5 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase bg-primary text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    @if (isLoading) {
+                    <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>{{ initialItem ? 'Guardando...' : 'Añadiendo...' }}</span>
+                    } @else {
                     {{ initialItem ? 'Guardar Cambios' : 'Añadir Ítem' }}
+                    }
                 </button>
             </div>
         </form>

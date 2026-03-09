@@ -22,11 +22,11 @@
         </div>
 
         <div class="flex items-center gap-8">
-            @if (parentBoxType() === 'percentage' && (pageData()?.availableAmountToAssign ?? 0) > 0) {
+            @if (parentBoxType() === 'percentage' && (pageData()?.available_amount_to_assign ?? 0) > 0) {
             <div class="flex flex-col items-end gap-1 border-r border-white/10 pr-8">
                 <span class="text-cyan-400/80 text-[10px] font-bold uppercase tracking-[0.2em]">Sin Asignar:</span>
                 <span class="text-cyan-400 font-bold text-xl tabular-nums tracking-tighter">{{ '' |
-                    dynamicCurrencySymbol }}{{ pageData()!.availableAmountToAssign |
+                    dynamicCurrencySymbol }}{{ pageData()!.available_amount_to_assign |
                     dynamicCurrency:currencyState.currentCurrency() }} <span class="text-sm ml-1">{{
                         currencyState.currentCurrency() }}</span></span>
             </div>
@@ -58,7 +58,7 @@
                     @for (item of itemsWithDetails(); track item.id) {
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full" [ngClass]="item.bgColorClass"></div>
-                        <span class="text-[10px] text-slate-400 uppercase font-bold">{{ item.name }}</span>
+                        <span class="text-[10px] text-slate-400 font-bold">{{ item.name }}</span>
                     </div>
                     }
                 </div>
@@ -67,7 +67,7 @@
             <!-- Custom Stacked Bar -->
             <div
                 class="h-6 w-full flex rounded-full overflow-hidden bg-black/40 border border-white/5 p-1 relative z-10">
-                @for (item of itemsWithDetails(); track item.id; let isFirst = $first; let isLast = $last) {
+                @for (item of proportionBarItems(); track item.id; let isFirst = $first; let isLast = $last) {
                 <div class="h-full relative border-l border-[#0d1017] cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:scale-y-110 z-10 hover:z-20 origin-bottom"
                     [ngClass]="[item.bgColorClass, isFirst ? 'rounded-l-full' : '', isLast ? 'rounded-r-full' : '']"
                     [style.color]="'var(--tw-colors-' + item.color + '-400)'" [style.width.%]="item.percentage"
@@ -82,8 +82,7 @@
                 <div
                     class="flex items-center gap-2 animate-fade-in-up bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
                     <div class="w-3 h-3 rounded-full" [ngClass]="hoveredItemDetails()?.bgColorClass"></div>
-                    <span [ngClass]="hoveredItemDetails()?.textColorClass"
-                        class="text-xs font-black tracking-widest uppercase">
+                    <span [ngClass]="hoveredItemDetails()?.textColorClass" class="text-xs font-black tracking-widest">
                         {{ hoveredItemDetails()?.name }}
                         <span class="text-white ml-1">({{ hoveredItemDetails()?.percentage | number:'1.0-1' }}%)</span>
                     </span>
@@ -104,7 +103,7 @@
                 </span>
             </div>
 
-            @if ((pageData()?.availableAmountToAssign ?? 1) > 0) {
+            @if ((pageData()?.available_amount_to_assign ?? 1) > 0) {
             <button (click)="openItemModal()"
                 class="group relative inline-flex items-center justify-center bg-white/5 border border-white/10 px-6 py-2.5 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                 <span
@@ -158,10 +157,12 @@
                 <!-- Right Details & Actions -->
                 <div class="flex items-center gap-8">
                     <div class="flex items-center gap-4">
+                        @if (item.has_payment_control) {
                         @if (item.paid) {
                         <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest pt-1">PAGADO</p>
                         } @else {
                         <p class="text-[10px] text-red-400 font-black uppercase tracking-widest pt-1">FALTA PAGAR</p>
+                        }
                         }
                         <div class="text-right">
                             <div class="flex items-baseline gap-2 justify-end">
@@ -176,6 +177,7 @@
                     </div>
 
                     <div class="flex items-center gap-2">
+                        @if (item.has_payment_control) {
                         @if (item.paid) {
                         <button (click)="togglePaidStatus(item.id); $event.stopPropagation()"
                             class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-400 text-[#0f0d15] transition-all hover:bg-emerald-500 shadow-[0_0_15px_rgba(52,211,153,0.15)] hover:shadow-[0_0_20px_rgba(52,211,153,0.3)]">
@@ -188,6 +190,7 @@
                             <span
                                 class="material-symbols-outlined text-[18px] font-bold leading-none group-hover/check:scale-110 transition-transform">check</span>
                         </button>
+                        }
                         }
 
                         <button (click)="openItemModal(item); $event.stopPropagation()"
@@ -222,13 +225,13 @@
 <!-- Modals -->
 @if (isItemFormModalOpen()) {
 <app-item-form-modal [initialItem]="itemToEdit()" [subCategoryId]="subCategoryId()!"
-    [availableAmountToAssign]="pageData()?.availableAmountToAssign || 0" [usedColors]="usedColors()"
-    [currentCurrency]="currencyState.currentCurrency() === 'USD' ? 'USD' : 'ARS'" (save)="handleSaveItem($event)"
-    (close)="closeItemModal()">
+    [availableAmountToAssign]="pageData()?.available_amount_to_assign || 0" [usedColors]="usedColors()"
+    [isLoading]="isItemModalSaving()" (save)="handleSaveItem($event)" (close)="closeItemModal()">
 </app-item-form-modal>
 }
 
 @if (isDeleteModalOpen() && itemToDelete()) {
-<app-delete-confirmation-modal [item]="itemToDelete()" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+<app-delete-confirmation-modal [item]="itemToDelete()" [isLoading]="isDeletingItem()" (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()">
 </app-delete-confirmation-modal>
 }

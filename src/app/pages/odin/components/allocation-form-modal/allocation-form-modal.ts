@@ -17,6 +17,8 @@ export class AllocationFormModalComponent implements OnInit {
   @Input() totalPool: number = 0;
   @Input() availablePool: number = 0;
   @Input() existingAllocations: AllocationBox[] = [];
+  @Input() initialAllocation: AllocationBox | null = null;
+  @Input() isLoading: boolean = false;
   @Output() save = new EventEmitter<AllocationBox>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -31,6 +33,7 @@ export class AllocationFormModalComponent implements OnInit {
     targetAmount: 0,
     icon: 'category',
     color: 'emerald',
+    savedAmount: 0,
     savingsTarget: undefined
   };
 
@@ -56,9 +59,25 @@ export class AllocationFormModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const avail = this.availableColors;
-    if (avail.length > 0) {
-      this.formData.color = avail[0]; // Auto pick first completely free color
+    if (this.initialAllocation) {
+      // For editing: copy existing data
+      this.formData = {
+        name: this.initialAllocation.name,
+        description: this.initialAllocation.description,
+        type: this.initialAllocation.type,
+        calculationType: this.initialAllocation.calculationType,
+        targetAmount: this.initialAllocation.targetAmount,
+        icon: this.initialAllocation.icon,
+        color: this.initialAllocation.color,
+        savedAmount: this.initialAllocation.savedAmount || 0,
+        savingsTarget: this.initialAllocation.savingsTarget
+      };
+    } else {
+      // For creating: auto-pick color
+      const avail = this.availableColors;
+      if (avail.length > 0) {
+        this.formData.color = avail[0];
+      }
     }
   }
 
@@ -119,24 +138,30 @@ export class AllocationFormModalComponent implements OnInit {
       this.errors['description'] = 'La descripción es requerida.';
     }
 
+    // Only validate targetAmount and savingsTarget if it's a new allocation or relevant fields are visible
+    // But since they are fixed when editing, we still want to ensure they are valid.
+    const currentCalcType = this.initialAllocation ? this.initialAllocation.calculationType : this.formData.calculationType;
+    const currentType = this.initialAllocation ? this.initialAllocation.type : this.formData.type;
+
     // For percentage, targetAmount must be > 0. For absoluto, it can be 0.
-    if (this.formData.calculationType === 'percentage' && (!this.formData.targetAmount || this.formData.targetAmount <= 0)) {
+    if (currentCalcType === 'percentage' && (!this.formData.targetAmount || this.formData.targetAmount <= 0)) {
       this.errors['targetAmount'] = 'El porcentaje debe ser mayor a 0.';
-    } else if (this.formData.calculationType === 'absolute' && (this.formData.targetAmount === undefined || this.formData.targetAmount < 0)) {
-      this.errors['targetAmount'] = 'El monto debe ser 0 o mayor.';
+    } else if (currentCalcType === 'absolute' && (this.formData.targetAmount === undefined || this.formData.targetAmount < 0)) {
+      // This shouldn't happen with the UI hiding it, but for safety:
+      this.formData.targetAmount = 0;
     }
 
     // Cross-validate maximum one last time to be safe
-    if (this.formData.calculationType === 'absolute' && this.formData.targetAmount! > this.availablePool) {
-      this.errors['targetAmount'] = 'El monto excede el disponible.';
-    } else if (this.formData.calculationType === 'percentage') {
+    if (currentCalcType === 'absolute' && this.formData.targetAmount! > this.availablePool) {
+      // For absolute it's 0 usually but let's be consistent
+    } else if (currentCalcType === 'percentage') {
       const percentageAmountValue = (this.formData.targetAmount! / 100) * this.totalPool;
       if (percentageAmountValue > this.availablePool) {
         this.errors['targetAmount'] = 'El porcentaje excede el dinero disponible del pool.';
       }
     }
 
-    if (this.formData.type === 'temporary') {
+    if (currentType === 'temporary') {
       if (!this.formData.savingsTarget || this.formData.savingsTarget <= 0) {
         this.errors['savingsTarget'] = 'El objetivo de ahorro es requerido para cajas temporales.';
       }
@@ -146,22 +171,26 @@ export class AllocationFormModalComponent implements OnInit {
       return; // Stop submission
     }
 
-    const newBox: AllocationBox = {
-      id: crypto.randomUUID(),
+    // Force original values if editing, to ensure absolute consistency
+    const boxType = (this.initialAllocation ? this.initialAllocation.type : this.formData.type) as 'permanent' | 'temporary';
+    const boxCalcType = (this.initialAllocation ? this.initialAllocation.calculationType : this.formData.calculationType) as 'percentage' | 'absolute';
+
+    const boxToSave: AllocationBox = {
+      id: this.initialAllocation ? this.initialAllocation.id : crypto.randomUUID(),
       name: this.formData.name!,
       description: this.formData.description!,
-      type: this.formData.type as 'permanent' | 'temporary',
-      calculationType: this.formData.calculationType as 'percentage' | 'absolute',
-      targetAmount: this.formData.targetAmount!,
+      type: boxType,
+      calculationType: boxCalcType,
+      targetAmount: boxCalcType === 'percentage' ? this.formData.targetAmount! : (this.initialAllocation?.targetAmount || 0),
       icon: this.formData.icon!,
       color: this.formData.color!,
     };
 
-    if (newBox.type === 'temporary') {
-      newBox.savingsTarget = this.formData.savingsTarget;
-      newBox.savedAmount = 0; // Starts at 0
+    if (boxToSave.type === 'temporary') {
+      boxToSave.savingsTarget = this.formData.savingsTarget;
+      boxToSave.savedAmount = this.formData.savedAmount || 0;
     }
 
-    this.save.emit(newBox);
+    this.save.emit(boxToSave);
   }
 }

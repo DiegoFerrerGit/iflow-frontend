@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { GoogleAuthService } from '../../modules/authentication/google-auth.service';
-import { selectIsLoading } from '../../modules/authentication/state/authentication.selectors';
+import { selectLoader } from '../../core/loader-manager/state/loader.selectors';
 
 @Component({
     selector: 'app-login-page',
@@ -21,7 +21,7 @@ export class LoginPage implements OnInit, OnDestroy {
     private googleAuthService = inject(GoogleAuthService);
 
     // Global state (backend login + profile calls)
-    private isGlobalLoading = this.store.selectSignal(selectIsLoading);
+    private isGlobalLoading = this.store.selectSignal(selectLoader);
     // Local state (immediate button click reaction before API starts)
     private isLocalLoading = signal(false);
 

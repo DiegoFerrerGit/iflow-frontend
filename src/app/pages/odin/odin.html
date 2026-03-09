@@ -19,8 +19,8 @@
         <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20" cdkDropList
             (cdkDropListDropped)="dropIncome($event)">
             @for (income of incomes; track income.id) {
-            <app-income-card cdkDrag [income]="income" (delete)="promptDelete(income)"
-                (edit)="openModal(income)"></app-income-card>
+            <app-income-card cdkDrag [income]="income" [isLoading]="updatingIncomeId === income.id"
+                (delete)="promptDelete(income)" (edit)="openModal(income)"></app-income-card>
             }
 
             @if (incomes.length === 0 || incomes.length % 3 !== 0) {
@@ -100,7 +100,8 @@
                     @if (freeMoney > 0 && totalPool > 0) {
                     <div
                         class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 animate-pulse shadow-[0_0_15px_rgba(34,211,238,0.15)]">
-                        <span class="text-[11px] font-black tracking-wider uppercase">Dinero Disponible:</span>
+                        <span class="text-[11px] font-black tracking-wider uppercase">Dinero Disponible sin
+                            asignar:</span>
                         <span class="text-[15px] font-black text-white">${{ freeMoney | number:'1.0-0' }}</span>
                         <span class="text-xs font-bold text-cyan-500">({{ (freeMoney / totalPool) * 100 | number:'1.0-0'
                             }}%)</span>
@@ -122,9 +123,9 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-16" cdkDropList
                 (cdkDropListDropped)="dropAllocation($event)">
                 @for (box of allocations; track box.id) {
-                <!-- Render the individual allocation card -->
                 <app-allocation-card cdkDrag [box]="box" [totalPool]="totalPool"
-                    (delete)="deleteAllocation(box)"></app-allocation-card>
+                    [isLoading]="updatingAllocationId === box.id" (delete)="deleteAllocation(box)"
+                    (edit)="openAllocationModal(box)"></app-allocation-card>
                 }
 
                 <!-- Empty State Card (Only shown if less than 4 items) -->
@@ -215,7 +216,13 @@
         <p class="text-slate-400 text-sm mb-8">¿Estás seguro de que deseas eliminar la fuente <span
                 class="text-white font-bold">"{{ incomeToDelete.name }}"</span>? Esta acción no se puede deshacer.</p>
 
-        <div class="flex gap-4 w-full">
+        @if (isDeletingIncome) {
+        <div class="flex flex-col items-center justify-center py-4 w-full">
+            <div class="w-8 h-8 rounded-full border-2 border-white/20 border-t-logout-coral animate-spin mb-3"></div>
+            <span class="text-sm font-bold text-slate-300 animate-pulse">Eliminando fuente...</span>
+        </div>
+        } @else {
+        <div class="flex gap-4 w-full animate-in fade-in duration-200">
             <button (click)="cancelDelete()"
                 class="flex-1 px-4 py-3 rounded-xl border border-white/10 text-slate-300 font-bold hover:bg-white/5 transition-colors">
                 Cancelar
@@ -225,6 +232,7 @@
                 Eliminar
             </button>
         </div>
+        }
     </div>
 </div>
 }
@@ -242,7 +250,13 @@
                 class="text-white font-bold">"{{ allocationToDelete.name }}"</span>? Esta acción no se puede deshacer.
         </p>
 
-        <div class="flex gap-4 w-full">
+        @if (isDeletingAllocation) {
+        <div class="flex flex-col items-center justify-center py-4 w-full">
+            <div class="w-8 h-8 rounded-full border-2 border-white/20 border-t-logout-coral animate-spin mb-3"></div>
+            <span class="text-sm font-bold text-slate-300 animate-pulse">Eliminando caja...</span>
+        </div>
+        } @else {
+        <div class="flex gap-4 w-full animate-in fade-in duration-200">
             <button (click)="cancelDeleteAllocation()"
                 class="flex-1 px-4 py-3 rounded-xl border border-white/10 text-slate-300 font-bold hover:bg-white/5 transition-colors">
                 Cancelar
@@ -252,14 +266,15 @@
                 Eliminar
             </button>
         </div>
+        }
     </div>
 </div>
 }
 
 <!-- Add/Edit Income Modal -->
 @if (isModalOpen) {
-<app-income-form-modal [initialIncome]="incomeToEdit" [existingIncomes]="incomes" (close)="closeModal()"
-    (save)="onSaveIncome($event)">
+<app-income-form-modal [initialIncome]="incomeToEdit" [existingIncomes]="incomes" [isLoading]="isModalSaving"
+    (close)="closeModal()" (save)="onSaveIncome($event)">
 </app-income-form-modal>
 }
 
@@ -267,6 +282,7 @@
 @if (isAllocationModalOpen) {
 <div class="fixed inset-0 z-[100] flex justify-end">
     <app-allocation-form-modal [totalPool]="totalPool" [availablePool]="freeMoney" [existingAllocations]="allocations"
-        (save)="handleSaveAllocation($event)" (cancel)="isAllocationModalOpen = false"></app-allocation-form-modal>
+        [initialAllocation]="allocationToEdit" [isLoading]="isAllocationModalSaving"
+        (save)="handleSaveAllocation($event)" (cancel)="closeAllocationModal()"></app-allocation-form-modal>
 </div>
 }

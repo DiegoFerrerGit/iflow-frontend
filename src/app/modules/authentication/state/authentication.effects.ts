@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthActions } from './authentication.actions';
 import { AuthenticationApi } from '../authentication.api';
 import { UserApi } from '../../user/user.api';
+import { HIDE_SPINNER_OPTIONS } from '../../../core/interceptors/models/constants/interceptors.constants';
 
 @Injectable()
 export class AuthenticationEffects {
@@ -20,7 +21,7 @@ export class AuthenticationEffects {
         this.actions$.pipe(
             ofType(AuthActions.bootstrapAuth),
             switchMap(() =>
-                this.userApi.loadProfileDirect().pipe(
+                this.userApi.loadProfile(HIDE_SPINNER_OPTIONS).pipe(
                     map((profile) => AuthActions.loadProfileSuccess({ profile })),
                     catchError(() =>
                         // Profile failed (401) → try refresh (also silencing interceptor)
@@ -49,7 +50,7 @@ export class AuthenticationEffects {
         this.actions$.pipe(
             ofType(AuthActions.refreshSuccess),
             switchMap(() =>
-                this.userApi.loadProfileDirect().pipe(
+                this.userApi.loadProfile(HIDE_SPINNER_OPTIONS).pipe(
                     map((profile) => AuthActions.loadProfileSuccess({ profile })),
                     catchError((err: HttpErrorResponse) =>
                         of(AuthActions.loadProfileFailure({
@@ -87,7 +88,7 @@ export class AuthenticationEffects {
         this.actions$.pipe(
             ofType(AuthActions.loginSuccess),
             switchMap(() =>
-                this.userApi.loadProfileDirect().pipe(
+                this.userApi.loadProfile(HIDE_SPINNER_OPTIONS).pipe(
                     map((profile) => AuthActions.loadProfileSuccess({ profile })),
                     catchError((err: HttpErrorResponse) =>
                         of(AuthActions.loadProfileFailure({

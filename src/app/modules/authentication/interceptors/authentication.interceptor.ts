@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { catchError, switchMap, throwError } from 'rxjs';
-import { NO_INTERCEPTORS } from '../../../core/models/constants/global.constants';
+import { NO_INTERCEPTORS } from '../../../core/interceptors/models/constants/interceptors.constants';
 import { AuthenticationApi } from '../authentication.api';
 import { AuthActions } from '../state/authentication.actions';
 

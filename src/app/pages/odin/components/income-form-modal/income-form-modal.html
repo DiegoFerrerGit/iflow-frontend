@@ -261,9 +261,14 @@
                     class="px-6 py-3 rounded-xl border border-white/10 text-slate-300 font-bold hover:bg-white/5 hover:text-white transition-colors">
                     Cancelar
                 </button>
-                <button type="submit" [disabled]="!incomeForm.valid"
-                    class="px-8 py-3 rounded-xl bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black tracking-wide uppercase text-sm transition-colors shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                    Guardar Fuente
+                <button type="submit" [disabled]="!incomeForm.valid || isLoading"
+                    class="px-8 py-3 rounded-xl bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black tracking-wide uppercase text-sm transition-colors shadow-[0_0_20px_rgba(168,85,247,0.3)] flex items-center justify-center min-w-[160px]">
+                    @if (isLoading) {
+                    <div class="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin mr-2"></div>
+                    <span>Guardando...</span>
+                    } @else {
+                    <span>Guardar Fuente</span>
+                    }
                 </button>
             </div>
         </form>

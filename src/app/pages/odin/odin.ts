@@ -1,10 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BannerComponent } from './components/banner/banner';
 import { IncomeCardComponent } from './components/income-card/income-card';
-import { OdinMockService } from '../../modules/odin/services/odin-mock.service';
 import { IncomeSource, ThemeColor, COLOR_MAP } from '../../models/income.model';
 import { AllocationBox } from '../../models/allocation.model';
+import { OdinApiService } from '../../modules/odin/odin.api';
+import { IOdinResponse, IIncomeSourceApi, IAllocationBoxApi } from '../../modules/odin/models/interfaces/api.response.interfaces';
+import { IIncomeSourceRequesApi, IAllocationBoxRequestApi } from '../../modules/odin/models/interfaces/api.request.interfaces';
+import { Subscription } from 'rxjs';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { IncomeFormModal } from './components/income-form-modal/income-form-modal';
 import { AnimatedFlowComponent } from './components/animated-flow/animated-flow';
@@ -14,7 +17,7 @@ import { DonutChartComponent, DonutChartSegment } from '../../shared/components/
 import { DynamicCurrencyPipe } from '../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../shared/pipes/dynamic-currency-symbol.pipe';
 import { CurrencyState } from '../../core/services/currency-state';
-import { LoaderService } from '../../core/services/loader.service';
+import { LoaderService } from '../../core/loader-manager/loader.service';
 
 @Component({
   selector: 'app-odin',
@@ -23,44 +26,111 @@ import { LoaderService } from '../../core/services/loader.service';
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
 })
-export class OdinPageComponent implements OnInit {
-  private mockService = inject(OdinMockService);
+export class OdinPageComponent implements OnInit, OnDestroy {
+  private odinApiService = inject(OdinApiService);
   private currencyState = inject(CurrencyState);
   private loaderService = inject(LoaderService);
+  private cdr = inject(ChangeDetectorRef);
+
+  // #region STATE
+  private odinSub?: Subscription;
 
   // Incomes State
   incomes: IncomeSource[] = [];
   incomeToDelete: IncomeSource | null = null;
   isModalOpen = false;
   incomeToEdit: IncomeSource | null = null;
+  isModalSaving = false;
+  updatingIncomeId: string | null = null;
+  isDeletingIncome = false;
 
   // Allocations State
   allocations: AllocationBox[] = [];
   isAllocationModalOpen = false;
+  allocationToEdit: AllocationBox | null = null;
+  isAllocationModalSaving = false;
+  updatingAllocationId: string | null = null;
   allocationToDelete: AllocationBox | null = null;
+  isDeletingAllocation = false;
+
+  // Dashboard Summary State (API sourced)
+  public totalPool: number = 0;
+  public totalAllocated: number = 0;
+  public freeMoney: number = 0;
 
   // Donut chart hover state -- moved mostly into the donut chart component internally
   // These are kept here just in case they are needed for cross-component interactions
   hoveredSegment: DonutChartSegment | null = null;
   hoveredAllocationSegment: DonutChartSegment | null = null;
+  // #endregion
 
-  ngOnInit() {
-    this.loaderService.show();
-    setTimeout(() => {
-      this.loadData();
-      this.loaderService.hide();
-    }, 1000); // Simulate API delay
+  // #region LIFECYCLE
+  public ngOnInit() {
+    this.loadData();
   }
 
-  loadData() {
-    this.incomes = this.mockService.getIncomes();
-    this.allocations = this.mockService.getAllocations();
-    this.updateCharts();
+  public loadData() {
+    this.odinSub = this.odinApiService.getOdin().subscribe({
+      next: (response: IOdinResponse) => {
+        this.totalPool = response.pool_summary.total_amount_in_usd;
+        this.totalAllocated = response.pool_summary.assigned_amount_in_usd;
+        this.freeMoney = response.pool_summary.unassigned_amount_in_usd;
+        this.incomes = this.mapIncomes(response.income_sources);
+        this.allocations = this.mapAllocations(response.allocation_boxes);
+        this.updateCharts();
+      },
+      error: (error) => {
+        console.error('Error fetching Odin data', error);
+      }
+    });
   }
 
-  updateCharts() {
+  public ngOnDestroy() {
+    if (this.odinSub) {
+      this.odinSub.unsubscribe();
+    }
+  }
+  // #endregion
+
+  // #region MAPPERS
+  private mapIncomes(apiIncomes: IIncomeSourceApi[]): IncomeSource[] {
+    return apiIncomes.map(apiIncome => ({
+      id: apiIncome.id,
+      name: apiIncome.name,
+      role: apiIncome.role,
+      amount: apiIncome.amount_with_currency.amount,
+      effortPercentage: apiIncome.effort_percentage,
+      icon: apiIncome.icon,
+      color: apiIncome.color as ThemeColor,
+      category: apiIncome.category,
+      currency: apiIncome.amount_with_currency.currency as 'USD' | 'ARS'
+    }));
+  }
+
+  private mapAllocations(apiAllocations: IAllocationBoxApi[]): AllocationBox[] {
+    return apiAllocations.map(apiAlloc => ({
+      id: apiAlloc.id,
+      name: apiAlloc.name,
+      description: apiAlloc.description,
+      type: apiAlloc.type,
+      calculationType: apiAlloc.calculation_type,
+      targetAmount: apiAlloc.calculation_type === 'percentage'
+        ? (apiAlloc.percentage_of_pool || 0)
+        : (apiAlloc.calculated_amount_in_usd || 0),
+      savedAmount: apiAlloc.saved_amount?.amount,
+      savingsTarget: apiAlloc.savings_target?.amount,
+      icon: apiAlloc.icon,
+      color: apiAlloc.color as ThemeColor
+    }));
+  }
+  // #endregion
+
+  // #region COMPUTED PROPERTIES
+  public updateCharts() {
     this.sortIncomes();
+    this.recalculateSummaries();
     this.sortAllocations();
+    this.cdr.markForCheck();
   }
 
   private sortIncomes() {
@@ -74,31 +144,31 @@ export class OdinPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Recalculates the pool summaries in memory for instant UI feedback.
+   * totalPool: Sum of all incomes converted to USD.
+   * totalAllocated: Sum of (absolute boxes) + (percentage boxes * totalPool).
+   * freeMoney: totalPool - totalAllocated.
+   */
+  public recalculateSummaries() {
+    this.totalPool = this.incomes.reduce((sum, income) =>
+      sum + this.currencyState.convert(income.amount, income.currency || 'USD'), 0);
 
-
-  get totalPool(): number {
-    return this.incomes.reduce((sum, income) => sum + this.currencyState.convert(income.amount, income.currency || 'USD'), 0);
-  }
-
-  get totalAllocated(): number {
-    const total = this.totalPool;
-    if (total === 0) return 0;
-
-    return this.allocations.reduce((sum, box) => {
+    const pool = this.totalPool;
+    this.totalAllocated = this.allocations.reduce((sum, box) => {
       if (box.calculationType === 'absolute') {
-        const convertedTarget = this.currencyState.convert(box.targetAmount, (box as any).currency || 'USD');
-        return sum + convertedTarget;
+        return sum + box.targetAmount;
       } else {
-        return sum + ((box.targetAmount / 100) * total);
+        return sum + ((box.targetAmount / 100) * pool);
       }
     }, 0);
-  }
 
-  get freeMoney(): number {
-    return Math.max(0, this.totalPool - this.totalAllocated);
+    this.freeMoney = Math.max(0, this.totalPool - this.totalAllocated);
   }
+  // #endregion
 
-  get allocationDonutSegments(): DonutChartSegment[] {
+  // #region CHART COMPUTATIONS
+  public get allocationDonutSegments(): DonutChartSegment[] {
     const totalAllocated = this.totalAllocated;
     const pool = this.totalPool;
     const freeMoney = this.freeMoney;
@@ -113,7 +183,7 @@ export class OdinPageComponent implements OnInit {
     // First map actual allocations
     const segments = this.allocations.map(box => {
       const amount = box.calculationType === 'absolute'
-        ? this.currencyState.convert(box.targetAmount, (box as any).currency || 'USD')
+        ? box.targetAmount
         : (box.targetAmount / 100) * pool;
 
       const percentage = amount / pool; // relative to entire pool to fit with free money
@@ -158,7 +228,7 @@ export class OdinPageComponent implements OnInit {
     return segments;
   }
 
-  get donutSegments(): DonutChartSegment[] {
+  public get donutSegments(): DonutChartSegment[] {
     const total = this.totalPool;
     if (total === 0) return [];
 
@@ -195,7 +265,7 @@ export class OdinPageComponent implements OnInit {
   }
 
   // Override to exact chart colors:
-  getChartColor(type: string): string {
+  public getChartColor(type: string): string {
     switch (type) {
       case 'primary': return '#6d489b';
       case 'cyan': return '#2d7a5d';
@@ -203,10 +273,22 @@ export class OdinPageComponent implements OnInit {
       default: return '#6d489b';
     }
   }
+  // #endregion
 
-  // --- Methods ---
+  // #region DRAG & DROP
+  public dropIncome(event: CdkDragDrop<IncomeSource[]>) {
+    moveItemInArray(this.incomes, event.previousIndex, event.currentIndex);
+  }
 
-  sortAllocations() {
+  public dropAllocation(event: CdkDragDrop<AllocationBox[]>) {
+    if (event.previousIndex !== event.currentIndex) {
+      moveItemInArray(this.allocations, event.previousIndex, event.currentIndex);
+    }
+  }
+  // #endregion
+
+  // #region ALLOCATION ACTIONS
+  public sortAllocations() {
     // Determine the real amount for sorting
     const getAmount = (box: AllocationBox) => {
       return box.calculationType === 'absolute' ? box.targetAmount : (box.targetAmount / 100) * this.totalPool;
@@ -214,88 +296,194 @@ export class OdinPageComponent implements OnInit {
     this.allocations.sort((a, b) => getAmount(b) - getAmount(a));
   }
 
-  dropIncome(event: CdkDragDrop<IncomeSource[]>) {
-    moveItemInArray(this.incomes, event.previousIndex, event.currentIndex);
-  }
-
-  dropAllocation(event: CdkDragDrop<AllocationBox[]>) {
-    if (event.previousIndex !== event.currentIndex) {
-      moveItemInArray(this.allocations, event.previousIndex, event.currentIndex);
-    }
-  }
-
-  // Modals - Allocations
-  openAllocationModal() {
-    if (this.freeMoney > 0) {
+  public openAllocationModal(allocation?: AllocationBox) {
+    if (this.freeMoney > 0 || allocation) {
+      this.allocationToEdit = allocation || null;
       this.isAllocationModalOpen = true;
     }
   }
 
-  closeAllocationModal() {
+  public closeAllocationModal() {
     this.isAllocationModalOpen = false;
+    this.allocationToEdit = null;
+    this.isAllocationModalSaving = false;
   }
 
-  handleSaveAllocation(newBox: AllocationBox) {
-    this.allocations.unshift(newBox);
-    this.sortAllocations();
-    this.closeAllocationModal();
-  }
+  public handleSaveAllocation(newBox: AllocationBox) {
+    const requestData: IAllocationBoxRequestApi = {
+      name: newBox.name,
+      description: newBox.description,
+      type: newBox.type,
+      calculation_type: newBox.calculationType,
+      percentage_of_pool: newBox.calculationType === 'percentage' ? newBox.targetAmount : undefined,
+      icon: newBox.icon,
+      color: newBox.color,
+      saved_amount: newBox.savedAmount !== undefined ? { amount: newBox.savedAmount, currency: 'USD' } : undefined,
+      savings_target: newBox.savingsTarget !== undefined ? { amount: newBox.savingsTarget, currency: 'USD' } : undefined
+    };
 
-  promptDelete(income: IncomeSource) {
-    this.incomeToDelete = income;
-  }
+    this.isAllocationModalSaving = true;
 
-  confirmDelete() {
-    if (this.incomeToDelete) {
-      this.incomes = this.incomes.filter(i => i.id !== this.incomeToDelete!.id);
-      this.incomeToDelete = null;
-      this.sortAllocations();
+    if (this.allocationToEdit) {
+      // Edit existing
+      this.updatingAllocationId = this.allocationToEdit.id;
+      this.odinApiService.updateAllocationBox(this.allocationToEdit.id, requestData).subscribe({
+        next: (apiAlloc: IAllocationBoxApi) => {
+          const updatedBox = this.mapAllocations([apiAlloc])[0];
+          const index = this.allocations.findIndex(a => a.id === updatedBox.id);
+          if (index !== -1) {
+            this.allocations[index] = updatedBox;
+            this.allocations = [...this.allocations];
+          }
+          this.updateCharts();
+          this.isAllocationModalSaving = false;
+          this.updatingAllocationId = null;
+          this.closeAllocationModal();
+        },
+        error: (err) => {
+          console.error('Error updating allocation', err);
+          this.isAllocationModalSaving = false;
+          this.updatingAllocationId = null;
+        }
+      });
+    } else {
+      // Create new
+      this.odinApiService.createAllocationBox(requestData).subscribe({
+        next: (apiAlloc: IAllocationBoxApi) => {
+          const createdBox = this.mapAllocations([apiAlloc])[0];
+          this.allocations = [createdBox, ...this.allocations];
+          this.updateCharts();
+          this.isAllocationModalSaving = false;
+          this.closeAllocationModal();
+        },
+        error: (err) => {
+          console.error('Error creating allocation', err);
+          this.isAllocationModalSaving = false;
+        }
+      });
     }
   }
 
-  deleteAllocation(box: AllocationBox) {
+  public deleteAllocation(box: AllocationBox) {
     this.allocationToDelete = box;
   }
 
-  confirmDeleteAllocation() {
+  public confirmDeleteAllocation() {
     if (this.allocationToDelete) {
-      this.allocations = this.allocations.filter(a => a.id !== this.allocationToDelete!.id);
-      this.allocationToDelete = null;
+      this.isDeletingAllocation = true;
+      this.odinApiService.deleteAllocationBox(this.allocationToDelete.id).subscribe({
+        next: () => {
+          this.allocations = this.allocations.filter(a => a.id !== this.allocationToDelete!.id);
+          this.isDeletingAllocation = false;
+          this.allocationToDelete = null;
+          this.updateCharts();
+        },
+        error: (err) => {
+          console.error('Error deleting allocation', err);
+          this.isDeletingAllocation = false;
+        }
+      });
     }
   }
 
-  cancelDeleteAllocation() {
+  public cancelDeleteAllocation() {
     this.allocationToDelete = null;
   }
+  // #endregion
 
-  cancelDelete() {
-    this.incomeToDelete = null;
-  }
-
-  openModal(income?: IncomeSource) {
+  // #region MODAL ACTIONS
+  public openModal(income?: IncomeSource) {
     this.incomeToEdit = income || null;
     this.isModalOpen = true;
   }
 
-  closeModal() {
+  public closeModal() {
     this.isModalOpen = false;
     this.incomeToEdit = null;
   }
+  // #endregion
 
-  onSaveIncome(income: IncomeSource) {
+  // #region INCOME ACTIONS
+  public onSaveIncome(income: IncomeSource) {
+    const requestData: IIncomeSourceRequesApi = {
+      name: income.name,
+      role: income.role,
+      effort_percentage: income.effortPercentage,
+      icon: income.icon || '',
+      color: income.color,
+      category: income.category,
+      amount_with_currency: {
+        amount: income.amount,
+        currency: income.currency || 'USD'
+      }
+    };
+
     if (this.incomeToEdit) {
       // Edit existing
-      const index = this.incomes.findIndex(i => i.id === income.id);
-      if (index !== -1) {
-        this.incomes[index] = income;
-      }
+      this.updatingIncomeId = income.id;
+      this.isModalSaving = true;
+      this.odinApiService.updateIncomeSource(income.id, requestData).subscribe({
+        next: () => {
+          const index = this.incomes.findIndex(i => i.id === income.id);
+          if (index !== -1) {
+            this.incomes[index] = { ...income };
+            this.incomes = [...this.incomes];
+          }
+          this.updateCharts();
+          this.isModalSaving = false;
+          this.updatingIncomeId = null;
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error updating income', err);
+          this.updatingIncomeId = null;
+          this.isModalSaving = false;
+        }
+      });
     } else {
       // Add new
-      this.incomes.push(income);
+      this.isModalSaving = true;
+      this.odinApiService.createIncomeSource(requestData).subscribe({
+        next: (apiIncome: IIncomeSourceApi) => {
+          const newIncomeSource = this.mapIncomes([apiIncome])[0];
+          this.incomes = [...this.incomes, newIncomeSource];
+          this.updateCharts();
+          this.isModalSaving = false;
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error creating income', err);
+          this.isModalSaving = false;
+        }
+      });
     }
-
-    this.sortIncomes();
-    this.sortAllocations();
-    this.closeModal();
   }
+
+  public promptDelete(income: IncomeSource) {
+    this.incomeToDelete = income;
+  }
+
+  public confirmDelete() {
+    if (this.incomeToDelete) {
+      this.isDeletingIncome = true;
+      this.odinApiService.deleteIncomeSource(this.incomeToDelete.id).subscribe({
+        next: () => {
+          this.isDeletingIncome = false;
+          this.incomes = this.incomes.filter(i => i.id !== this.incomeToDelete?.id);
+          this.incomeToDelete = null;
+          this.updateCharts();
+        },
+        error: (err) => {
+          console.error('Error deleting income', err);
+          this.isDeletingIncome = false;
+          this.incomeToDelete = null;
+        }
+      });
+    }
+  }
+
+  public cancelDelete() {
+    this.incomeToDelete = null;
+  }
+  // #endregion
 }

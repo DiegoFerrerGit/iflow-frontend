@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CREDENTIALS_AND_SKIP_INTERCEPTORS } from '../../core/models/constants/global.constants';
+import { WITH_CREDENTIALS_AND_SKIP_INTERCEPTORS } from '../../core/interceptors/models/constants/interceptors.constants';
 import { AuthApiResponse } from './models/interfaces/auth.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -15,7 +15,7 @@ export class AuthenticationApi {
         return this.http.post<AuthApiResponse>(
             `${this.baseUrl}/google`,
             { id_token: idToken },
-            CREDENTIALS_AND_SKIP_INTERCEPTORS,
+            WITH_CREDENTIALS_AND_SKIP_INTERCEPTORS,
         );
     }
 
@@ -23,7 +23,7 @@ export class AuthenticationApi {
         return this.http.post<AuthApiResponse>(
             `${this.baseUrl}/refresh`,
             {},
-            CREDENTIALS_AND_SKIP_INTERCEPTORS,
+            WITH_CREDENTIALS_AND_SKIP_INTERCEPTORS,
         );
     }
 
@@ -31,7 +31,7 @@ export class AuthenticationApi {
         return this.http.post<AuthApiResponse>(
             `${this.baseUrl}/logout`,
             {},
-            CREDENTIALS_AND_SKIP_INTERCEPTORS,
+            WITH_CREDENTIALS_AND_SKIP_INTERCEPTORS,
         );
     }
 }

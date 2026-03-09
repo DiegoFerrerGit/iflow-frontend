@@ -7,43 +7,7 @@ import { AllocationBox } from '../../../models/allocation.model';
 })
 export class OdinMockService {
 
-  getIncomes(): IncomeSource[] {
-    return [
-      {
-        id: '1',
-        name: 'TINASOFT',
-        role: 'Engineering Manager',
-        amount: 8000,
-        effortPercentage: 40,
-        icon: 'work',
-        color: 'primary',
-        category: 'Management',
-        currency: 'USD'
-      },
-      {
-        id: '2',
-        name: 'MODAK',
-        role: 'Frontend Lead',
-        amount: 5000,
-        effortPercentage: 60,
-        icon: 'laptop_mac',
-        color: 'cyan',
-        category: 'Developer',
-        currency: 'USD'
-      },
-      {
-        id: '3',
-        name: 'SUNSET',
-        role: 'Engineering Advisor',
-        amount: 2000000,
-        effortPercentage: 10,
-        icon: 'lightbulb',
-        color: 'rose',
-        category: 'Consulting',
-        currency: 'ARS'
-      }
-    ];
-  }
+
 
   getAllocations(): AllocationBox[] {
     return [

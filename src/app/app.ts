@@ -1,16 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter, map, mergeMap } from 'rxjs';
+import { delay, filter, map, mergeMap, Observable, Subscription, tap } from 'rxjs';
 import { SidebarMenu } from './layout/sidebar-menu/sidebar-menu';
 import { CurrencySwitcherComponent } from './layout/currency-switcher/currency-switcher';
 import { LayoutService } from './core/services/layout';
 import { LoaderComponent } from './shared/components/loader/loader.component';
-import { LoaderService } from './core/services/loader.service';
+import { Store } from '@ngrx/store';
+import { selectLoader } from './core/loader-manager/state/loader.selectors';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent],
+  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -21,9 +23,34 @@ export class AppComponent implements OnInit {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   readonly layoutService = inject(LayoutService);
-  public loaderService = inject(LoaderService);
+  private store = inject(Store);
 
-  ngOnInit() {
+  public inProgress$!: Observable<boolean>;
+
+
+
+  ngOnInit(): void {
+    this.routerEventsSubscription();
+    this.loaderStateSubscription();
+  }
+
+  /**
+   * Subscribes to the global NgRx Loader state.
+   * This observable drives the fullscreen blocking spinner across the app.
+   */
+  private loaderStateSubscription(): void {
+    this.inProgress$ = this.store.select(selectLoader).pipe(
+      delay(0)
+    );
+  }
+
+  /**
+   * Listens to Angular Router events to detect when navigation ends successfully.
+   * It traverses the active route tree to find the deepest primary outlet and 
+   * checks its route data for a custom 'hideSidebar' flag.
+   * This dynamically hides/shows the sidebar layout on specific pages (like Login).
+   */
+  private routerEventsSubscription(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       map(() => this.activatedRoute),

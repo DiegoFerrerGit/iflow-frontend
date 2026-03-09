@@ -9,6 +9,15 @@
         <span class="material-symbols-outlined text-[16px]">drag_indicator</span>
     </div>
 
+    <!-- Loading Overlay -->
+    @if (isLoading) {
+    <div
+        class="absolute inset-0 bg-sidebar-bg/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-2xl">
+        <div class="w-8 h-8 rounded-full border-2 border-white/20 border-t-primary animate-spin"></div>
+        <span class="text-xs font-bold text-white mt-3 animate-pulse">Actualizando...</span>
+    </div>
+    }
+
     <div class="flex items-start justify-between mb-6 mt-2 relative z-10">
         <div class="flex items-center gap-4">
             <!-- Icon Block -->

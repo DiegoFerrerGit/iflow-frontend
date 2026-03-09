@@ -89,4 +89,18 @@ export class DonutChartComponent {
             default: return 'text-[10px]';
         }
     }
+
+    get firstSegment(): DonutChartSegment | null {
+        return this.segments.length > 0 ? this.segments[0] : null;
+    }
+
+    get lastSegment(): DonutChartSegment | null {
+        return this.segments.length > 0 ? this.segments[this.segments.length - 1] : null;
+    }
+
+    getTipOffset(segment: DonutChartSegment): number {
+        const length = parseFloat(segment.dashArray.split(' ')[0]) || 0;
+        // The end of the segment is at dashOffset - length
+        return segment.dashOffset - length;
+    }
 }

@@ -12,12 +12,11 @@ export const guestGuard: CanActivateFn = () => {
     const store = inject(Store);
     const router = inject(Router);
 
-    // Check if auth state is resolved. If not, trigger bootstrap so we can definitively know
-    // if the user has an active session before deciding whether to show the login page
-    // or redirect them.
     const isResolved = store.selectSignal(selectIsAuthResolved)();
     if (!isResolved) {
-        store.dispatch({ type: '[Authentication] Bootstrap Auth' });
+        // If we are navigating to login, and auth is not resolved, we just assume they are a guest
+        // to prevent unnecessary 401 backend requests.
+        store.dispatch({ type: '[Authentication] Set Resolved Unauthenticated' });
     }
 
     return store.select(selectIsAuthResolved).pipe(

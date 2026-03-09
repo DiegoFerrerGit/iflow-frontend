@@ -16,6 +16,7 @@ export class IncomeCardComponent {
   private categoryColorService = inject(CategoryColorService);
 
   @Input({ required: true }) income!: IncomeSource;
+  @Input() isLoading = false;
   @Output() delete = new EventEmitter<void>();
   @Output() edit = new EventEmitter<void>();
 

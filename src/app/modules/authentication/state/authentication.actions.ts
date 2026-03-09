@@ -6,6 +6,7 @@ export const AuthActions = createActionGroup({
     events: {
         // Bootstrap
         'Bootstrap Auth': emptyProps(),
+        'Set Resolved Unauthenticated': emptyProps(),
 
         // Login
         'Login Start': props<{ idToken: string }>(),

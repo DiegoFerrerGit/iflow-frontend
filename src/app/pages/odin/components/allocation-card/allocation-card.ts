@@ -16,7 +16,9 @@ import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-curr
 export class AllocationCardComponent {
   @Input({ required: true }) box!: AllocationBox;
   @Input({ required: true }) totalPool!: number;
+  @Input() isLoading: boolean = false;
   @Output() delete = new EventEmitter<void>();
+  @Output() edit = new EventEmitter<void>();
 
   get computedAmount(): number {
     if (this.totalPool === 0) return 0;
