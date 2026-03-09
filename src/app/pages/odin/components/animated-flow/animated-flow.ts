@@ -12,9 +12,9 @@ export class AnimatedFlowComponent {
   @Input() color: 'green' | 'orange' = 'green';
   @Input() direction: 'in' | 'out' = 'in';
 
-  // Fixed coordinate space (0-400 wide, 0-100 tall) — same as test_colors.html
-  readonly VB_WIDTH = 400;
-  readonly CENTER_X = 200;
+  // Viewbox mapped to 1000x120 space
+  readonly VB_WIDTH = 1000;
+  readonly CENTER_X = 500;
 
   getPointsArray(): number[] {
     return Array.from({ length: this.points }, (_, i) => i);
@@ -24,8 +24,11 @@ export class AnimatedFlowComponent {
     return this.color === 'green' ? '#10b981' : '#fb923c';
   }
 
-  // X position of each card's connection dot (in 0-400 space)
+  // X position of each card's connection dot (in 1000 space)
   getCircleCx(index: number): number {
+    if (this.points <= 0) return this.CENTER_X;
+
+    // We divide the 1000 width into N sections and place the dot in the middle of each
     const sectionWidth = this.VB_WIDTH / this.points;
     return (sectionWidth * index) + (sectionWidth / 2);
   }
