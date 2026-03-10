@@ -15,8 +15,8 @@ import { AllocationFormModalComponent } from './components/allocation-form-modal
 import { DonutChartComponent, DonutChartSegment } from '../../shared/components/donut-chart/donut-chart.component';
 import { DynamicCurrencyPipe } from '../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../shared/pipes/dynamic-currency-symbol.pipe';
-import { CurrencyState } from '../../core/currency-manager/currency-state';
-import { LoaderService } from '../../core/loader-manager/loader.service';
+import { CurrencyManager } from '../../core/currency-manager/currency-manager.manager';
+import { LoaderManager } from '../../core/loader-manager/loader.manager';
 
 @Component({
   selector: 'app-odin',
@@ -27,8 +27,8 @@ import { LoaderService } from '../../core/loader-manager/loader.service';
 })
 export class OdinPageComponent implements OnInit {
   private readonly odinApiService = inject(OdinApiService);
-  public readonly currencyState = inject(CurrencyState);
-  private readonly loaderService = inject(LoaderService);
+  public readonly currencyState = inject(CurrencyManager);
+  private readonly loaderService = inject(LoaderManager);
   private readonly cdr = inject(ChangeDetectorRef);
 
   // #region STATE

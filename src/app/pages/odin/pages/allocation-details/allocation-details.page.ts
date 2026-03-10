@@ -10,8 +10,8 @@ import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-curr
 import { DonutChartComponent, DonutChartSegment } from '../../../../shared/components/donut-chart/donut-chart.component';
 import { BackButtonComponent } from '../../../../shared/components/back-button/back-button';
 import { ThemeColor, COLOR_MAP } from '../../../../models/income.model';
-import { CurrencyState } from '../../../../core/currency-manager/currency-state';
-import { LoaderService } from '../../../../core/loader-manager/loader.service';
+import { CurrencyManager } from '../../../../core/currency-manager/currency-manager.manager';
+import { LoaderManager } from '../../../../core/loader-manager/loader.manager';
 import { SubCategoryFormModal } from '../../components/sub-category-form-modal/sub-category-form-modal';
 import { DeleteConfirmationModal } from '../../components/delete-confirmation-modal/delete-confirmation-modal';
 
@@ -57,8 +57,8 @@ export class AllocationDetailsPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private odinApi = inject(OdinApiService);
-  public currencyState = inject(CurrencyState);
-  private loaderService = inject(LoaderService);
+  public currencyState = inject(CurrencyManager);
+  private loaderService = inject(LoaderManager);
 
   trueBoxCapacity = signal<number | null>(null);
   boxPercentage = signal<number | null>(null);

@@ -1,13 +1,20 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { StoreModule } from '@ngrx/store';
+import { CurrencyManager } from '../currency-manager.manager';
 
-import { CurrencyState } from './currency-state';
-
-describe('CurrencyState', () => {
-  let service: CurrencyState;
+describe('CurrencyManager', () => {
+  let service: CurrencyManager;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(CurrencyState);
+    TestBed.configureTestingModule({
+      imports: [
+        HttpClientTestingModule,
+        StoreModule.forRoot({})
+      ],
+      providers: [CurrencyManager]
+    });
+    service = TestBed.inject(CurrencyManager);
   });
 
   it('should be created', () => {
