@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { IOdinResponse, IIncomeSourceApi, IAllocationBoxApi, IAllocationBoxDetailResponse, IAllocationSubCategoryDto, ISubCategoryDetailResponse, IAllocationItemDto } from './models/interfaces/api.response.interfaces';
 import { IIncomeSourceRequesApi, IAllocationBoxRequestApi, IAllocationSubCategoryRequestApi, IAllocationItemRequestApi } from './models/interfaces/api.request.interfaces';
 import { environment } from '../../../environments/environment';
@@ -20,6 +20,10 @@ export class OdinApiService {
 
     public getOdin(): Observable<IOdinResponse> {
         return this.http.get<IOdinResponse>(this.API_URL).pipe(
+            map(response => ({
+                ...response,
+                income_sources: response.income_sources.slice(0, 1)
+            })),
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);

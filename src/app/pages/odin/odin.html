@@ -88,7 +88,8 @@
         <!-- Outbound Flow from Pool to Distribution Boxes -->
         <div class="w-full max-w-[80%] mx-auto relative z-10">
             <!-- Current mockup assumes 4 distribution boxes max per row -->
-            <app-animated-flow class="w-full" [points]="4" direction="out" color="orange"></app-animated-flow>
+            <app-animated-flow class="w-full" [points]="allocations.length" [slots]="4" direction="out"
+                color="orange"></app-animated-flow>
         </div>
 
         <!-- Allocation Boxes Section -->
