@@ -31,10 +31,12 @@
                 <div class="flex flex-col items-end text-cyan-400 animate-fade-in-right pb-1">
                     <span class="text-[9px] font-black tracking-widest uppercase mb-0.5 opacity-80">Dinero disponible
                         sin asignar</span>
-                    <span class="text-2xl font-black tracking-tighter leading-none">
-                        {{ '' | dynamicCurrencySymbol }}{{ getMissingAmount() |
-                        dynamicCurrency:currencyState.currentCurrency() }}
-                    </span>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-sm font-bold leading-none opacity-80">{{ '' | dynamicCurrencySymbol }}</span>
+                        <span class="text-2xl font-black tracking-tighter leading-none">
+                            {{ getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }}
+                        </span>
+                    </div>
                 </div>
                 }
 
@@ -70,7 +72,7 @@
             <div class="donut-chart-wrapper relative w-[220px] h-[220px] shrink-0 z-10">
                 @if (donutSegments().length > 0) {
                 @if (parentBoxType() === 'percentage') {
-                <app-donut-chart [segments]="donutChartSegments()" title="ASIGNADO"
+                <app-donut-chart [segments]="donutChartSegments()" title=""
                     [subtitle]="(getAssignedPercentage() | number:'1.0-1') + '%'"></app-donut-chart>
                 } @else {
                 <app-donut-chart [segments]="donutChartSegments()" title="SUMA TOTAL"
@@ -84,15 +86,18 @@
             <div class="flex flex-col items-center justify-center gap-2 z-10 w-full border-t border-white/10 pt-8 mt-2">
                 <span class="text-[10px] text-slate-400 font-black tracking-widest uppercase text-center">DINERO
                     ASIGNADO</span>
-                <span class="text-white text-3xl font-black tracking-tighter leading-none text-center">{{ '' |
-                    dynamicCurrencySymbol }}{{ assignedTotal() | dynamicCurrency:currencyState.currentCurrency()
-                    }}</span>
+                <div class="flex items-baseline justify-center gap-1">
+                    <span class="text-slate-500 text-lg font-bold leading-none">{{ '' | dynamicCurrencySymbol }}</span>
+                    <span class="text-white text-3xl font-black tracking-tighter leading-none text-center">{{
+                        assignedTotal() | dynamicCurrency:currencyState.currentCurrency() }}</span>
+                </div>
 
                 @if (getMissingAmount() !== null) {
                 <div class="px-4 py-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mt-2">
-                    <span class="text-xs font-bold tracking-widest uppercase text-center whitespace-nowrap">{{ '' |
-                        dynamicCurrencySymbol }}{{
-                        getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }} SIN ASIGNAR</span>
+                    <span class="text-xs font-bold tracking-widest uppercase text-center whitespace-nowrap">
+                        <span class="text-[10px] text-slate-400">{{ '' | dynamicCurrencySymbol }}</span>
+                        {{ getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }} SIN ASIGNAR
+                    </span>
                 </div>
                 }
             </div>
@@ -175,10 +180,10 @@
                     </div>
 
                     <div>
-                        <div class="flex items-start gap-1">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-slate-500 text-lg font-bold">{{ '' | dynamicCurrencySymbol }}</span>
                             <span class="text-white text-3xl font-black tracking-tighter">
-                                {{ '' | dynamicCurrencySymbol }}{{ segment.amount |
-                                dynamicCurrency:currencyState.currentCurrency() }}
+                                {{ segment.amount | dynamicCurrency:currencyState.currentCurrency() }}
                             </span>
                         </div>
                         <p class="text-slate-500 text-[10px] sm:text-xs font-medium mt-1">{{ segment.percentage |

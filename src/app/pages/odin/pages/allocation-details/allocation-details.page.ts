@@ -154,7 +154,8 @@ export class AllocationDetailsPage implements OnInit {
     if (unassigned > 0) {
       const percentage = (unassigned / parsedAvailableAmount) * 100;
       const strokeLength = (percentage / 100) * circumference;
-      const visualStrokeLength = totalSegmentsCount > 1 ? Math.max(1, strokeLength) : strokeLength;
+      // Minimum visual length to prevent round linecap overlap at small percentages
+      const visualStrokeLength = totalSegmentsCount > 1 ? Math.max(18, strokeLength) : strokeLength;
       const initialOffset = currentOffset;
 
       segments.push({
@@ -384,10 +385,12 @@ export class AllocationDetailsPage implements OnInit {
         next: () => {
           this.allocationData.update(data => {
             if (!data) return null;
-            return {
+            const updated = {
               ...data,
               sub_categories: data.sub_categories.map(s => s.id === subCategory.id ? { ...s, ...subCategory } : s)
             };
+            updated.available_amount_to_assign = this.recalcAvailable(updated.sub_categories);
+            return updated;
           });
           this.isSubCategoryModalSaving.set(false);
           this.closeSubCategoryModal();
@@ -399,10 +402,12 @@ export class AllocationDetailsPage implements OnInit {
         next: (newSub) => {
           this.allocationData.update(data => {
             if (!data) return null;
-            return {
+            const updated = {
               ...data,
               sub_categories: [...data.sub_categories, newSub]
             };
+            updated.available_amount_to_assign = this.recalcAvailable(updated.sub_categories);
+            return updated;
           });
           this.isSubCategoryModalSaving.set(false);
           this.closeSubCategoryModal();
@@ -439,16 +444,36 @@ export class AllocationDetailsPage implements OnInit {
       next: () => {
         this.allocationData.update(data => {
           if (!data) return null;
-          return {
+          const updated = {
             ...data,
             sub_categories: data.sub_categories.filter(s => s.id !== sub.id)
           };
+          updated.available_amount_to_assign = this.recalcAvailable(updated.sub_categories);
+          return updated;
         });
         this.isDeletingSubCategory.set(false);
         this.cancelDeleteSubCategory();
       },
       error: () => this.isDeletingSubCategory.set(false)
     });
+  }
+
+  /**
+   * Recalculates available_amount_to_assign locally using trueBoxCapacity.
+   * available = capacity - sum(all subcategories in USD)
+   */
+  private recalcAvailable(subCategories: IAllocationSubCategoryDto[]): number {
+    const capacity = this.trueBoxCapacity();
+    if (capacity === null) return 0;
+
+    const totalAssignedInUsd = subCategories.reduce((sum, sub) => {
+      if (sub.display_amount.currency === 'ARS') {
+        return sum + sub.display_amount.amount / this.currencyState.exchangeRate();
+      }
+      return sum + sub.display_amount.amount;
+    }, 0);
+
+    return Math.max(0, capacity - totalAssignedInUsd);
   }
 
   navigateToSubCategory(subCategoryId: string) {

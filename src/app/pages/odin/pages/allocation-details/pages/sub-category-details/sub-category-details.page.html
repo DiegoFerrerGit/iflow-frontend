@@ -25,10 +25,14 @@
             @if (parentBoxType() === 'percentage' && (pageData()?.available_amount_to_assign ?? 0) > 0) {
             <div class="flex flex-col items-end gap-1 border-r border-white/10 pr-8">
                 <span class="text-cyan-400/80 text-[10px] font-bold uppercase tracking-[0.2em]">Sin Asignar:</span>
-                <span class="text-cyan-400 font-bold text-xl tabular-nums tracking-tighter">{{ '' |
-                    dynamicCurrencySymbol }}{{ pageData()!.available_amount_to_assign |
-                    dynamicCurrency:currencyState.currentCurrency() }} <span class="text-sm ml-1">{{
-                        currencyState.currentCurrency() }}</span></span>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-cyan-400/70 text-sm font-bold">{{ '' | dynamicCurrencySymbol }}</span>
+                    <span class="text-cyan-400 font-bold text-2xl tabular-nums tracking-tighter">{{
+                        pageData()!.available_amount_to_assign |
+                        dynamicCurrency:currencyState.currentCurrency() }}</span>
+                    <span class="text-cyan-400/60 text-sm ml-1">{{
+                        currencyState.currentCurrency() }}</span>
+                </div>
             </div>
             }
 
@@ -144,8 +148,10 @@
                     <div>
                         <h4 class="text-white font-black text-xl leading-tight">{{ item.name }}</h4>
                         <div class="flex items-center gap-2 mt-1">
+                            @if (item.description) {
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{
                                 item.description || 'Detalle' }}</span>
+                            }
                             <span class="w-1 h-1 rounded-full bg-slate-700"></span>
                             <span class="text-[10px] font-black uppercase tracking-widest"
                                 [ngClass]="item.textColorClass">{{
@@ -165,9 +171,10 @@
                         }
                         }
                         <div class="text-right">
-                            <div class="flex items-baseline gap-2 justify-end">
+                            <div class="flex items-baseline gap-1.5 justify-end">
+                                <span class="text-slate-500 text-lg font-bold">{{ '' | dynamicCurrencySymbol }}</span>
                                 <span class="text-white text-3xl font-black tabular-nums">
-                                    {{ '' | dynamicCurrencySymbol }}{{ item.calculatedAmount |
+                                    {{ item.calculatedAmount |
                                     dynamicCurrency:currencyState.currentCurrency() }}
                                 </span>
                                 <span class="text-sm font-bold text-slate-500">{{ currencyState.currentCurrency()

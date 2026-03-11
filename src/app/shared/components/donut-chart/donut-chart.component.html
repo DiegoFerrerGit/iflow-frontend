@@ -11,8 +11,8 @@
             class="cursor-pointer" (mouseenter)="hoveredSegment = segment" (mouseleave)="hoveredSegment = null" />
         }
 
-        <!-- Dynamic Segments (REVERSE Order: S1 on top of S2) -->
-        <!-- Each segment has stroke-linecap="round" at its end, covering the NEXT segment's start -->
+        <!-- Dynamic Segments (REVERSE Order for anti-clockwise visual direction) -->
+        <!-- Each segment's rounded end overlaps the previous segment's start -->
         @for (segment of segments.slice().reverse(); track segment.id) {
         <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
             [attr.stroke-width]="hoveredSegment?.id === segment.id ? 20 : 16" stroke-linecap="round"
@@ -21,12 +21,11 @@
             [class.brightness-125]="hoveredSegment?.id === segment.id" />
         }
 
-        <!-- The "Final Loop Closer" Overlay (S3 on top of S1) -->
-        <!-- We use a larger piece of the last segment (Celeste) to ensure it blends perfectly -->
-        @if (lastSegment) {
+        <!-- Loop Closer: end tip of the last segment overlaps the first segment's start -->
+        @if (lastSegment && lastSegmentTip) {
         <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="lastSegment.color"
             [attr.stroke-width]="hoveredSegment?.id === lastSegment.id ? 20 : 16" stroke-linecap="round"
-            [attr.stroke-dasharray]="lastSegment.dashArray" [attr.stroke-dashoffset]="lastSegment.dashOffset"
+            [attr.stroke-dasharray]="lastSegmentTip.dashArray" [attr.stroke-dashoffset]="lastSegmentTip.dashOffset"
             class="transition-all duration-200 ease-out pointer-events-none"
             [class.brightness-125]="hoveredSegment?.id === lastSegment.id" />
         }

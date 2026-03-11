@@ -103,4 +103,39 @@ export class DonutChartComponent {
         // The end of the segment is at dashOffset - length
         return segment.dashOffset - length;
     }
+
+    /**
+     * Returns a tiny arc (just the end tip) of the last segment.
+     * Used to overlay ONLY the final rounded cap on top of the first segment's start,
+     * without covering any other junctions.
+     */
+    get lastSegmentTip(): { dashArray: string; dashOffset: number } | null {
+        const seg = this.lastSegment;
+        if (!seg) return null;
+        const circumference = 2 * Math.PI * 50; // r=50
+        const segLength = parseFloat(seg.dashArray.split(' ')[0]) || 0;
+
+        const tipLength = 1; // Minimal: keeps backward cap extension far from the previous segment's junction
+        // Position the tip at the END of the last segment
+        return {
+            dashArray: `${tipLength} ${circumference}`,
+            dashOffset: seg.dashOffset - segLength + tipLength
+        };
+    }
+
+    /**
+     * A near-zero-length dash at the very END of the last segment.
+     * With stroke-linecap="round", this creates just a round dot (the "finger" finish)
+     * without a significant backward-extending cap.
+     */
+    get lastSegmentEndDot(): { dashArray: string; dashOffset: number } {
+        const seg = this.lastSegment!;
+        const circumference = 2 * Math.PI * 50;
+        const segLength = parseFloat(seg.dashArray.split(' ')[0]) || 0;
+        const dotLength = 0.1; // Near-zero: round caps create a circle at this point
+        return {
+            dashArray: `${dotLength} ${circumference}`,
+            dashOffset: seg.dashOffset - segLength + dotLength
+        };
+    }
 }
