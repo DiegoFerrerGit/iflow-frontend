@@ -50,8 +50,12 @@ export class OdinOnboardingService {
         } else if (!hasIncomes) {
             // Fresh start
             this.store.activate();
+            // Default step is already CREATE_FIRST_INCOME_SOURCE
+        } else if (hasIncomes && hasAllocations) {
+            // Backend flag is true but user already has both — likely an anomaly or incomplete save
+            // Automatically complete it so it doesn't bother them again
+            this.completeOnboarding();
         }
-        // If hasIncomes && hasAllocations, onboarding should have been completed by backend — do nothing
     }
 
     /**
