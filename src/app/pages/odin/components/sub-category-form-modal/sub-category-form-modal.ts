@@ -67,7 +67,7 @@ export class SubCategoryFormModal implements OnInit {
 
         this.form = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(2)]],
-            icon: ['category', Validators.required],
+            icon: ['category'],
             type: ['fixed_amount', Validators.required],
             currency: [initialCurrency],
             amount: [initialAmountInOriginalCurrency, [Validators.min(0)]],
@@ -156,7 +156,7 @@ export class SubCategoryFormModal implements OnInit {
 
         const amountControl = this.form.get('amount');
         if (type === 'fixed_amount') {
-            amountControl?.setValidators([Validators.required, Validators.min(0), Validators.max(this.maxAllowedAmount)]);
+            amountControl?.setValidators([Validators.required, Validators.min(0.01), Validators.max(this.maxAllowedAmount)]);
         } else {
             amountControl?.clearValidators();
             amountControl?.setValidators([Validators.min(0)]);
@@ -180,12 +180,19 @@ export class SubCategoryFormModal implements OnInit {
     public onSubmit(): void {
         if (this.form.valid) {
             const val = this.form.getRawValue();
+            let finalIcon = val.icon;
+            if (!finalIcon) {
+                const usedIcons = new Set(this.usedColors.map(c => c)); // Simplification, technically we just want a random icon from the list
+                const randomIndex = Math.floor(Math.random() * this.iconsList.length);
+                finalIcon = this.iconsList[randomIndex];
+            }
+
             const result: IAllocationSubCategoryDto = {
                 id: this.initialSubCategory?.id || crypto.randomUUID(),
                 allocation_box_id: this.allocationBoxId,
                 name: val.name,
                 type: val.type,
-                icon: val.icon,
+                icon: finalIcon,
                 color: val.color,
                 display_amount: {
                     amount: val.type === 'fixed_amount' ? Number(val.amount) : 0,

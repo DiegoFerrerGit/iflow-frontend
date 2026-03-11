@@ -68,7 +68,7 @@ export class ItemFormModalComponent implements OnInit {
         this.form = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(2)]],
             description: [''],
-            icon: ['category', Validators.required],
+            icon: ['category'],
             currency: [initialCurrency],
             amount: [initialAmountInOriginalCurrency, [Validators.required, Validators.min(0)]],
             color: ['primary', Validators.required],
@@ -151,12 +151,19 @@ export class ItemFormModalComponent implements OnInit {
     public onSubmit(): void {
         if (this.form.valid) {
             const val = this.form.getRawValue();
+            let finalIcon = val.icon;
+            if (!finalIcon) {
+                const usedIcons = new Set(this.usedColors.map(c => c)); // Approximation for random
+                const randomIndex = Math.floor(Math.random() * this.iconsList.length);
+                finalIcon = this.iconsList[randomIndex];
+            }
+
             const result: IAllocationItemDto = {
                 id: this.initialItem?.id || crypto.randomUUID(),
                 sub_category_id: this.subCategoryId,
                 name: val.name,
                 description: val.description ? val.description : undefined,
-                icon: val.icon,
+                icon: finalIcon,
                 color: val.color,
                 amount_with_currency: {
                     amount: Number(val.amount),

@@ -214,7 +214,9 @@ export class OdinPageComponent implements OnInit {
           if (indexA !== indexB) {
             return indexA - indexB;
           }
-          if (b.amount !== a.amount) return b.amount - a.amount;
+          const convertedA = this.currencyState.convert(a.amount, a.currency || 'USD');
+          const convertedB = this.currencyState.convert(b.amount, b.currency || 'USD');
+          if (convertedB !== convertedA) return convertedB - convertedA;
           return a.effortPercentage - b.effortPercentage;
         });
         return;
@@ -224,9 +226,12 @@ export class OdinPageComponent implements OnInit {
     }
 
     this.incomes.sort((a, b) => {
-      // 1. Highest monthly amount first
-      if (b.amount !== a.amount) {
-        return b.amount - a.amount;
+      // 1. Highest monthly amount first (converted to USD for fair comparison)
+      const convertedA = this.currencyState.convert(a.amount, a.currency || 'USD');
+      const convertedB = this.currencyState.convert(b.amount, b.currency || 'USD');
+
+      if (convertedB !== convertedA) {
+        return convertedB - convertedA;
       }
       // 2. Lowest effort percentage first
       return a.effortPercentage - b.effortPercentage;
