@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
-import { CurrencyState } from '../../core/currency-manager/currency-state';
+import { CurrencyManager } from '../../core/currency-manager/currency-manager.manager';
 
 @Pipe({
   name: 'dynamicCurrency',
@@ -9,7 +9,7 @@ import { CurrencyState } from '../../core/currency-manager/currency-state';
   pure: false
 })
 export class DynamicCurrencyPipe implements PipeTransform {
-  private currencyState = inject(CurrencyState);
+  private currencyState = inject(CurrencyManager);
 
   transform(value: number | string | null | undefined, sourceCurrency: 'USD' | 'ARS' = 'USD', forceFormat?: 'USD' | 'ARS'): string | null {
     if (value == null) return null;

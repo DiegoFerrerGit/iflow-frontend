@@ -7,8 +7,8 @@ import { IAllocationItemRequestApi } from '../../../../../../modules/odin/models
 import { DynamicCurrencyPipe } from '../../../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { BackButtonComponent } from '../../../../../../shared/components/back-button/back-button';
-import { CurrencyState } from '../../../../../../core/currency-manager/currency-state';
-import { LoaderService } from '../../../../../../core/loader-manager/loader.service';
+import { CurrencyManager } from '../../../../../../core/currency-manager/currency-manager.manager';
+import { LoaderManager } from '../../../../../../core/loader-manager/loader.manager';
 import { ThemeColor } from '../../../../../../models/income.model';
 import { DeleteConfirmationModal } from '../../../../components/delete-confirmation-modal/delete-confirmation-modal';
 import { ItemFormModalComponent } from '../../../../components/item-form-modal/item-form-modal.component';
@@ -75,8 +75,8 @@ export class SubCategoryDetailsPage implements OnInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private odinApi = inject(OdinApiService);
-    public currencyState = inject(CurrencyState);
-    private loaderService = inject(LoaderService);
+    public currencyState = inject(CurrencyManager);
+    private loaderService = inject(LoaderManager);
 
     boxId = signal<string | null>(null);
     subCategoryId = signal<string | null>(null);

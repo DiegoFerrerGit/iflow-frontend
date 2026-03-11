@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CurrencyState, CurrencyType } from '../../core/currency-manager/currency-state';
+import { CurrencyManager, CurrencyType } from '../../core/currency-manager/currency-manager.manager';
 
 @Component({
   selector: 'app-currency-switcher',
@@ -10,8 +10,9 @@ import { CurrencyState, CurrencyType } from '../../core/currency-manager/currenc
   styleUrl: './currency-switcher.scss',
 })
 export class CurrencySwitcherComponent {
-  currencyState = inject(CurrencyState);
-  elementRef = inject(ElementRef);
+  public currencyState = inject(CurrencyManager);
+  public currencyManager = inject(CurrencyManager);
+  private elementRef = inject(ElementRef);
 
   isOpen = signal<boolean>(false);
 
@@ -20,6 +21,17 @@ export class CurrencySwitcherComponent {
     if (this.isOpen() && !this.elementRef.nativeElement.contains(event.target)) {
       this.isOpen.set(false);
     }
+  }
+
+  @HostListener('document:visibilitychange')
+  onVisibilityChange() {
+    if (document.visibilityState === 'visible') {
+      this.currencyManager.tryRefreshIfNeeded();
+    }
+  }
+
+  constructor() {
+    this.currencyManager.tryRefreshIfNeeded();
   }
 
   togglePanel() {

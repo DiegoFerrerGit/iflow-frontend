@@ -31,8 +31,6 @@ export class ErrorsManager {
 
         } catch (managerError) {
             // Failsafe in case the ErrorManager itself crashes
-            console.error('Fatal error within ErrorsManager:', managerError);
-            console.error('Original error that was being processed:', error);
         }
     }
 }

@@ -5,7 +5,7 @@ import { isLoading, stopLoading } from '../loader-manager/state/loader.actions';
 @Injectable({
     providedIn: 'root'
 })
-export class LoaderService {
+export class LoaderManager {
     private readonly store: Store = inject(Store);
 
     public show(): void {

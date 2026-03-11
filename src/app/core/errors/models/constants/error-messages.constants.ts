@@ -23,8 +23,27 @@ export const FALLBACK_MESSAGES: Record<string, string> = {
  * These are prioritized over raw backend technical messages.
  */
 export const PRODUCT_MESSAGES: Record<string, string> = {
+    // Auth & Access
     [ERROR_CODES.INVALID_RESOURCE_ID]: 'El identificador solicitado no es válido.',
-    [ERROR_CODES.VALIDATION_ERROR]: 'Los datos ingresados no son válidos. Por favor revisa la información e intenta nuevamente.'
+    [ERROR_CODES.VALIDATION_ERROR]: 'Los datos ingresados no son válidos. Por favor revisa la información e intenta nuevamente.',
+    [ERROR_CODES.EMAIL_NOT_ALLOWED]: 'Usuario no registrado.',
+    [ERROR_CODES.INVALID_SIGNUP_SECRET]: 'El código de invitación no es válido o ya ha sido utilizado.',
+    [ERROR_CODES.USER_NOT_FOUND]: 'No encontramos ninguna cuenta asociada a estos datos.',
+    [ERROR_CODES.INVALID_GOOGLE_TOKEN]: 'Hubo un problema al validar tu cuenta de Google. Intenta ingresar de nuevo.',
+
+    // Common & System
+    [ERROR_CODES.FORBIDDEN]: 'No tienes permisos para realizar esta acción.',
+    [ERROR_CODES.RESOURCE_NOT_FOUND]: 'Lo sentimos, no pudimos encontrar lo que buscabas.',
+    [ERROR_CODES.BUSINESS_RULE_VIOLATION]: 'Esta acción no puede realizarse según las reglas del sistema.',
+    [ERROR_CODES.EXTERNAL_SERVICE_ERROR]: 'Estamos teniendo problemas con un servicio externo. Intenta nuevamente en unos momentos.',
+    [ERROR_CODES.ALLOWLIST_DISABLED]: 'El acceso restringido está desactivado actualmente.',
+
+    // Odin Specific
+    [ERROR_CODES.INCOME_SOURCE_NOT_FOUND]: 'La fuente de ingreso solicitada no existe.',
+    [ERROR_CODES.ALLOCATION_BOX_NOT_FOUND]: 'La caja de asignación no fue encontrada.',
+    [ERROR_CODES.SUBCATEGORY_NOT_FOUND]: 'La subcategoría seleccionada no está disponible.',
+    [ERROR_CODES.ITEM_NOT_FOUND]: 'El ítem solicitado no existe.',
+    [ERROR_CODES.PERCENTAGE_EXCEEDS_LIMIT]: 'El porcentaje total asignado no puede superar el 100%.'
 };
 
 /**

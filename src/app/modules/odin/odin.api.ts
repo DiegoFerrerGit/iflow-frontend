@@ -30,6 +30,18 @@ export class OdinApiService {
             })
         );
     }
+    // #endregion
+
+    // #region ONBOARDING
+    public completeOnboarding(): Observable<void> {
+        return this.http.patch<void>(`${this.API_URL}/onboarding-completed`, {}, HIDE_SPINNER_OPTIONS).pipe(
+            catchError((error: HttpErrorResponse) => {
+                this.errorsManager.handle(error);
+                return throwError(() => error);
+            })
+        );
+    }
+    // #endregion
 
     // #region INCOME SECTION
     public createIncomeSource(data: IIncomeSourceRequesApi): Observable<IIncomeSourceApi> {
@@ -137,6 +149,8 @@ export class OdinApiService {
             })
         );
     }
+
+    // #endregion
 
     // #region ITEMS of SUB CATEGORIES
 

@@ -6,7 +6,7 @@ import { ThemeColor, THEME_COLORS } from '../../../../models/income.model';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
-import { CurrencyState } from '../../../../core/currency-manager/currency-state';
+import { CurrencyManager } from '../../../../core/currency-manager/currency-manager.manager';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -18,7 +18,7 @@ import { Subscription } from 'rxjs';
 })
 export class SubCategoryFormModal implements OnInit {
     private readonly fb = inject(FormBuilder);
-    private readonly currencyState = inject(CurrencyState);
+    private readonly currencyState = inject(CurrencyManager);
     private readonly cdr = inject(ChangeDetectorRef);
     private readonly subs = new Subscription();
 

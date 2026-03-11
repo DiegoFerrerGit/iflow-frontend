@@ -1,8 +1,7 @@
 <!-- Modal Backdrop -->
-<div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+<div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end">
     <!-- Modal Container -->
-    <div
-        class="bg-sidebar-bg border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden">
+    <div class="relative w-full max-w-lg h-full bg-[#1b202c] shadow-2xl flex flex-col transform transition-transform">
 
         <!-- Header -->
         <div class="flex items-start justify-between p-6 border-b border-white/5 bg-white/[0.02]">
@@ -53,10 +52,11 @@
                         <label
                             class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Monto</label>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{{
+                            <span
+                                class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold max-w-[40px] truncate">{{
                                 '' | dynamicCurrencySymbol:incomeForm.get('currency')?.value }}</span>
                             <input formControlName="amount"
-                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-10 pr-4 py-3 placeholder:text-slate-600 transition-all"
+                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-14 pr-4 py-3 placeholder:text-slate-600 transition-all [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                                 placeholder="0.00" type="number" />
                         </div>
                     </div>
@@ -199,7 +199,7 @@
                         </div>
                     </div>
 
-                    <div class="space-y-2 relative">
+                    <div class="col-span-2 space-y-2 relative">
                         <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">Icono o
                             URL Imagen</label>
                         <div class="relative">
@@ -227,7 +227,7 @@
                         <!-- Popover Icon Picker -->
                         @if (showIconPicker) {
                         <div
-                            class="absolute z-50 top-full mt-2 right-0 w-[280px] bg-[#2a2e3d] border border-white/10 rounded-xl shadow-2xl p-3 grid grid-cols-6 gap-2 max-h-[200px] overflow-y-auto custom-scrollbar">
+                            class="absolute z-50 top-full mt-2 left-0 right-0 bg-[#2a2e3d] border border-white/10 rounded-xl shadow-2xl p-3 grid grid-cols-6 gap-2 max-h-[200px] overflow-y-auto custom-scrollbar">
                             @for (icon of curatedIcons; track icon) {
                             <button type="button" (click)="selectIcon(icon)"
                                 class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/10 text-slate-400 hover:text-white transition-colors"

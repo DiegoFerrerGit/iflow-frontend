@@ -1,7 +1,7 @@
 import { HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { finalize, tap, filter, delay } from 'rxjs';
-import { LoaderService } from '../loader-manager/loader.service';
+import { LoaderManager } from '../loader-manager/loader.manager';
 import { HIDE_SPINNER, NO_INTERCEPTORS } from './models/constants/interceptors.constants';
 
 let pendingRequests = 0;
@@ -13,7 +13,7 @@ export const loaderInterceptor: HttpInterceptorFn = (req, next) => {
     }
 
 
-    const loaderService = inject(LoaderService);
+    const loaderService = inject(LoaderManager);
     pendingRequests++;
 
     // We call show synchronously to ensure it fires

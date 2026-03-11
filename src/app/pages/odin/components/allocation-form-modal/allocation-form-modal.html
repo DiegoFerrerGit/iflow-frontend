@@ -40,7 +40,8 @@
                             <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest pl-1">Nombre de
                                 la Caja <span class="text-red-400">*</span></label>
                             <input type="text" [(ngModel)]="formData.name" name="name" required
-                                class="w-full bg-[#151821] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium"
+                                [disabled]="onboardingMode"
+                                class="w-full bg-[#151821] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                                 placeholder="Ej: Calidad de Vida">
                             @if (errors['name']) { <p class="text-red-400 text-xs pl-1 mt-1">{{ errors['name'] }}</p> }
                         </div>
@@ -50,7 +51,8 @@
                                 class="text-xs font-semibold text-slate-300 uppercase tracking-widest pl-1">Descripción
                                 <span class="text-red-400">*</span></label>
                             <input type="text" [(ngModel)]="formData.description" name="description" required
-                                class="w-full bg-[#151821] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium"
+                                [disabled]="onboardingMode"
+                                class="w-full bg-[#151821] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                                 placeholder="Ej: Gastos Base">
                             @if (errors['description']) { <p class="text-red-400 text-xs pl-1 mt-1">{{
                                 errors['description'] }}</p> }
@@ -71,7 +73,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @if (!initialAllocation) {
+                        @if (!initialAllocation && !onboardingMode) {
                         <div class="space-y-1.5 flex flex-col">
                             <label
                                 class="text-xs font-semibold text-slate-300 uppercase tracking-widest pl-1">Asignación
@@ -123,7 +125,7 @@
 
                     <!-- Temporal Target -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                        @if (!initialAllocation) {
+                        @if (!initialAllocation && !onboardingMode) {
                         <div class="space-y-1.5 flex flex-col">
                             <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest pl-1">Tipo de
                                 Caja
@@ -188,13 +190,15 @@
                         class="text-white/80 font-semibold text-sm border-b border-white/5 pb-2 uppercase tracking-wider">
                         Apariencia Estética</h3>
 
+                    @if (!onboardingMode) {
                     <div class="space-y-3">
                         <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest pl-1">Seleccionar
                             Color</label>
                         <div class="flex flex-wrap gap-3">
                             @for (color of colorsList; track color) {
-                            <button type="button" (click)="!isColorInUse(color) ? selectColor(color) : null"
-                                [disabled]="isColorInUse(color)"
+                            <button type="button"
+                                (click)="!isColorInUse(color) && !onboardingMode ? selectColor(color) : null"
+                                [disabled]="isColorInUse(color) || onboardingMode"
                                 class="w-8 h-8 rounded-full border-2 transition-transform" [ngClass]="{
                           'bg-primary border-primary': color === 'primary',
                           'bg-cyan-400 border-cyan-400': color === 'cyan',
@@ -218,6 +222,7 @@
                             }
                         </div>
                     </div>
+                    }
 
                     <div class="space-y-3 pt-2">
                         <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest pl-1">Seleccionar

@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { isIFlowErrorResponse } from '../guards/is-iflow-error.guard';
+import { isIFlowErrorResponse } from '../validators/iflow-error.validator';
 import { NormalizedError } from '../models/interfaces/normalized-error.interface';
 import { ErrorContextType } from '../models/types/error-context.type';
 import { FALLBACK_MESSAGES } from '../models/constants/error-messages.constants';

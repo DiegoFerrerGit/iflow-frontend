@@ -19,6 +19,7 @@ export class IncomeFormModal implements OnInit {
   @Input() initialIncome: IncomeSource | null = null;
   @Input() existingIncomes: IncomeSource[] = [];
   @Input() isLoading = false;
+  @Input() onboardingMode = false;
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<IncomeSource>();
 
@@ -86,6 +87,7 @@ export class IncomeFormModal implements OnInit {
   }
 
   get availableCategoryColors(): ThemeColor[] {
+    if (this.onboardingMode) return [...THEME_COLORS];
     const currentCategory = this.incomeForm.get('categoryLabel')?.value;
     const usedColors = this.categoryColorService.getUsedColors();
     const currentColor = this.categoryColorService.getColor(currentCategory);
@@ -93,6 +95,7 @@ export class IncomeFormModal implements OnInit {
   }
 
   get availableCardColors(): ThemeColor[] {
+    if (this.onboardingMode) return [...THEME_COLORS];
     const currentColor = this.incomeForm.get('color')?.value;
     const usedColors = new Set(this.existingIncomes
       .filter(i => i.id !== this.initialIncome?.id)

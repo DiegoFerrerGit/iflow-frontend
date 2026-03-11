@@ -40,30 +40,22 @@
         @if (direction === 'in') {
         <!-- 
             GREEN INBOUND FLOW (Cards -> Pool)
-            Matches Stitch EXACTLY: 3 top dots, green sweeping parabolic curve down to a center glowing dot, dropping to a single arrow.
+            Dynamic: N top dots, green sweeping curve down to a center glowing dot, dropping to a single arrow.
             -->
 
-        <!-- Center Vertical (Always drawn) -->
-        <!-- Note: we use 500.01 to fix an SVG rendering bug where glow filters disappear on perfectly vertical lines -->
-        <path d="M 500 0 L 500.01 80" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
-            filter="url(#af-glow)" stroke-linecap="round" />
+        @for (i of getPointsArray(); track i) {
+        <!-- Path from card to merge point (500, 80) -->
+        <!-- We add 0.01 to the target X to avoid a rendering bug with glow filters on perfectly vertical lines -->
+        <path [attr.d]="'M ' + getCircleCx(i) + ' 0 Q ' + ((getCircleCx(i) + 500.01) / 2) + ' 80 500.01 80'" fill="none"
+            stroke="#10b981" stroke-width="2" class="flow-in" filter="url(#af-glow)" stroke-linecap="round" />
 
-        <!-- Left Parabola -->
-        <path d="M 166 0 Q 333 80 500 80" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
-            filter="url(#af-glow)" stroke-linecap="round" />
-
-        <!-- Right Parabola -->
-        <path d="M 833 0 Q 666 80 500 80" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
-            filter="url(#af-glow)" stroke-linecap="round" />
+        <!-- Top Origin Dot -->
+        <circle [attr.cx]="getCircleCx(i)" cy="0" r="3" fill="#10b981" />
+        }
 
         <!-- Single drop from merge point to pool -->
         <path d="M 500 80 L 500.01 100" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
             filter="url(#af-glow)" stroke-linecap="round" />
-
-        <!-- Top Dots (Origins) -->
-        <circle cx="166" cy="0" r="3" fill="#10b981" /> <!-- Left -->
-        <circle cx="500" cy="0" r="3" fill="#10b981" /> <!-- Center -->
-        <circle cx="833" cy="0" r="3" fill="#10b981" /> <!-- Right -->
 
         <!-- Merge Glowing Center Point -->
         <circle cx="500" cy="80" r="5" fill="#10b981" filter="url(#af-glow)" />
@@ -86,31 +78,16 @@
             filter="url(#af-glow)" stroke-linecap="round" />
         <circle cx="500" cy="35" r="5" fill="#fb923c" filter="url(#af-glow)" />
 
-        <!-- Branch 1 (Far Left): Horizontal from center arc left to x=200, then drop to y=100 -->
-        <!-- We use Q (Quadratic Bezier) for the corner to make it rounded like Stitch -->
-        <path d="M 470 45 C 400 65, 200 65, 200 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
-            filter="url(#af-glow)" stroke-linejoin="round" />
-
-        <!-- Branch 2 (Inner Left): Horizontal from center arc left to x=400, then drop to y=100 -->
-        <path d="M 485 40 C 450 55, 400 55, 400 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
-            filter="url(#af-glow)" stroke-linejoin="round" />
-
-        <!-- Branch 3 (Inner Right): Horizontal from center arc right to x=600, then drop to y=100 -->
-        <path d="M 515 40 C 550 55, 600 55, 600 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
-            filter="url(#af-glow)" stroke-linejoin="round" />
-
-        <!-- Branch 4 (Far Right): Horizontal from center arc right to x=800, then drop to y=100 -->
-        <path d="M 530 45 C 600 65, 800 65, 800 100" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
-            filter="url(#af-glow)" stroke-linejoin="round" />
-
-        <!-- Top Origin Dot (Pool Base) -->
-        <circle cx="500" cy="0" r="3" fill="#fb923c" />
+        @for (i of getPointsArray(); track i) {
+        <!-- Branch: Center junction (500.01, 35) spread out to targeted x coordinate -->
+        <!-- Offset added to avoid rendering bugs on vertical lines -->
+        <path [attr.d]="'M 500.01 35 C 500.01 55, ' + getCircleCx(i) + ' 55, ' + getCircleCx(i) + ' 100'" fill="none"
+            stroke="#fb923c" stroke-width="2" class="flow-out" filter="url(#af-glow)" stroke-linejoin="round" />
 
         <!-- Arrowheads pointing down -->
-        <polygon points="194,92 206,92 200,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B1 -->
-        <polygon points="394,92 406,92 400,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B2 -->
-        <polygon points="594,92 606,92 600,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B3 -->
-        <polygon points="794,92 806,92 800,108" fill="#fb923c" filter="url(#af-glow)" /> <!-- B4 -->
+        <polygon [attr.points]="(getCircleCx(i)-6) + ',92 ' + (getCircleCx(i)+6) + ',92 ' + getCircleCx(i) + ',108'"
+            fill="#fb923c" filter="url(#af-glow)" />
+        }
         }
 
     </svg>
