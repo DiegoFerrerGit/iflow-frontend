@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
+import { ResponsiveState } from '../../../../core/responsive/responsive.state';
 
 @Component({
   selector: 'app-animated-flow',
@@ -12,6 +13,8 @@ export class AnimatedFlowComponent {
   @Input() slots: number = 3; // Number of columns in the UI grid
   @Input() color: 'green' | 'orange' = 'green';
   @Input() direction: 'in' | 'out' = 'in';
+
+  public responsiveState = inject(ResponsiveState);
 
   // Viewbox mapped to 1000x120 space
   readonly VB_WIDTH = 1000;

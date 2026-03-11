@@ -43,6 +43,7 @@ export class LoginPage implements OnInit, OnDestroy {
     signInWithGoogle(): void {
         // Show loader instantly on click while Google's prompt opens
         this.isLocalLoading.set(true);
+
         // Fallback reset in case the user closes the Google window without completing
         setTimeout(() => this.isLocalLoading.set(false), 3000);
 

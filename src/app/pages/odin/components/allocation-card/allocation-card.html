@@ -21,16 +21,16 @@
         <span class="material-symbols-outlined text-[16px]">drag_indicator</span>
     </div>
 
-    <div class="absolute top-4 right-4 flex items-center gap-2 z-20">
-        <!-- Edit Button (Visible on hover) -->
+    <div class="absolute top-6 md:top-4 right-5 md:right-4 flex items-center gap-2.5 md:gap-2 z-20">
+        <!-- Edit Button (Always visible on mobile, hover on desktop) -->
         <button (click)="edit.emit(); $event.stopPropagation()"
-            class="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">edit</span>
+            class="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded-lg bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors cursor-pointer shadow-sm md:opacity-0 md:group-hover:opacity-100">
+            <span class="material-symbols-outlined text-[20px] md:text-[16px]">edit</span>
         </button>
-        <!-- Delete Button (Visible on hover) -->
+        <!-- Delete Button (Always visible on mobile, hover on desktop) -->
         <button (click)="delete.emit(); $event.stopPropagation()"
-            class="w-7 h-7 flex items-center justify-center rounded-lg bg-logout-coral/10 text-logout-coral hover:bg-logout-coral/20 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">delete</span>
+            class="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded-lg bg-logout-coral/10 text-logout-coral hover:bg-logout-coral/20 transition-colors cursor-pointer shadow-sm md:opacity-0 md:group-hover:opacity-100">
+            <span class="material-symbols-outlined text-[20px] md:text-[16px]">delete</span>
         </button>
     </div>
 

@@ -21,11 +21,13 @@ import { OdinOnboardingStore } from '../../modules/odin/onboarding/odin-onboardi
 import { OdinOnboardingService } from '../../modules/odin/onboarding/odin-onboarding.service';
 import { OdinOnboardingOverlayComponent } from './components/onboarding/odin-onboarding-overlay.component';
 import { MOCK_INCOMES, MOCK_ALLOCATIONS, MOCK_TOTAL_POOL, MOCK_TOTAL_ALLOCATED, MOCK_FREE_MONEY } from '../../modules/odin/onboarding/mock/odin-onboarding.mock';
+import { ResponsiveDirective } from '../../shared/directives/responsive.directive';
+import { ResponsiveState } from '../../core/responsive/responsive.state';
 
 @Component({
   selector: 'app-odin',
   standalone: true,
-  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent, DonutChartComponent, DynamicCurrencyPipe, DynamicCurrencySymbolPipe, OdinOnboardingOverlayComponent],
+  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent, DonutChartComponent, DynamicCurrencyPipe, DynamicCurrencySymbolPipe, OdinOnboardingOverlayComponent, ResponsiveDirective],
   providers: [OdinOnboardingStore, OdinOnboardingService],
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
@@ -35,6 +37,7 @@ export class OdinPageComponent implements OnInit {
   public readonly currencyState = inject(CurrencyManager);
   private readonly loaderService = inject(LoaderManager);
   private readonly cdr = inject(ChangeDetectorRef);
+  public responsiveState = inject(ResponsiveState);
 
   // Onboarding
   public readonly onboardingStore = inject(OdinOnboardingStore);
@@ -72,9 +75,7 @@ export class OdinPageComponent implements OnInit {
   public totalAllocated: number = 0;
   public freeMoney: number = 0;
 
-  // Donut chart hover state
-  public hoveredSegment: DonutChartSegment | null = null;
-  public hoveredAllocationSegment: DonutChartSegment | null = null;
+  // Donut chart interaction is handled internally by DonutChartComponent
   // #endregion
 
   // #region LIFECYCLE
@@ -609,6 +610,10 @@ export class OdinPageComponent implements OnInit {
   public promptDelete(income: IncomeSource): void {
     this.incomeToDelete = income;
   }
+
+  // #region CHART INTERACTION
+  // Note: Hover/Touch logic is now handled internally by DonutChartComponent
+  // #endregion
 
   public confirmDelete(): void {
     if (this.incomeToDelete) {

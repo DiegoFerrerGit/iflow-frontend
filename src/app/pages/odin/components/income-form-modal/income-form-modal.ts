@@ -28,6 +28,7 @@ export class IncomeFormModal implements OnInit {
   showTagPicker = false;
   tagSearch = '';
   activeColorMode: 'card' | 'category' = 'card';
+  isClosing = false;
   defaultTags = ['Management', 'Developer', 'Consulting'];
   allThemeColors = THEME_COLORS;
 
@@ -189,6 +190,13 @@ export class IncomeFormModal implements OnInit {
   isImageUrl(str: string): boolean {
     if (!str) return false;
     return str.startsWith('http://') || str.startsWith('https://');
+  }
+
+  closeModal() {
+    this.isClosing = true;
+    setTimeout(() => {
+      this.close.emit();
+    }, 280); // matches Tailwind animation duration
   }
 
   onSubmit() {

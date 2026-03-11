@@ -4,6 +4,7 @@ import { IncomeSource, ThemeColor, COLOR_MAP } from '../../../../models/income.m
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { CategoryColorService } from '../../../../shared/services/category-color.service';
+import { ResponsiveState } from '../../../../core/responsive/responsive.state';
 
 @Component({
   selector: 'app-income-card',
@@ -14,6 +15,7 @@ import { CategoryColorService } from '../../../../shared/services/category-color
 })
 export class IncomeCardComponent {
   private categoryColorService = inject(CategoryColorService);
+  public responsiveState = inject(ResponsiveState);
 
   @Input({ required: true }) income!: IncomeSource;
   @Input() isLoading = false;

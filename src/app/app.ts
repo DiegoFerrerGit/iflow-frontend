@@ -10,11 +10,14 @@ import { selectLoader } from './core/loader-manager/state/loader.selectors';
 import { AsyncPipe } from '@angular/common';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ToastService } from './shared/components/toast/toast.service';
+import { ResponsiveDirective } from './shared/directives/responsive.directive';
+import { ResponsiveState } from './core/responsive/responsive.state';
+import { BottomNavComponent } from './core/layout/bottom-nav/bottom-nav';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe, ToastComponent],
+  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe, ToastComponent, ResponsiveDirective, BottomNavComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -27,6 +30,7 @@ export class AppComponent implements OnInit {
   readonly layoutService = inject(LayoutService);
   private store = inject(Store);
   public readonly toastService = inject(ToastService);
+  public readonly responsiveState = inject(ResponsiveState);
 
   public inProgress$!: Observable<boolean>;
 

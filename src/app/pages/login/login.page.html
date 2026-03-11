@@ -1,4 +1,4 @@
-<div class="bg-[#0f0a15] text-slate-100 min-h-screen flex flex-col font-display relative overflow-hidden">
+<div class="bg-[#0f0a15] text-slate-100 fixed inset-0 flex flex-col font-display z-50 overflow-hidden touch-none">
 
     <!-- Animated background effects -->
     <div class="netflow-bg fixed inset-0 z-0 pointer-events-none">
@@ -21,36 +21,37 @@
         <div class="w-64 h-64 bg-emerald-500 rounded-full blur-[120px]"></div>
     </div>
 
-    <div class="relative z-10 flex min-h-screen w-full flex-col">
+    <div class="relative z-10 flex h-full w-full flex-col overflow-hidden">
 
 
         <!-- Main Content -->
-        <main class="flex-1 flex items-center justify-center p-6">
+        <main class="flex-1 flex items-center justify-center p-6 pb-12 overflow-hidden">
             <div class="w-full max-w-[460px] flex flex-col items-center">
 
                 <!-- Logo hero -->
-                <div class="mb-10 flex flex-col items-center">
-                    <div class="relative mb-8">
+                <div class="mb-6 md:mb-10 flex flex-col items-center">
+                    <div class="relative mb-6 md:mb-8">
                         <div class="absolute inset-0 bg-primary/20 rounded-full blur-[40px] scale-150 animate-pulse">
                         </div>
                         <img src="assets/images/iflow-logo.svg" alt="IFLOW Logo"
-                            class="relative size-28 object-contain drop-shadow-[0_0_30px_rgba(168,85,247,0.6)]">
+                            class="relative size-24 md:size-28 object-contain drop-shadow-[0_0_20px_rgba(168,85,247,0.4)] antialiased"
+                            style="image-rendering: -webkit-optimize-contrast;">
                     </div>
                     <h1
                         class="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400 mb-4">
                         Bienvenido a <span
                             class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-fuchsia-400">IFLOW</span>
                     </h1>
-                    <p class="text-slate-500 text-base leading-relaxed text-center max-w-sm">
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed text-center max-w-sm">
                         Tu plataforma de gestión financiera inteligente.
                         <span class="text-slate-400">Control total, visión clara.</span>
                     </p>
                 </div>
 
                 <!-- Login Card -->
-                <div class="w-full glass-card rounded-2xl p-10 flex flex-col items-center">
+                <div class="w-full glass-card rounded-2xl p-8 md:p-10 flex flex-col items-center">
                     <!-- Subtle header inside card -->
-                    <div class="flex items-center gap-2 mb-8">
+                    <div class="flex items-center gap-2 mb-6 md:mb-8">
                         <div class="h-px w-8 bg-gradient-to-r from-transparent to-primary/50"></div>
                         <span class="text-[11px] font-bold text-slate-500 tracking-[0.2em] uppercase">Acceso
                             Exclusivo</span>
@@ -113,7 +114,7 @@
 
         <!-- Footer -->
         <footer
-            class="px-8 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-600 gap-3">
+            class="px-8 md:px-12 py-5 hidden md:flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-600 gap-3">
             <p>© 2025 IFLOW Systems. Todos los derechos reservados.</p>
             <div class="flex items-center gap-6">
                 <div class="flex items-center gap-2">

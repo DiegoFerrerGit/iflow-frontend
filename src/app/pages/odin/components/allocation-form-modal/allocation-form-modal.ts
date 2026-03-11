@@ -38,6 +38,7 @@ export class AllocationFormModalComponent implements OnInit {
     savingsTarget: undefined
   };
 
+  isClosing = false;
   errors: { [key: string]: string } = {};
 
   iconsList = [
@@ -139,6 +140,13 @@ export class AllocationFormModalComponent implements OnInit {
     } else {
       this.formData.targetAmount = numValue;
     }
+  }
+
+  closeModal() {
+    this.isClosing = true;
+    setTimeout(() => {
+      this.cancel.emit();
+    }, 280);
   }
 
   onSubmit() {

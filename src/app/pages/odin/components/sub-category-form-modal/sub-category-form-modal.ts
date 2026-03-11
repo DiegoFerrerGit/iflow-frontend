@@ -36,6 +36,7 @@ export class SubCategoryFormModal implements OnInit {
     public formattedAvailableAmount: string = '0';
     public maxAllowedAmount: number = 0;
     public totalAvailableInBase: number = 0;
+    public isClosing = false;
 
     public typeOptions: ToggleOption[] = [
         { label: 'Monto Único', value: 'fixed_amount', icon: 'payments' },
@@ -175,6 +176,13 @@ export class SubCategoryFormModal implements OnInit {
     public selectColor(color: ThemeColor): void {
         if (this.isColorUsed(color)) return;
         this.form.patchValue({ color });
+    }
+
+    public closeModal(): void {
+        this.isClosing = true;
+        setTimeout(() => {
+            this.close.emit();
+        }, 280);
     }
 
     public onSubmit(): void {

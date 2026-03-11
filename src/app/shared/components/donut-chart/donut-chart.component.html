@@ -1,91 +1,109 @@
-<div class="relative w-80 h-80 md:w-[340px] md:h-[340px] flex shrink-0 items-center justify-center">
-    <svg class="w-full h-full transform -rotate-90 scale-x-[-1] drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]"
-        viewBox="0 0 120 120" overflow="visible">
-        <!-- Background Track -->
-        <circle cx="60" cy="60" r="50" fill="none" class="stroke-slate-800" stroke-width="12" />
+<div class="flex flex-col items-center w-full">
+    <div class="relative w-64 h-64 md:w-[340px] md:h-[340px] flex shrink-0 items-center justify-center">
+        <svg class="w-full h-full transform -rotate-90 scale-x-[-1] drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+            viewBox="0 0 120 120" overflow="visible">
+            <!-- Background Track -->
+            <circle cx="60" cy="60" r="50" fill="none" class="stroke-slate-800" stroke-width="12" />
 
-        <!-- Hit Areas (REVERSE Order for Z-indexing) -->
-        @for (segment of segments.slice().reverse(); track segment.id + '_hit') {
-        <circle cx="60" cy="60" r="50" fill="none" stroke="transparent" stroke-width="32" stroke-linecap="butt"
-            [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
-            class="cursor-pointer" (mouseenter)="hoveredSegment = segment" (mouseleave)="hoveredSegment = null" />
-        }
-
-        <!-- Dynamic Segments (REVERSE Order for anti-clockwise visual direction) -->
-        <!-- Each segment's rounded end overlaps the previous segment's start -->
-        @for (segment of segments.slice().reverse(); track segment.id) {
-        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
-            [attr.stroke-width]="hoveredSegment?.id === segment.id ? 20 : 16" stroke-linecap="round"
-            [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
-            class="transition-all duration-200 ease-out pointer-events-none"
-            [class.brightness-125]="hoveredSegment?.id === segment.id" />
-        }
-
-        <!-- Loop Closer: end tip of the last segment overlaps the first segment's start -->
-        @if (lastSegment && lastSegmentTip) {
-        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="lastSegment.color"
-            [attr.stroke-width]="hoveredSegment?.id === lastSegment.id ? 20 : 16" stroke-linecap="round"
-            [attr.stroke-dasharray]="lastSegmentTip.dashArray" [attr.stroke-dashoffset]="lastSegmentTip.dashOffset"
-            class="transition-all duration-200 ease-out pointer-events-none"
-            [class.brightness-125]="hoveredSegment?.id === lastSegment.id" />
-        }
-
-        <!-- Hover Top Overlay -->
-        @if (hoveredSegment) {
-        <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="hoveredSegment.color" stroke-width="20"
-            stroke-linecap="round" [attr.stroke-dasharray]="hoveredSegment.dashArray"
-            [attr.stroke-dashoffset]="hoveredSegment.dashOffset"
-            class="pointer-events-none transition-all duration-200 ease-out brightness-125" />
-        }
-
-    </svg>
-
-    <!-- Center Information Display -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30">
-
-        <!-- Idle State (Title + Subtitle) -->
-        <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
-            [class.opacity-100]="!hoveredSegment" [class.scale-100]="!hoveredSegment" [class.opacity-0]="hoveredSegment"
-            [class.scale-95]="hoveredSegment">
-            @if (title) {
-            <span class="text-slate-400 font-black tracking-[0.2em] uppercase text-center px-4 leading-relaxed"
-                [ngClass]="titleClass">
-                {{ title }}
-            </span>
+            <!-- Hit Areas (REVERSE Order for Z-indexing) -->
+            @for (segment of segments.slice().reverse(); track segment.id + '_hit') {
+            <circle cx="60" cy="60" r="50" fill="none" stroke="transparent" stroke-width="32" stroke-linecap="butt"
+                [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
+                class="cursor-pointer" (mouseenter)="onSegmentEnter(segment)" (mouseleave)="onSegmentLeave(segment)"
+                (click)="onSegmentClick(segment)" />
             }
-            @if (subtitle) {
-            <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none mt-0.5"
-                [ngClass]="subtitleClass">
-                {{ subtitle }}
-            </span>
+
+            <!-- Dynamic Segments (REVERSE Order for anti-clockwise visual direction) -->
+            <!-- Each segment's rounded end overlaps the previous segment's start -->
+            @for (segment of segments.slice().reverse(); track segment.id) {
+            <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="segment.color"
+                [attr.stroke-width]="activeSegment?.id === segment.id ? 20 : 16" stroke-linecap="round"
+                [attr.stroke-dasharray]="segment.dashArray" [attr.stroke-dashoffset]="segment.dashOffset"
+                class="transition-all duration-200 ease-out pointer-events-none"
+                [class.brightness-125]="activeSegment?.id === segment.id" />
             }
-        </div>
 
-        <!-- Hover State (Segment Details) -->
-        <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
-            [class.opacity-100]="hoveredSegment" [class.scale-100]="hoveredSegment" [class.opacity-0]="!hoveredSegment"
-            [class.scale-95]="!hoveredSegment">
+            <!-- Loop Closer: end tip of the last segment overlaps the first segment's start -->
+            @if (lastSegment && lastSegmentTip) {
+            <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="lastSegment.color"
+                [attr.stroke-width]="activeSegment?.id === lastSegment.id ? 20 : 16" stroke-linecap="round"
+                [attr.stroke-dasharray]="lastSegmentTip.dashArray" [attr.stroke-dashoffset]="lastSegmentTip.dashOffset"
+                class="transition-all duration-200 ease-out pointer-events-none"
+                [class.brightness-125]="activeSegment?.id === lastSegment.id" />
+            }
 
-            <div class="flex flex-col items-center text-center w-full">
-                @if (hoveredSegment) {
-                <span
-                    class="text-white/60 font-black tracking-widest uppercase mb-0.5 truncate w-full px-2 transition-colors"
-                    [ngClass]="hoverNameClass" [style.color]="hoveredSegment.color">
-                    {{ hoveredSegment.name }}
+            <!-- Hover Top Overlay -->
+            @if (activeSegment) {
+            <circle cx="60" cy="60" r="50" fill="none" [attr.stroke]="activeSegment.color" stroke-width="20"
+                stroke-linecap="round" [attr.stroke-dasharray]="activeSegment.dashArray"
+                [attr.stroke-dashoffset]="activeSegment.dashOffset"
+                class="pointer-events-none transition-all duration-200 ease-out brightness-125" />
+            }
+
+        </svg>
+
+        <!-- Center Information Display -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30">
+
+            <!-- Idle State (Title + Subtitle) -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
+                [class.opacity-100]="!activeSegment" [class.scale-100]="!activeSegment"
+                [class.opacity-0]="activeSegment" [class.scale-95]="activeSegment">
+                @if (title) {
+                <span class="text-slate-400 font-black tracking-[0.2em] uppercase text-center px-4 leading-relaxed"
+                    [ngClass]="titleClass">
+                    {{ title }}
                 </span>
-                <div class="flex items-baseline justify-center gap-1.5 mb-0.5">
-                    <span class="text-slate-400 text-sm font-bold drop-shadow-md">{{ '' |
-                        dynamicCurrencySymbol }}</span>
-                    <span class="font-black tracking-tighter drop-shadow-md transition-colors"
-                        [ngClass]="hoverAmountClass + ' ' + (hoveredSegment.amountColorClass || 'text-white')">{{
-                        hoveredSegment.amount |
-                        dynamicCurrency:currencyState.currentCurrency() }}</span>
-                </div>
-                <span class="text-slate-400 font-black" [ngClass]="hoverPercentageClass">({{ hoveredSegment.percentage |
-                    number:'1.0-0'
-                    }}%)</span>
                 }
+                @if (subtitle) {
+                <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none mt-0.5"
+                    [ngClass]="subtitleClass">
+                    {{ subtitle }}
+                </span>
+                }
+            </div>
+
+            <!-- Hover State (Segment Details) -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
+                [class.opacity-100]="activeSegment" [class.scale-100]="activeSegment" [class.opacity-0]="!activeSegment"
+                [class.scale-95]="!activeSegment">
+
+                <div class="flex flex-col items-center text-center w-full">
+                    @if (activeSegment) {
+                    <span
+                        class="text-white/60 font-black tracking-widest uppercase mb-0.5 truncate w-full px-2 transition-colors"
+                        [ngClass]="hoverNameClass" [style.color]="activeSegment.color">
+                        {{ activeSegment.name }}
+                    </span>
+                    <div class="flex items-baseline justify-center gap-1.5 mb-0.5">
+                        <span class="text-slate-400 text-sm font-bold drop-shadow-md">{{ '' |
+                            dynamicCurrencySymbol }}</span>
+                        <span class="font-black tracking-tighter drop-shadow-md transition-colors"
+                            [ngClass]="hoverAmountClass + ' ' + (activeSegment.amountColorClass || 'text-white')">{{
+                            activeSegment.amount |
+                            dynamicCurrency:currencyState.currentCurrency() }}</span>
+                    </div>
+                    <span class="text-slate-400 font-black" [ngClass]="hoverPercentageClass">({{
+                        activeSegment.percentage |
+                        number:'1.0-0'
+                        }}%)</span>
+                    }
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Mobile Legend -->
+    @if (responsiveState.isMobile()) {
+    <div class="w-full flex flex-wrap justify-center gap-2 mt-6 px-2 pb-2">
+        @for (segment of segments; track segment.id) {
+        <div class="flex items-center gap-1.5 cursor-pointer transition-opacity px-3 py-1.5 rounded-full bg-white/5 border border-white/5"
+            [class.opacity-50]="activeSegment && activeSegment.id !== segment.id"
+            [class.border-white/20]="activeSegment?.id === segment.id" (click)="onSegmentClick(segment)">
+            <div class="w-2.5 h-2.5 rounded-full shadow-sm" [style.background-color]="segment.color"></div>
+            <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">{{ segment.name }}</span>
+        </div>
+        }
+    </div>
+    }
 </div>

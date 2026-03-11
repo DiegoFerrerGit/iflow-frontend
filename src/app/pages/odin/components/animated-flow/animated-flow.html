@@ -1,4 +1,4 @@
-<div class="w-full h-[120px] relative">
+<div class="w-full h-[80px] md:h-[120px] relative">
     <!-- SVG Viewbox mapped exactly to a 1000x120 conceptual space. 
          This gives us high precision to manually draw the exact shapes from Stitch -->
     <svg width="100%" height="100%" viewBox="0 0 1000 120" preserveAspectRatio="none"
@@ -34,9 +34,33 @@
                         stroke-dashoffset: -16;
                     }
                 }
+
+                /* Mobile-specific thicker dashes */
+                .flow-in-mobile {
+                    stroke-dasharray: 12 18;
+                    animation: dash-in-mobile 0.4s linear infinite;
+                }
+
+                @keyframes dash-in-mobile {
+                    to {
+                        stroke-dashoffset: -30;
+                    }
+                }
+
+                .flow-out-mobile {
+                    stroke-dasharray: 12 18;
+                    animation: dash-out-mobile 0.4s linear infinite;
+                }
+
+                @keyframes dash-out-mobile {
+                    to {
+                        stroke-dashoffset: -30;
+                    }
+                }
             </style>
         </defs>
 
+        @if (!responsiveState.isMobile()) {
         @if (direction === 'in') {
 
         @if (points <= 3) { <!-- GREEN INBOUND FLOW (Cards -> Pool) — STANDARD MODE (1-3 points)
@@ -94,11 +118,23 @@
                 fill="#fb923c" filter="url(#af-glow)" />
             }
             }
+            } @else {
+            <!-- MOBILE SCROLLING ARROW (Simple, larger, separated from edges) -->
+            @if (direction === 'in') {
+            <path d="M 500 10 L 500.01 45" fill="none" stroke="#10b981" stroke-width="12" class="flow-in-mobile"
+                filter="url(#af-glow)" stroke-linecap="round" />
+            <polygon points="460,35 540,35 500,80" fill="#10b981" filter="url(#af-glow)" />
+            } @else {
+            <path d="M 500 10 L 500.01 45" fill="none" stroke="#fb923c" stroke-width="12" class="flow-out-mobile"
+                filter="url(#af-glow)" stroke-linecap="round" />
+            <polygon points="460,35 540,35 500,80" fill="#fb923c" filter="url(#af-glow)" />
+            }
+            }
 
     </svg>
 
     <!-- CSS-based horizontal bar for 4+ inbound points (avoids SVG horizontal line rendering issues) -->
-    @if (direction === 'in' && points > 3) {
+    @if (!responsiveState.isMobile() && direction === 'in' && points > 3) {
     <!-- Animated dashed horizontal bar — split into two halves converging toward center -->
     <!-- Left half: flows from left → center -->
     <div class="absolute top-[10px] left-0 w-1/2 h-[2px] flow-bar-to-right"

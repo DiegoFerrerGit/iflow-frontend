@@ -1,12 +1,17 @@
 // Override the donut chart component's internal sizing for this page
+// Both Mobile and Desktop must fit exactly 220px to stay inside the sidebar.
+// Sizes are now enforced inline via Tailwind arbitary variants in the HTML.
 .donut-chart-wrapper {
-  ::ng-deep app-donut-chart>div {
-    width: 220px !important;
-    height: 220px !important;
-  }
 
-  ::ng-deep app-donut-chart>div>svg {
-    width: 220px !important;
-    height: 220px !important;
+  // Mobile: prevent legend overlap by allowing the container to grow vertically
+  @media (max-width: 768px) {
+    height: auto !important;
+    min-height: 220px;
+    overflow: visible;
+
+    ::ng-deep app-donut-chart>div.relative {
+      height: auto !important;
+      min-height: 220px;
+    }
   }
 }

@@ -1,18 +1,18 @@
 <div class="bg-background-dark text-slate-100 min-h-screen relative flex overflow-x-hidden font-sans">
     @if (layoutService.showSidebar()) {
-    <app-sidebar-menu (expandedChange)="isSidebarExpanded = $event"></app-sidebar-menu>
-    <app-currency-switcher></app-currency-switcher>
+    <app-sidebar-menu *iflowResponsive="'DESKTOP'" (expandedChange)="isSidebarExpanded = $event"></app-sidebar-menu>
+    <app-currency-switcher *iflowResponsive="'DESKTOP'"></app-currency-switcher>
     }
 
     <div class="content-wrapper flex flex-col min-w-0 transition-all duration-300 flex-1 w-full"
-        [class.ml-[256px]]="layoutService.showSidebar() && isSidebarExpanded"
-        [class.ml-[80px]]="layoutService.showSidebar() && !isSidebarExpanded"
-        [class.ml-0]="!layoutService.showSidebar()"
-        [class.w-[calc(100%-256px)]]="layoutService.showSidebar() && isSidebarExpanded"
-        [class.w-[calc(100%-80px)]]="layoutService.showSidebar() && !isSidebarExpanded"
-        [class.w-full]="!layoutService.showSidebar()">
+        [class.ml-[256px]]="layoutService.showSidebar() && isSidebarExpanded && responsiveState.isDesktop()"
+        [class.ml-[80px]]="layoutService.showSidebar() && !isSidebarExpanded && responsiveState.isDesktop()"
+        [class.ml-0]="!layoutService.showSidebar() || responsiveState.isMobile()"
+        [class.w-[calc(100%-256px)]]="layoutService.showSidebar() && isSidebarExpanded && responsiveState.isDesktop()"
+        [class.w-[calc(100%-80px)]]="layoutService.showSidebar() && !isSidebarExpanded && responsiveState.isDesktop()"
+        [class.w-full]="!layoutService.showSidebar() || responsiveState.isMobile()">
 
-        <main class="z-10 w-full flex flex-col flex-1">
+        <main class="z-10 w-full flex flex-col flex-1" [class.pb-20]="responsiveState.isMobile()">
             <router-outlet></router-outlet>
         </main>
 
@@ -21,12 +21,17 @@
     <!-- Global Full Screen Loader mapped to content area -->
     @if (inProgress$ | async) {
     <div class="fixed inset-y-0 right-0 z-[9999] transition-all duration-300 pointer-events-none"
-        [class.left-[256px]]="layoutService.showSidebar() && isSidebarExpanded"
-        [class.left-[80px]]="layoutService.showSidebar() && !isSidebarExpanded"
-        [class.left-0]="!layoutService.showSidebar()">
+        [class.left-[256px]]="layoutService.showSidebar() && isSidebarExpanded && responsiveState.isDesktop()"
+        [class.left-[80px]]="layoutService.showSidebar() && !isSidebarExpanded && responsiveState.isDesktop()"
+        [class.left-0]="!layoutService.showSidebar() || responsiveState.isMobile()">
         <!-- The app-loader child overrides pointer-events to catch clicks within the content area only. block class ensures predictable dimension filling. -->
         <app-loader [fullScreen]="true" class="pointer-events-auto block relative w-full h-full"></app-loader>
     </div>
+    }
+
+    <!-- Bottom Mobile Navigation -->
+    @if (layoutService.showSidebar()) {
+    <app-bottom-nav *iflowResponsive="'MOBILE'"></app-bottom-nav>
     }
 
 </div>

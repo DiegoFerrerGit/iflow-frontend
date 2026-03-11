@@ -3,6 +3,7 @@ import { CommonModule, DecimalPipe, CurrencyPipe } from '@angular/common';
 import { DynamicCurrencyPipe } from '../../pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../pipes/dynamic-currency-symbol.pipe';
 import { CurrencyManager } from '../../../core/currency-manager/currency-manager.manager';
+import { ResponsiveState } from '../../../core/responsive/responsive.state';
 
 export interface DonutChartSegment {
     id: string;
@@ -26,19 +27,44 @@ export interface DonutChartSegment {
 })
 export class DonutChartComponent {
     public currencyState = inject(CurrencyManager);
+    public responsiveState = inject(ResponsiveState);
 
     @Input() segments: DonutChartSegment[] = [];
     @Input() size: 'sm' | 'md' | 'lg' = 'md';
     @Input() title?: string;
     @Input() subtitle?: string;
 
-    hoveredSegment: DonutChartSegment | null = null;
+    activeSegment: DonutChartSegment | null = null;
+
+    onSegmentEnter(segment: DonutChartSegment) {
+        if (!this.responsiveState.isMobile()) {
+            this.activeSegment = segment;
+        }
+    }
+
+    onSegmentLeave(segment: DonutChartSegment) {
+        if (!this.responsiveState.isMobile()) {
+            this.activeSegment = null;
+        }
+    }
+
+    onSegmentClick(segment: DonutChartSegment) {
+        if (this.responsiveState.isMobile()) {
+            // Toggle selection on touch
+            if (this.activeSegment?.id === segment.id) {
+                this.activeSegment = null;
+            } else {
+                this.activeSegment = segment;
+            }
+        }
+    }
 
     get titleClass(): string {
+        const isMobile = this.responsiveState.isMobile();
         switch (this.size) {
-            case 'lg': return 'text-[12px]';
+            case 'lg': return isMobile ? 'text-[7px]' : 'text-[12px]';
             case 'sm': return 'text-[7px]';
-            default: return 'text-[8px]';
+            default: return isMobile ? 'text-[7px]' : 'text-[8px]';
         }
     }
 
