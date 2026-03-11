@@ -258,6 +258,61 @@
     </div>
 </main>
 
+<!-- Mobile Floating Action Button (FAB) -->
+<div *iflowResponsive="'MOBILE'" class="fixed bottom-[80px] right-6 z-[50] flex flex-col items-end"
+    [class.pointer-events-none]="isModalOpen || isAllocationModalOpen"
+    [class.opacity-0]="isModalOpen || isAllocationModalOpen" [class.invisible]="isModalOpen || isAllocationModalOpen">
+
+    <!-- FAB Backdrop (when menu is open) -->
+    @if (isFabMenuOpen) {
+    <div class="fixed inset-0 bg-[#070509]/60 backdrop-blur-[3px] z-[-1] animate-fade-in" (click)="toggleFabMenu()">
+    </div>
+    }
+
+    <!-- Menu Options (Arched Layout) -->
+    <div class="flex flex-col items-end mb-4 pr-1" [class.hidden]="!isFabMenuOpen">
+        <!-- New Income (Top-most, least offset) -->
+        <button (click)="openModal(); toggleFabMenu()"
+            class="flex items-center gap-3 mb-5 translate-x-[-12px] animate-in slide-in-from-bottom-6 duration-500 delay-150 group">
+            <div
+                class="w-12 h-12 rounded-full border-2 border-emerald-500/50 bg-[#16121d] flex items-center justify-center text-emerald-400 shadow-lg group-active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-2xl">add_card</span>
+            </div>
+            <span
+                class="bg-[#1f222e] text-white/90 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase shadow-xl border border-white/5">Nueva
+                Fuente</span>
+        </button>
+
+        <!-- New Allocation (Bottom, most offset) -->
+        <button (click)="openAllocationModal(); toggleFabMenu()"
+            class="flex items-center gap-3 translate-x-[-45px] animate-in slide-in-from-bottom-6 duration-500 group">
+            <div
+                class="w-12 h-12 rounded-full border-2 border-dist-orange/50 bg-[#16121d] flex items-center justify-center text-dist-orange shadow-lg group-active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-2xl">package_2</span>
+            </div>
+            <span
+                class="bg-[#1f222e] text-white/90 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase shadow-xl border border-white/5">Nueva
+                Caja</span>
+        </button>
+    </div>
+
+    <!-- Main Toggle Button (Darker Purple, No Shadow) -->
+    <div class="relative flex items-center justify-center">
+        <!-- Diffused Glow Effect (Style 3 - Solid) -->
+        <div class="absolute inset-0 rounded-full blur-[40px] animate-pulse pointer-events-none transition-all duration-700"
+            style="background-color: #40236b;" [class.scale-[4]]="isFabMenuOpen" [class.opacity-100]="isFabMenuOpen"
+            [class.opacity-50]="!isFabMenuOpen">
+        </div>
+
+        <button (click)="toggleFabMenu()"
+            class="relative w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-95 z-10 focus:outline-none"
+            style="background-color: #40236b; box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 15px inset;"
+            [class.rotate-45]="isFabMenuOpen">
+            <span class="material-symbols-outlined text-4xl">add</span>
+        </button>
+    </div>
+</div>
+
 <!-- Onboarding Overlay -->
 <app-odin-onboarding-overlay></app-odin-onboarding-overlay>
 

@@ -75,6 +75,9 @@ export class OdinPageComponent implements OnInit {
   public totalAllocated: number = 0;
   public freeMoney: number = 0;
 
+  // FAB State
+  public isFabMenuOpen: boolean = false;
+
   // Donut chart interaction is handled internally by DonutChartComponent
   // #endregion
 
@@ -159,6 +162,10 @@ export class OdinPageComponent implements OnInit {
   }
   // #endregion
   // #endregion
+
+  public toggleFabMenu(): void {
+    this.isFabMenuOpen = !this.isFabMenuOpen;
+  }
 
   // #region MAPPERS
   private mapIncomes(apiIncomes: IIncomeSourceApi[]): IncomeSource[] {
@@ -430,6 +437,7 @@ export class OdinPageComponent implements OnInit {
     this.isAllocationModalOpen = false;
     this.allocationToEdit = null;
     this.isAllocationModalSaving = false;
+    this.isFabMenuOpen = false;
 
     // If onboarding is active and overlay is hidden, re-show the overlay
     if (this.onboardingStore.isActive() && !this.onboardingStore.showOverlay()) {
@@ -529,6 +537,7 @@ export class OdinPageComponent implements OnInit {
   public closeModal() {
     this.isModalOpen = false;
     this.incomeToEdit = null;
+    this.isFabMenuOpen = false;
 
     // If onboarding is active and overlay is hidden, re-show the overlay
     if (this.onboardingStore.isActive() && !this.onboardingStore.showOverlay()) {
