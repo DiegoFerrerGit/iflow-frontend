@@ -19,6 +19,7 @@ export class AllocationFormModalComponent implements OnInit {
   @Input() existingAllocations: AllocationBox[] = [];
   @Input() initialAllocation: AllocationBox | null = null;
   @Input() isLoading: boolean = false;
+  @Input() onboardingMode: boolean = false;
   @Output() save = new EventEmitter<AllocationBox>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -59,7 +60,20 @@ export class AllocationFormModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.initialAllocation) {
+    if (this.onboardingMode) {
+      // Onboarding: pre-fill 'Inversión' with locked fields
+      this.formData = {
+        name: 'Inversión',
+        description: 'Patrimonio & Capital',
+        type: 'permanent',
+        calculationType: 'percentage',
+        targetAmount: 0,
+        icon: 'trending_up',
+        color: 'emerald',
+        savedAmount: 0,
+        savingsTarget: undefined
+      };
+    } else if (this.initialAllocation) {
       // For editing: copy existing data
       this.formData = {
         name: this.initialAllocation.name,

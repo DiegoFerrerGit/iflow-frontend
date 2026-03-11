@@ -40,6 +40,7 @@ export interface IOdinResponse {
     pool_summary: IPoolSummary;
     income_sources: IIncomeSourceApi[];
     allocation_boxes: IAllocationBoxApi[];
+    odin_onboarding?: boolean;
 }
 
 export interface IAllocationSubCategoryDto {

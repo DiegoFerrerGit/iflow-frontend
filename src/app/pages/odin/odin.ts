@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BannerComponent } from './components/banner/banner';
 import { IncomeCardComponent } from './components/income-card/income-card';
@@ -17,11 +17,16 @@ import { DynamicCurrencyPipe } from '../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../shared/pipes/dynamic-currency-symbol.pipe';
 import { CurrencyManager } from '../../core/currency-manager/currency-manager.manager';
 import { LoaderManager } from '../../core/loader-manager/loader.manager';
+import { OdinOnboardingStore } from '../../modules/odin/onboarding/odin-onboarding.store';
+import { OdinOnboardingService } from '../../modules/odin/onboarding/odin-onboarding.service';
+import { OdinOnboardingOverlayComponent } from './components/onboarding/odin-onboarding-overlay.component';
+import { MOCK_INCOMES, MOCK_ALLOCATIONS, MOCK_TOTAL_POOL, MOCK_TOTAL_ALLOCATED, MOCK_FREE_MONEY } from '../../modules/odin/onboarding/mock/odin-onboarding.mock';
 
 @Component({
   selector: 'app-odin',
   standalone: true,
-  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent, DonutChartComponent, DynamicCurrencyPipe, DynamicCurrencySymbolPipe],
+  imports: [CommonModule, BannerComponent, IncomeCardComponent, CdkDropList, CdkDrag, IncomeFormModal, AnimatedFlowComponent, AllocationCardComponent, AllocationFormModalComponent, DonutChartComponent, DynamicCurrencyPipe, DynamicCurrencySymbolPipe, OdinOnboardingOverlayComponent],
+  providers: [OdinOnboardingStore, OdinOnboardingService],
   templateUrl: './odin.html',
   styleUrl: './odin.scss',
 })
@@ -30,6 +35,17 @@ export class OdinPageComponent implements OnInit {
   public readonly currencyState = inject(CurrencyManager);
   private readonly loaderService = inject(LoaderManager);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Onboarding
+  public readonly onboardingStore = inject(OdinOnboardingStore);
+  public readonly onboardingService = inject(OdinOnboardingService);
+
+  // Real data backup (used to restore after mock data phase)
+  private realIncomes: IncomeSource[] = [];
+  private realAllocations: AllocationBox[] = [];
+  private realTotalPool: number = 0;
+  private realTotalAllocated: number = 0;
+  private realFreeMoney: number = 0;
 
   // #region STATE
 
@@ -62,6 +78,28 @@ export class OdinPageComponent implements OnInit {
   // #endregion
 
   // #region LIFECYCLE
+  constructor() {
+    // React to onboarding mock data changes — must be in constructor for injection context
+    effect(() => {
+      const useMock = this.onboardingStore.useMockData();
+      if (useMock) {
+        this.applyMockData();
+      } else if (this.onboardingStore.isActive()) {
+        // Always restore real data when mock is turned off during active onboarding
+        this.restoreRealData();
+      }
+    });
+
+    // Listen for onboarding actions (auto-open forms)
+    this.onboardingService.action$.subscribe(action => {
+      if (action === 'openIncomeForm') {
+        this.openModal();
+      } else if (action === 'openAllocationForm') {
+        this.isAllocationModalOpen = true;
+      }
+    });
+  }
+
   public ngOnInit(): void {
     this.loadData();
   }
@@ -75,12 +113,50 @@ export class OdinPageComponent implements OnInit {
         this.incomes = this.mapIncomes(response.income_sources);
         this.allocations = this.mapAllocations(response.allocation_boxes);
         this.updateCharts();
+
+        // Save real data for onboarding restore
+        this.saveRealData();
+
+        // Initialize onboarding if backend says so — smart-resume based on existing data
+        this.onboardingService.initialize(
+          response.odin_onboarding,
+          this.incomes.length > 0,
+          this.allocations.length > 0
+        );
       },
       error: () => {
         // Errors are globally handled by ErrorsManager
       }
     });
   }
+
+  // #region ONBOARDING DATA SWAP
+  private saveRealData(): void {
+    this.realIncomes = [...this.incomes];
+    this.realAllocations = [...this.allocations];
+    this.realTotalPool = this.totalPool;
+    this.realTotalAllocated = this.totalAllocated;
+    this.realFreeMoney = this.freeMoney;
+  }
+
+  private applyMockData(): void {
+    this.incomes = [...MOCK_INCOMES];
+    this.allocations = [...MOCK_ALLOCATIONS];
+    this.totalPool = MOCK_TOTAL_POOL;
+    this.totalAllocated = MOCK_TOTAL_ALLOCATED;
+    this.freeMoney = MOCK_FREE_MONEY;
+    this.updateCharts();
+  }
+
+  private restoreRealData(): void {
+    this.incomes = [...this.realIncomes];
+    this.allocations = [...this.realAllocations];
+    this.totalPool = this.realTotalPool;
+    this.totalAllocated = this.realTotalAllocated;
+    this.freeMoney = this.realFreeMoney;
+    this.updateCharts();
+  }
+  // #endregion
   // #endregion
 
   // #region MAPPERS
@@ -348,6 +424,11 @@ export class OdinPageComponent implements OnInit {
     this.isAllocationModalOpen = false;
     this.allocationToEdit = null;
     this.isAllocationModalSaving = false;
+
+    // If onboarding is active and overlay is hidden, re-show the overlay
+    if (this.onboardingStore.isActive() && !this.onboardingStore.showOverlay()) {
+      this.onboardingService.reShowOverlay();
+    }
   }
 
   public handleSaveAllocation(newBox: AllocationBox) {
@@ -393,8 +474,12 @@ export class OdinPageComponent implements OnInit {
           const createdBox = this.mapAllocations([apiAlloc])[0];
           this.allocations = [createdBox, ...this.allocations];
           this.updateCharts();
+          this.saveRealData();
           this.isAllocationModalSaving = false;
           this.closeAllocationModal();
+
+          // Notify onboarding that the first allocation was created
+          this.onboardingService.notifyAllocationCreated();
         },
         error: () => {
           this.isAllocationModalSaving = false;
@@ -438,6 +523,11 @@ export class OdinPageComponent implements OnInit {
   public closeModal() {
     this.isModalOpen = false;
     this.incomeToEdit = null;
+
+    // If onboarding is active and overlay is hidden, re-show the overlay
+    if (this.onboardingStore.isActive() && !this.onboardingStore.showOverlay()) {
+      this.onboardingService.reShowOverlay();
+    }
   }
   // #endregion
 
@@ -483,10 +573,26 @@ export class OdinPageComponent implements OnInit {
       this.odinApiService.createIncomeSource(requestData).subscribe({
         next: (apiIncome: IIncomeSourceApi) => {
           const newIncomeSource = this.mapIncomes([apiIncome])[0];
-          this.incomes = [...this.incomes, newIncomeSource];
-          this.updateCharts();
-          this.isModalSaving = false;
-          this.closeModal();
+
+          if (this.onboardingStore.useMockData()) {
+            // During onboarding, we're currently displaying mock data.
+            // We shouldn't mutate the UI immediately to prevent mock + new mixing.
+            // Add it to realIncomes so it's there when the step advances and mock data is removed.
+            this.realIncomes = [...this.realIncomes, newIncomeSource];
+          } else {
+            // Normal flow outside of onboarding mock mode
+            this.incomes = [...this.incomes, newIncomeSource];
+            this.updateCharts();
+            this.saveRealData();
+          }
+
+          setTimeout(() => {
+            this.isModalSaving = false;
+            this.closeModal();
+
+            // Notify onboarding that the first income was created
+            this.onboardingService.notifyIncomeCreated();
+          }, 500);
         },
         error: () => {
           this.isModalSaving = false;
