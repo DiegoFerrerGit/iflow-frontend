@@ -34,8 +34,8 @@
             </div>
         </div>
         } @else if (incomes.length > 0) {
-        <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20" cdkDropList
-            (cdkDropListDropped)="dropIncome($event)">
+        <div [class]="'w-full grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20' + (incomes.length > 3 ? ' px-6' : '')"
+            cdkDropList (cdkDropListDropped)="dropIncome($event)">
             @for (income of incomes; track income.id; let i = $index) {
             <app-income-card cdkDrag [income]="income" [isLoading]="updatingIncomeId === income.id"
                 (delete)="promptDelete(income)" (edit)="openModal(income)"
@@ -62,7 +62,8 @@
 
         @if (incomes.length > 0) {
         <!-- Incomes to Pool Flow -->
-        <div class="w-full max-w-[80%] mx-auto -mt-3 relative z-10">
+        <div
+            [class]="incomes.length > 3 ? 'w-full mx-auto mt-4 relative z-10' : 'w-full max-w-[80%] mx-auto -mt-3 relative z-10'">
             <app-animated-flow class="w-full" [points]="incomes.length" direction="in"
                 color="green"></app-animated-flow>
         </div>
@@ -89,9 +90,11 @@
                     <h3 class="text-slate-400 text-[11px] font-black tracking-[0.2em] uppercase mb-2">Total de
                         Ingresos
                     </h3>
-                    <div class="flex items-baseline gap-3 mb-8">
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-slate-500 text-2xl leading-none font-bold tracking-tighter drop-shadow-md">{{
+                            '' | dynamicCurrencySymbol }}</span>
                         <span class="text-emerald-400 text-5xl leading-none font-black tracking-tighter drop-shadow-md">
-                            {{ '' | dynamicCurrencySymbol }}{{ totalPool | dynamicCurrency }}
+                            {{ totalPool | dynamicCurrency }}
                         </span>
                     </div>
 
@@ -190,10 +193,12 @@
                             <span
                                 class="text-slate-400 text-[11px] font-black tracking-[0.2em] uppercase block mb-1">TOTAL
                                 DE GASTOS</span>
-                            <div class="flex items-baseline gap-1.5">
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-slate-500 text-xl leading-none font-bold drop-shadow-sm">{{ '' |
+                                    dynamicCurrencySymbol }}</span>
                                 <span
                                     class="text-logout-coral text-4xl leading-none font-black tracking-tighter drop-shadow-sm">
-                                    {{ totalAllocated | currency:'USD':'symbol':'1.0-0' }}
+                                    {{ totalAllocated | dynamicCurrency }}
                                 </span>
                             </div>
                         </div>
@@ -204,10 +209,12 @@
                             <span
                                 class="text-slate-400 text-[11px] font-black tracking-[0.2em] uppercase block mb-1 cursor-help"
                                 title="Dinero remanente sin asignar">DINERO LIBRE / DISPONIBLE</span>
-                            <div class="flex items-baseline gap-1.5">
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-slate-500 text-xl leading-none font-bold drop-shadow-sm">{{ '' |
+                                    dynamicCurrencySymbol }}</span>
                                 <span
                                     class="text-cyan-400 text-4xl leading-none font-black tracking-tighter drop-shadow-sm">
-                                    {{ freeMoney | currency:'USD':'symbol':'1.0-0' }}
+                                    {{ freeMoney | dynamicCurrency }}
                                 </span>
                             </div>
                         </div>

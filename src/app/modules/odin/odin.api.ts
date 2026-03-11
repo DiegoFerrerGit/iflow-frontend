@@ -22,7 +22,7 @@ export class OdinApiService {
         return this.http.get<IOdinResponse>(this.API_URL).pipe(
             map(response => ({
                 ...response,
-                income_sources: response.income_sources.slice(0, 1)
+                income_sources: response.income_sources
             })),
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);

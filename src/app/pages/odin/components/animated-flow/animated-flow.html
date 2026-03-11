@@ -15,80 +15,104 @@
             <style>
                 .flow-in {
                     stroke-dasharray: 6 10;
-                    animation: dash-in 2s linear infinite;
+                    animation: dash-in 0.32s linear infinite;
                 }
 
                 @keyframes dash-in {
                     to {
-                        stroke-dashoffset: -100;
+                        stroke-dashoffset: -16;
                     }
                 }
 
                 .flow-out {
                     stroke-dasharray: 6 10;
-                    animation: dash-out 2s linear infinite;
+                    animation: dash-out 0.32s linear infinite;
                 }
 
                 @keyframes dash-out {
                     to {
-                        stroke-dashoffset: -100;
+                        stroke-dashoffset: -16;
                     }
                 }
             </style>
         </defs>
 
         @if (direction === 'in') {
-        <!-- 
-            GREEN INBOUND FLOW (Cards -> Pool)
+
+        @if (points <= 3) { <!-- GREEN INBOUND FLOW (Cards -> Pool) — STANDARD MODE (1-3 points)
             Dynamic: N top dots, green sweeping curve down to a center glowing dot, dropping to a single arrow.
             -->
 
-        @for (i of getPointsArray(); track i) {
-        <!-- Path from card to merge point (500, 80) -->
-        <!-- We add 0.01 to the target X to avoid a rendering bug with glow filters on perfectly vertical lines -->
-        <path [attr.d]="'M ' + getCircleCx(i) + ' 0 Q ' + ((getCircleCx(i) + 500.01) / 2) + ' 80 500.01 80'" fill="none"
-            stroke="#10b981" stroke-width="2" class="flow-in" filter="url(#af-glow)" stroke-linecap="round" />
+            @for (i of getPointsArray(); track i) {
+            <path [attr.d]="'M ' + getCircleCx(i) + ' 0 Q ' + ((getCircleCx(i) + 500.01) / 2) + ' 80 500.01 80'"
+                fill="none" stroke="#10b981" stroke-width="2" class="flow-in" filter="url(#af-glow)"
+                stroke-linecap="round" />
+            <circle [attr.cx]="getCircleCx(i)" cy="0" r="3" fill="#10b981" />
+            }
 
-        <!-- Top Origin Dot -->
-        <circle [attr.cx]="getCircleCx(i)" cy="0" r="3" fill="#10b981" />
-        }
+            <path d="M 500 80 L 500.01 100" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
+                filter="url(#af-glow)" stroke-linecap="round" />
+            <circle cx="500" cy="80" r="5" fill="#10b981" filter="url(#af-glow)" />
+            <polygon points="492,92 508,92 500,108" fill="#10b981" filter="url(#af-glow)" />
 
-        <!-- Single drop from merge point to pool -->
-        <path d="M 500 80 L 500.01 100" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
-            filter="url(#af-glow)" stroke-linecap="round" />
+            } @else {
+            <!-- 
+                GREEN INBOUND FLOW — MULTI-ROW MODE (4+ points)
+                Horizontal bar is rendered as a CSS div (outside SVG) to avoid preserveAspectRatio distortion.
+                SVG only handles the vertical center drop + arrow.
+                -->
 
-        <!-- Merge Glowing Center Point -->
-        <circle cx="500" cy="80" r="5" fill="#10b981" filter="url(#af-glow)" />
+            <!-- Center junction: vertical drop from top to arrow -->
+            <path d="M 500 10 L 500.01 90" fill="none" stroke="#10b981" stroke-width="2" class="flow-in"
+                filter="url(#af-glow)" stroke-linecap="round" />
 
-        <!-- Arrow pointing down to Pool -->
-        <polygon points="492,92 508,92 500,108" fill="#10b981" filter="url(#af-glow)" />
+            <!-- Glowing center junction dot -->
+            <circle cx="500" cy="10" r="5" fill="#10b981" filter="url(#af-glow)" />
 
-        } @else {
-        <!-- 
+            <!-- Arrow pointing down to Pool -->
+            <polygon points="492,85 508,85 500,105" fill="#10b981" filter="url(#af-glow)" />
+            }
+
+            } @else {
+            <!-- 
             ORANGE OUTBOUND FLOW (Pool -> Distribution)
-            Matches Stitch EXACTLY: center drop to an arc, branching into 4 horizontal lines that drop vertically.
             -->
 
-        <!-- Main Trunk Drop -->
-        <path d="M 500 0 L 500.01 50" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
-            filter="url(#af-glow)" stroke-linecap="round" />
+            <path d="M 500 0 L 500.01 50" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+                filter="url(#af-glow)" stroke-linecap="round" />
 
-        <!-- The glowing junction node arc -->
-        <path d="M 470 45 Q 500 25 530 45" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
-            filter="url(#af-glow)" stroke-linecap="round" />
-        <circle cx="500" cy="35" r="5" fill="#fb923c" filter="url(#af-glow)" />
+            <path d="M 470 45 Q 500 25 530 45" fill="none" stroke="#fb923c" stroke-width="2" class="flow-out"
+                filter="url(#af-glow)" stroke-linecap="round" />
+            <circle cx="500" cy="35" r="5" fill="#fb923c" filter="url(#af-glow)" />
 
-        @for (i of getPointsArray(); track i) {
-        <!-- Branch: Center junction (500.01, 35) spread out to targeted x coordinate -->
-        <!-- Offset added to avoid rendering bugs on vertical lines -->
-        <path [attr.d]="'M 500.01 35 C 500.01 55, ' + getCircleCx(i) + ' 55, ' + getCircleCx(i) + ' 100'" fill="none"
-            stroke="#fb923c" stroke-width="2" class="flow-out" filter="url(#af-glow)" stroke-linejoin="round" />
+            @for (i of getPointsArray(); track i) {
+            <path [attr.d]="'M 500.01 35 C 500.01 55, ' + getCircleCx(i) + ' 55, ' + getCircleCx(i) + ' 100'"
+                fill="none" stroke="#fb923c" stroke-width="2" class="flow-out" filter="url(#af-glow)"
+                stroke-linejoin="round" />
 
-        <!-- Arrowheads pointing down -->
-        <polygon [attr.points]="(getCircleCx(i)-6) + ',92 ' + (getCircleCx(i)+6) + ',92 ' + getCircleCx(i) + ',108'"
-            fill="#fb923c" filter="url(#af-glow)" />
-        }
-        }
+            <polygon [attr.points]="(getCircleCx(i)-6) + ',92 ' + (getCircleCx(i)+6) + ',92 ' + getCircleCx(i) + ',108'"
+                fill="#fb923c" filter="url(#af-glow)" />
+            }
+            }
 
     </svg>
+
+    <!-- CSS-based horizontal bar for 4+ inbound points (avoids SVG horizontal line rendering issues) -->
+    @if (direction === 'in' && points > 3) {
+    <!-- Animated dashed horizontal bar — split into two halves converging toward center -->
+    <!-- Left half: flows from left → center -->
+    <div class="absolute top-[10px] left-0 w-1/2 h-[2px] flow-bar-to-right"
+        style="filter: drop-shadow(0 0 4px #10b981);"></div>
+    <!-- Right half: flows from right → center -->
+    <div class="absolute top-[10px] right-0 w-1/2 h-[2px] flow-bar-to-left"
+        style="filter: drop-shadow(0 0 4px #10b981);"></div>
+
+    <!-- Left bracket: vertical line curving into horizontal bar -->
+    <div class="absolute left-0 top-[-30px] w-[2px] h-[42px] flow-bar-animated-vertical rounded-b-full"
+        style="filter: drop-shadow(0 0 4px #10b981);"></div>
+
+    <!-- Right bracket: vertical line curving into horizontal bar -->
+    <div class="absolute right-0 top-[-30px] w-[2px] h-[42px] flow-bar-animated-vertical rounded-b-full"
+        style="filter: drop-shadow(0 0 4px #10b981);"></div>
+    }
 </div>

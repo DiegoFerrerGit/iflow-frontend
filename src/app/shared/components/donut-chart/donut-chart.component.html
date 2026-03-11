@@ -74,11 +74,14 @@
                     [ngClass]="hoverNameClass" [style.color]="hoveredSegment.color">
                     {{ hoveredSegment.name }}
                 </span>
-                <span class="font-black tracking-tighter drop-shadow-md transition-colors mb-0.5"
-                    [ngClass]="hoverAmountClass + ' ' + (hoveredSegment.amountColorClass || 'text-white')">
-                    {{ '' | dynamicCurrencySymbol }}{{ hoveredSegment.amount |
-                    dynamicCurrency:currencyState.currentCurrency() }}
-                </span>
+                <div class="flex items-baseline justify-center gap-1.5 mb-0.5">
+                    <span class="text-slate-400 text-sm font-bold drop-shadow-md">{{ '' |
+                        dynamicCurrencySymbol }}</span>
+                    <span class="font-black tracking-tighter drop-shadow-md transition-colors"
+                        [ngClass]="hoverAmountClass + ' ' + (hoveredSegment.amountColorClass || 'text-white')">{{
+                        hoveredSegment.amount |
+                        dynamicCurrency:currencyState.currentCurrency() }}</span>
+                </div>
                 <span class="text-slate-400 font-black" [ngClass]="hoverPercentageClass">({{ hoveredSegment.percentage |
                     number:'1.0-0'
                     }}%)</span>

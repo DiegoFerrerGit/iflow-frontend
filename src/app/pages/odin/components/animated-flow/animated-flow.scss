@@ -2,3 +2,62 @@
     display: block;
     width: 100%;
 }
+
+// Shared gradient for dashed green lines
+$dash-gradient-h: repeating-linear-gradient(90deg,
+        #10b981 0px,
+        #10b981 6px,
+        transparent 6px,
+        transparent 16px);
+
+// Left half: flows LEFT → RIGHT (toward center)
+.flow-bar-to-right {
+    background: $dash-gradient-h;
+    animation: flow-dash-right 0.32s linear infinite;
+}
+
+@keyframes flow-dash-right {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 16px 0;
+    }
+}
+
+// Right half: flows RIGHT → LEFT (toward center)
+.flow-bar-to-left {
+    background: $dash-gradient-h;
+    animation: flow-dash-left 0.32s linear infinite;
+}
+
+@keyframes flow-dash-left {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: -16px 0;
+    }
+}
+
+// Animated dashed vertical bracket lines
+.flow-bar-animated-vertical {
+    background: repeating-linear-gradient(180deg,
+            #10b981 0px,
+            #10b981 6px,
+            transparent 6px,
+            transparent 16px);
+    animation: flow-dash-vertical 0.32s linear infinite;
+}
+
+@keyframes flow-dash-vertical {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 0 -16px;
+    }
+}
