@@ -27,6 +27,7 @@ export class SubCategoryFormModal implements OnInit {
     @Input() availableAmountToAssign: number = 0; // Base USD
     @Input() usedColors: ThemeColor[] = [];
     @Input() isLoading: boolean = false;
+    @Input() forcedType: 'fixed_amount' | 'sum_items' | null = null;
     @Output() close = new EventEmitter<void>();
     @Output() save = new EventEmitter<IAllocationSubCategoryDto>();
 
@@ -69,7 +70,7 @@ export class SubCategoryFormModal implements OnInit {
         this.form = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(2)]],
             icon: ['category'],
-            type: ['fixed_amount', Validators.required],
+            type: [this.forcedType || 'fixed_amount', Validators.required],
             currency: [initialCurrency],
             amount: [initialAmountInOriginalCurrency, [Validators.min(0)]],
             color: ['primary', Validators.required]

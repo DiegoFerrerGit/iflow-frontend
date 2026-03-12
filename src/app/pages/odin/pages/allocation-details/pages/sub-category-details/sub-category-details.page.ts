@@ -13,6 +13,7 @@ import { ThemeColor } from '../../../../../../models/income.model';
 import { DeleteConfirmationModal } from '../../../../components/delete-confirmation-modal/delete-confirmation-modal';
 import { ItemFormModalComponent } from '../../../../components/item-form-modal/item-form-modal.component';
 import { LoaderComponent } from '../../../../../../shared/components/loader/loader.component';
+import { ResponsiveDirective } from '../../../../../../shared/directives/responsive.directive';
 
 const TEXT_CLASS_MAP: Record<string, string> = {
     'primary': 'text-purple-400',
@@ -67,7 +68,8 @@ const BG_CLASS_MAP: Record<string, string> = {
         BackButtonComponent,
         DeleteConfirmationModal,
         ItemFormModalComponent,
-        LoaderComponent
+        LoaderComponent,
+        ResponsiveDirective
     ],
     templateUrl: './sub-category-details.page.html'
 })
@@ -103,6 +105,9 @@ export class SubCategoryDetailsPage implements OnInit {
     // Modal Loading States
     isItemModalSaving = signal<boolean>(false);
     isDeletingItem = signal<boolean>(false);
+
+    activeMobileMenuId = signal<string | null>(null);
+    isFabMenuOpen = signal<boolean>(false);
 
     // Gets the box name from signal or fallback
     boxName = computed(() => {
@@ -357,5 +362,27 @@ export class SubCategoryDetailsPage implements OnInit {
             },
             error: () => this.isDeletingItem.set(false)
         });
+    }
+
+    toggleMobileMenu(id: string, event: Event) {
+        event.stopPropagation();
+        if (this.activeMobileMenuId() === id) {
+            this.activeMobileMenuId.set(null);
+        } else {
+            this.activeMobileMenuId.set(id);
+            this.isFabMenuOpen.set(false);
+        }
+    }
+
+    closeMobileMenu() {
+        this.activeMobileMenuId.set(null);
+        this.isFabMenuOpen.set(false);
+    }
+
+    toggleFabMenu() {
+        this.isFabMenuOpen.update(prev => !prev);
+        if (this.isFabMenuOpen()) {
+            this.activeMobileMenuId.set(null);
+        }
     }
 }

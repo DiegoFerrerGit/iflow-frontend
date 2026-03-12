@@ -45,19 +45,17 @@
                 </div>
 
                 <!-- Group 2 -->
-                <div class="grid grid-cols-[1fr_2fr] md:grid-cols-2 gap-3 md:gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">
+                <div class="grid grid-cols-[1.4fr_1.6fr] md:grid-cols-2 gap-3 md:gap-6 items-start">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1 mb-2">
                             Moneda <span class="text-red-400">*</span>
                         </label>
-                        <select formControlName="currency"
-                            class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary px-3 py-2.5 md:px-4 md:py-3 appearance-none transition-all cursor-pointer">
-                            <option value="USD">USD ($)</option>
-                            <option value="ARS">ARS ($)</option>
-                        </select>
+                        <app-toggle [options]="currencyOptions" [selectedValue]="incomeForm.get('currency')?.value"
+                            (selectionChange)="incomeForm.get('currency')?.setValue($event)">
+                        </app-toggle>
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1 mb-2">
                             Monto <span class="text-red-400">*</span>
                         </label>
                         <div class="relative">
@@ -65,7 +63,7 @@
                                 class="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold max-w-[40px] truncate text-xs md:text-sm">{{
                                 '' | dynamicCurrencySymbol:incomeForm.get('currency')?.value }}</span>
                             <input formControlName="amount"
-                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-10 pr-3 py-2.5 md:pl-14 md:pr-4 md:py-3 placeholder:text-slate-600 transition-all cursor-text select-text [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+                                class="w-full h-[46px] bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-10 pr-3 py-2.5 md:pl-14 md:pr-4 md:py-3 placeholder:text-slate-600 transition-all cursor-text select-text [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                                 placeholder="0.00" type="number" />
                         </div>
                     </div>

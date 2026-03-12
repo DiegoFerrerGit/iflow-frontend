@@ -61,8 +61,8 @@
                     </div>
                 </div>
 
-                <!-- Type Selection with Toggle (Hidden if editing) -->
-                @if (!initialSubCategory) {
+                <!-- Type Selection with Toggle (Hidden if editing OR if type is forced) -->
+                @if (!initialSubCategory && !forcedType) {
                 <div class="space-y-4">
                     <label class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1 block mb-2">Tipo
                         de Monto <span class="text-red-400">*</span></label>
@@ -70,6 +70,7 @@
                         (selectionChange)="onTypeChange($event)">
                     </app-toggle>
                 </div>
+                }
 
                 @if (amountType === 'sum_items') {
                 <div
@@ -79,13 +80,12 @@
                         calculará automáticamente sumando los ítems internos que agregues luego.</p>
                 </div>
                 }
-                }
 
                 <!-- Amount & Currency Details (Conditional) -->
                 @if (amountType === 'fixed_amount') {
                 <div class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div class="grid grid-cols-[1fr_2fr] md:grid-cols-2 gap-3 md:gap-4">
-                        <div>
+                    <div class="grid grid-cols-[1.4fr_1.6fr] md:grid-cols-2 gap-3 md:gap-4 items-start">
+                        <div class="flex flex-col">
                             <label
                                 class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1 block mb-2">Moneda
                                 <span class="text-red-400">*</span></label>
@@ -94,12 +94,13 @@
                             </app-toggle>
                         </div>
 
-                        <div class="space-y-1.5 flex flex-col">
-                            <label class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1">Monto
+                        <div class="flex flex-col">
+                            <label
+                                class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1 block mb-2">Monto
                                 Fijo <span class="text-red-400">*</span></label>
                             <div class="relative">
                                 <input type="number" formControlName="amount"
-                                    class="w-full bg-[#151821] border border-white/10 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    class="w-full h-[46px] bg-[#151821] border border-white/10 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     [class.border-red-500]="form.get('amount')?.hasError('max')">
                             </div>
                         </div>

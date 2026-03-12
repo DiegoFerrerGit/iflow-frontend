@@ -3,14 +3,17 @@
     width: 100%;
 }
 
-.bg-primary\/20 {
-    background-color: rgba(168, 85, 247, 0.2);
-}
-
-.border-primary\/30 {
-    border-color: rgba(168, 85, 247, 0.3);
+.shadow-glow {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
 }
 
 .text-primary {
     color: #a855f7;
+}
+
+// Ensure the highlight transition is smooth
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
 }

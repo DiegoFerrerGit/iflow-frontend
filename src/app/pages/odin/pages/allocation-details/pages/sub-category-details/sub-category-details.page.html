@@ -1,51 +1,108 @@
-<div class="h-full flex flex-col p-4 sm:p-6 md:p-8 lg:p-12 mb-32 max-w-[1600px] mx-auto overflow-y-auto">
+<div
+    class="h-full flex flex-col p-4 sm:p-6 md:p-8 lg:p-12 mb-32 max-w-[1600px] mx-auto overflow-y-auto overflow-x-hidden">
+
+    <!-- Mobile Action Menu Backdrop -->
+    @if (activeMobileMenuId()) {
+    <div class="fixed inset-0 z-[105] bg-transparent" (click)="closeMobileMenu()"></div>
+    }
 
     @if (pageData() !== null) {
-    <!-- Breadcrumbs -->
-    <div class="flex items-center gap-2 mb-2">
-        <button [routerLink]="['/odin']"
-            class="text-slate-500 hover:text-white transition-colors text-xs font-black tracking-widest uppercase truncate">DASHBOARD</button>
-        <span class="text-slate-500 text-xs font-black tracking-widest uppercase">&gt;</span>
-        <button (click)="goBack()"
-            class="text-slate-500 hover:text-white transition-colors text-xs font-black tracking-widest uppercase truncate">{{
-            boxName() }}</button>
-        <span class="text-slate-500 text-xs font-black tracking-widest uppercase">&gt;</span>
-        <span class="text-indigo-400 text-xs font-black tracking-widest uppercase truncate">{{ subCategoryName()
-            }}</span>
-    </div>
-
-    <!-- Header: Title & Amount -->
-    <div class="flex items-start justify-between mb-4 mt-2">
-        <div class="flex items-center gap-4 mt-2">
-            <app-back-button></app-back-button>
-            <h1 class="text-5xl font-black text-white tracking-tight uppercase">{{ subCategoryName() }}</h1>
+    <div *iflowResponsive="'DESKTOP'">
+        <!-- Breadcrumbs -->
+        <div class="flex items-center gap-2 mb-2 uppercase font-black text-xs tracking-widest text-slate-500">
+            <button [routerLink]="['/odin']" class="hover:text-white transition-colors">DASHBOARD</button>
+            <span class="opacity-50">&gt;</span>
+            <button (click)="goBack()" class="hover:text-white transition-colors">{{ boxName() }}</button>
+            <span class="opacity-50">&gt;</span>
+            <span class="text-indigo-400">{{ subCategoryName() }}</span>
         </div>
 
-        <div class="flex items-center gap-8">
-            @if (parentBoxType() === 'percentage' && (pageData()?.available_amount_to_assign ?? 0) > 0) {
-            <div class="flex flex-col items-end gap-1 border-r border-white/10 pr-8">
-                <span class="text-cyan-400/80 text-[10px] font-bold uppercase tracking-[0.2em]">Sin Asignar:</span>
-                <div class="flex items-baseline gap-1">
-                    <span class="text-cyan-400/70 text-sm font-bold">{{ '' | dynamicCurrencySymbol }}</span>
-                    <span class="text-cyan-400 font-bold text-2xl tabular-nums tracking-tighter">{{
-                        pageData()!.available_amount_to_assign |
-                        dynamicCurrency:currencyState.currentCurrency() }}</span>
-                    <span class="text-cyan-400/60 text-sm ml-1">{{
-                        currencyState.currentCurrency() }}</span>
+        <!-- Header: Title & Amount -->
+        <div class="flex items-start justify-between mb-8 mt-2">
+            <div class="flex items-center gap-4 mt-2">
+                <app-back-button></app-back-button>
+                <h1 class="text-5xl font-black text-white tracking-tight uppercase leading-none">{{ subCategoryName() }}
+                </h1>
+            </div>
+
+            <div class="flex items-center gap-8">
+                @if (parentBoxType() === 'percentage' && (pageData()?.available_amount_to_assign ?? 0) > 0) {
+                <div class="flex flex-col items-end gap-1 border-r border-white/10 pr-8 pb-1">
+                    <span class="text-cyan-400/80 text-[10px] font-black uppercase tracking-[0.2em]">Sin Asignar:</span>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-cyan-400/70 text-sm font-bold">{{ '' | dynamicCurrencySymbol }}</span>
+                        <span class="text-cyan-400 font-black text-2xl tabular-nums tracking-tighter">{{
+                            pageData()!.available_amount_to_assign |
+                            dynamicCurrency:currencyState.currentCurrency() }}</span>
+                    </div>
+                </div>
+                }
+
+                <div class="flex flex-col items-end gap-1">
+                    <span class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total
+                        Acumulado:</span>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-emerald-400 text-3xl font-bold mt-1">{{ '' | dynamicCurrencySymbol }}</span>
+                        <span
+                            class="text-emerald-400 text-5xl font-black tabular-nums tracking-tighter drop-shadow-xl leading-none">
+                            {{ accumulatedTotal() | dynamicCurrency:currencyState.currentCurrency() }}
+                        </span>
+                    </div>
                 </div>
             </div>
-            }
+        </div>
+    </div>
 
-            <div class="flex flex-col items-end gap-1">
-                <span class="text-slate-500 text-sm font-medium uppercase tracking-[0.2em]">Total Acumulado:</span>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-emerald-400 text-3xl font-bold mt-1">{{ '' | dynamicCurrencySymbol }}</span>
-                    <span
-                        class="text-emerald-400 text-5xl font-black tabular-nums tracking-tighter drop-shadow-lg leading-none">
-                        {{ accumulatedTotal() | dynamicCurrency:currencyState.currentCurrency() }}
-                    </span>
-                    <span class="text-emerald-400/80 text-sm font-bold ml-1">{{ currencyState.currentCurrency()
-                        }}</span>
+    <!-- MOBILE HEADER -->
+    <div *iflowResponsive="'MOBILE'" class="mb-12">
+        <!-- Breadcrumbs Fixed -->
+        <div
+            class="fixed top-0 left-0 w-full z-[100] bg-[#0f0a15] px-4 py-3 flex items-center gap-3 border-b border-white/5 shadow-2xl">
+            <button (click)="goBack()"
+                class="text-orange-500 hover:text-orange-400 transition-colors flex items-center">
+                <span class="material-symbols-outlined text-[28px]">chevron_left</span>
+            </button>
+            <div class="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase">
+                <span class="text-slate-400">ODIN</span>
+                <span class="text-slate-400 opacity-20">/</span>
+                <span class="text-slate-400 truncate max-w-[100px]">{{ boxName() }}</span>
+                <span class="text-slate-400 opacity-20">/</span>
+                <span class="text-orange-500 truncate max-w-[120px]">{{ subCategoryName() }}</span>
+            </div>
+        </div>
+
+        <div class="h-16"></div>
+
+        <div class="flex flex-col items-center text-center gap-3 px-2">
+            <h1 class="text-white text-[40px] font-black tracking-tighter uppercase leading-none">{{ subCategoryName()
+                }}
+            </h1>
+
+            <div class="w-full flex justify-center gap-8 mt-2">
+                <!-- Sin Asignar -->
+                @if (parentBoxType() === 'percentage') {
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-cyan-500 font-black tracking-widest uppercase mb-1">Sin Asignar</span>
+                    <div class="flex items-baseline gap-0.5">
+                        <span class="text-slate-400 text-[10px] font-bold leading-none">u$d</span>
+                        <span class="text-cyan-400 text-2xl font-black tracking-tighter leading-none">{{
+                            pageData()?.available_amount_to_assign | dynamicCurrency:currencyState.currentCurrency()
+                            }}</span>
+                    </div>
+                </div>
+                <div class="w-[1px] h-6 bg-white/10 self-center"></div>
+                }
+
+                <!-- Total Acumulado -->
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-emerald-500/80 font-black tracking-widest uppercase mb-1">Total
+                        Acumulado</span>
+                    <div class="flex items-baseline gap-0.5">
+                        <span class="text-slate-400 text-[10px] font-bold leading-none">u$d</span>
+                        <span class="text-emerald-400 text-2xl font-black tracking-tighter leading-none">{{
+                            accumulatedTotal()
+                            | dynamicCurrency:currencyState.currentCurrency() }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -96,24 +153,25 @@
         </div>
     </section>
 
-    <!-- Main Items List Section -->
-    <section class="pb-12 flex-1 w-full mt-4">
+    <section class="pb-12 flex-1 w-full mt-4 overflow-visible">
         <div class="flex items-center justify-between mb-8 pb-2 border-b border-white/5 flex-wrap gap-4">
             <div class="flex items-center gap-4">
                 <h3 class="text-2xl font-black text-white uppercase tracking-tighter">Detalle de Gastos</h3>
-                <span
+                <span *iflowResponsive="'DESKTOP'"
                     class="text-[10px] font-bold bg-indigo-500/10 px-2.5 py-1 rounded-full text-indigo-400 border border-indigo-500/20 tracking-widest uppercase">
                     {{ itemsWithDetails().length }} ITEMS ACTIVOS
                 </span>
             </div>
 
             @if ((pageData()?.available_amount_to_assign ?? 1) > 0) {
-            <button (click)="openItemModal()"
-                class="group relative inline-flex items-center justify-center bg-white/5 border border-white/10 px-6 py-2.5 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
-                <span
-                    class="material-symbols-outlined mr-2 text-white/70 group-hover:text-white transition-colors">add</span>
-                <span class="text-white font-bold tracking-wide text-sm">AÑADIR ÍTEM</span>
-            </button>
+            <div *iflowResponsive="'DESKTOP'">
+                <button (click)="openItemModal()"
+                    class="group relative inline-flex items-center justify-center bg-white/5 border border-white/10 px-6 py-2.5 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                    <span
+                        class="material-symbols-outlined mr-2 text-white/70 group-hover:text-white transition-colors">add</span>
+                    <span class="text-white font-bold tracking-wide text-sm">AÑADIR ÍTEM</span>
+                </button>
+            </div>
             } @else {
             <div class="px-5 py-2.5 rounded-full bg-rose-500/10 border border-rose-500/20">
                 <span class="text-[10px] text-rose-400 font-black uppercase tracking-widest">Todo el dinero disponible
@@ -122,10 +180,11 @@
             }
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-3 relative z-10" [class.z-[110]]="activeMobileMenuId()">
             @for (item of itemsWithDetails(); track item.id) {
-            <!-- Item Row -->
-            <div class="group border border-transparent hover:border-white/10 transition-all duration-300 relative flex items-center justify-between py-5 px-4 rounded-2xl bg-transparent hover:bg-white/[0.02]"
+            <!-- DESKTOP ITEM ROW -->
+            <div *iflowResponsive="'DESKTOP'"
+                class="group border border-transparent hover:border-white/10 transition-all duration-300 relative flex items-center justify-between py-5 px-4 rounded-2xl bg-transparent hover:bg-white/[0.02]"
                 [class.pointer-events-none]="loadingItemId() === item.id">
 
                 <!-- Element Loader Overlay -->
@@ -210,7 +269,85 @@
                         </button>
                     </div>
                 </div>
+            </div>
 
+            <!-- MOBILE ITEM ROW -->
+            <div *iflowResponsive="'MOBILE'"
+                class="bg-[#141722]/50 border border-white/5 rounded-2xl py-2.5 px-3 flex items-center justify-between group active:bg-[#1a1e2d] transition-all relative overflow-visible"
+                [class.z-[110]]="activeMobileMenuId() === item.id">
+
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[20px]" [ngClass]="item.textColorClass">
+                            {{ item.icon || 'category' }}
+                        </span>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-1.5 min-h-[1.25em]">
+                            <h3 class="font-black text-[14px] tracking-wide text-white uppercase leading-none">
+                                {{ item.name }}
+                            </h3>
+                            @if (item.has_payment_control && item.paid) {
+                            <span class="material-symbols-outlined text-emerald-400 text-[14px]">check_circle</span>
+                            }
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span class="text-[9px] font-black uppercase tracking-wider opacity-60"
+                                [ngClass]="item.textColorClass">
+                                {{ item.percentage | number:'1.0-0' }}% de {{ subCategoryName() }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="flex items-baseline gap-0.5">
+                        <span class="text-slate-500 text-[9px] font-black uppercase">u$d</span>
+                        <span class="text-white font-black text-sm">
+                            {{ item.calculatedAmount | dynamicCurrency:currencyState.currentCurrency() }}
+                        </span>
+                    </div>
+
+                    <div class="relative">
+                        <button (click)="toggleMobileMenu(item.id, $event)"
+                            class="w-8 h-8 rounded-full flex items-center justify-center border border-white/10 transition-all"
+                            [class.border-rose-500/50]="activeMobileMenuId() === item.id"
+                            [class.bg-rose-500/10]="activeMobileMenuId() === item.id">
+                            <span class="material-symbols-outlined text-[18px]"
+                                [class.text-rose-400]="activeMobileMenuId() === item.id"
+                                [class.text-slate-500]="activeMobileMenuId() !== item.id">
+                                {{ activeMobileMenuId() === item.id ? 'close' : 'more_horiz' }}
+                            </span>
+                        </button>
+
+                        <!-- Action Menu Overlay -->
+                        @if (activeMobileMenuId() === item.id) {
+                        <div
+                            class="absolute right-0 top-10 min-w-[120px] bg-[#1a1e2d] border border-white/10 rounded-xl shadow-2xl z-[120] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                            @if (item.has_payment_control) {
+                            <button (click)="togglePaidStatus(item.id); closeMobileMenu(); $event.stopPropagation()"
+                                class="w-full flex items-center gap-2 px-4 py-3 text-white hover:bg-white/5 transition-colors border-b border-white/5">
+                                <span class="material-symbols-outlined text-[18px]" [class.text-emerald-400]="item.paid"
+                                    [class.text-slate-400]="!item.paid">check_circle</span>
+                                <span class="text-[11px] font-bold tracking-widest uppercase">{{ item.paid ? 'Marc.
+                                    Pendiente' : 'Marc. Pagado' }}</span>
+                            </button>
+                            }
+                            <button (click)="openItemModal(item); closeMobileMenu(); $event.stopPropagation()"
+                                class="w-full flex items-center gap-2 px-4 py-3 text-white hover:bg-white/5 transition-colors border-b border-white/5">
+                                <span class="material-symbols-outlined text-[18px] text-indigo-400">edit</span>
+                                <span class="text-[11px] font-bold tracking-widest uppercase">Editar</span>
+                            </button>
+                            <button (click)="openDeleteModal(item); closeMobileMenu(); $event.stopPropagation()"
+                                class="w-full flex items-center gap-2 px-4 py-3 text-rose-500 hover:bg-rose-500/5 transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                <span class="text-[11px] font-bold tracking-widest uppercase">Eliminar</span>
+                            </button>
+                        </div>
+                        }
+                    </div>
+                </div>
             </div>
             }
 
@@ -226,6 +363,49 @@
 
         </div>
     </section>
+    }
+
+    <!-- Mobile Orange FAB -->
+    @if ((pageData()?.available_amount_to_assign ?? 1) > 0) {
+    <div *iflowResponsive="'MOBILE'"
+        class="fixed bottom-[80px] right-6 z-[50] flex flex-col items-end transition-all duration-300 pointer-events-auto"
+        [class.opacity-0]="activeMobileMenuId() || isItemFormModalOpen()"
+        [class.invisible]="activeMobileMenuId() || isItemFormModalOpen()">
+
+        <!-- FAB Backdrop (when menu is open) -->
+        @if (isFabMenuOpen()) {
+        <div class="fixed inset-0 bg-[#070509]/60 backdrop-blur-[3px] z-[-1] animate-fade-in" (click)="toggleFabMenu()">
+        </div>
+        }
+
+        <!-- Menu Options -->
+        <div class="flex flex-col items-end mb-4 pr-1" [class.hidden]="!isFabMenuOpen()">
+            <button (click)="openItemModal(); toggleFabMenu()"
+                class="flex items-center gap-3 animate-in slide-in-from-bottom-6 duration-500 group">
+                <div
+                    class="w-12 h-12 rounded-full border-2 border-orange-500/50 bg-[#16121d] flex items-center justify-center text-orange-500 shadow-lg group-active:scale-95 transition-transform">
+                    <span class="material-symbols-outlined text-2xl">receipt_long</span>
+                </div>
+                <span
+                    class="bg-[#1f222e] text-white/90 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase shadow-xl border border-white/5">Añadir
+                    Ítem</span>
+            </button>
+        </div>
+
+        <!-- Main Toggle Button -->
+        <div class="relative flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full blur-[40px] animate-pulse pointer-events-none transition-all duration-700"
+                style="background-color: #f97316;" [class.scale-[4]]="isFabMenuOpen()"
+                [class.opacity-100]="isFabMenuOpen()" [class.opacity-50]="!isFabMenuOpen()">
+            </div>
+
+            <button (click)="toggleFabMenu()"
+                class="relative w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-95 z-10 focus:outline-none bg-orange-500 shadow-[rgba(0,0,0,0.15)_0px_0px_15px_inset]"
+                [class.rotate-45]="isFabMenuOpen()">
+                <span class="material-symbols-outlined text-4xl">add</span>
+            </button>
+        </div>
+    </div>
     }
 </div>
 

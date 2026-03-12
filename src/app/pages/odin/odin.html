@@ -41,7 +41,7 @@
         <div [class]="'w-full flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:grid md:grid-cols-3 md:gap-6 md:pb-0 md:overflow-visible md:snap-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative z-20' + (incomes.length > 3 ? ' md:px-6' : '')"
             cdkDropList (cdkDropListDropped)="dropIncome($event)">
             @for (income of incomes; track income.id; let i = $index) {
-            <div class="w-[280px] sm:w-[350px] shrink-0 snap-center md:w-auto md:shrink-1 md:snap-align-none">
+            <div class="w-[300px] sm:w-[370px] shrink-0 snap-center md:w-auto md:shrink-1 md:snap-align-none">
                 <app-income-card cdkDrag [cdkDragDisabled]="responsiveState.isMobile()" [income]="income"
                     [isLoading]="updatingIncomeId === income.id" (delete)="promptDelete(income)"
                     (edit)="openModal(income)"
@@ -51,7 +51,7 @@
 
             @if (incomes.length % 3 !== 0) {
             <div *iflowResponsive="'DESKTOP'"
-                class="w-[85vw] sm:w-[350px] shrink-0 snap-center md:w-auto md:shrink-1 md:snap-align-none md:col-span-1 flex min-h-[140px]">
+                class="w-[85vw] sm:w-[370px] shrink-0 snap-center md:w-auto md:shrink-1 md:snap-align-none md:col-span-1 flex min-h-[140px]">
                 <div (click)="openModal()"
                     class="w-full rounded-2xl border-2 border-dashed border-white/10 hover:border-white/30 p-6 flex flex-col items-center justify-center relative cursor-pointer group transition-all duration-300 bg-white/[0.02] hover:bg-white/[0.04] shadow-none">
                     <div

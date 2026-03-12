@@ -6,10 +6,14 @@ import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-p
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { CategoryColorService } from '../../../../shared/services/category-color.service';
 
+import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
+import { ResponsiveDirective } from '../../../../shared/directives/responsive.directive';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-income-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DynamicCurrencySymbolPipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DynamicCurrencySymbolPipe, ToggleComponent],
   templateUrl: './income-form-modal.html',
   styleUrl: './income-form-modal.scss'
 })
@@ -31,6 +35,11 @@ export class IncomeFormModal implements OnInit {
   isClosing = false;
   defaultTags = ['Management', 'Developer', 'Consulting'];
   allThemeColors = THEME_COLORS;
+
+  public currencyOptions: ToggleOption[] = [
+    { label: 'USD', value: 'USD' },
+    { label: 'ARS', value: 'ARS' }
+  ];
 
   // Curated list of popular generic and tech/finance Material Icons
   public curatedIcons = [

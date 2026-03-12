@@ -1,9 +1,11 @@
-<div class="fixed inset-0 z-[100] flex justify-end">
+<div class="fixed inset-0 z-[100] flex justify-end overflow-hidden">
     <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" (click)="close.emit()"></div>
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-fade-in"
+        [class.animate-fade-out]="isClosing" (click)="closeModal()"></div>
 
     <!-- Modal panel -->
-    <div class="relative w-full max-w-lg h-full bg-[#1b202c] shadow-2xl flex flex-col transform transition-transform">
+    <div class="absolute top-0 bottom-[calc(60px+env(safe-area-inset-bottom,0px))] md:bottom-0 right-0 w-[85%] md:w-full md:max-w-lg bg-[#1b202c] shadow-2xl flex flex-col transform transition-transform animate-slide-in-right md:animate-none md:transform-none pointer-events-auto"
+        [class.animate-slide-out-right]="isClosing" (click)="$event.stopPropagation()">
 
         <!-- Header -->
         <div class="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-[#1f222e]">
@@ -18,7 +20,7 @@
                     <p class="text-slate-400 text-xs mt-0.5">Define los detalles del gasto o asignación.</p>
                 </div>
             </div>
-            <button (click)="close.emit()" class="text-slate-400 hover:text-white transition-colors">
+            <button (click)="closeModal()" class="text-slate-400 hover:text-white transition-colors">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
@@ -56,17 +58,18 @@
                 <!-- Amount & Currency Details -->
                 <div class="space-y-6">
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1.5 flex flex-col">
+                        <div class="space-y-1 flex flex-col">
                             <label
-                                class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1 block mb-2">Moneda
+                                class="text-[9px] md:text-[10px] font-black tracking-normal md:tracking-[0.2em] text-slate-400 uppercase pl-1 block mb-1 md:mb-2">Moneda
                                 <span class="text-red-400">*</span></label>
                             <app-toggle [options]="currencyOptions" [selectedValue]="form.get('currency')?.value"
                                 (selectionChange)="onCurrencyChange($event)">
                             </app-toggle>
                         </div>
 
-                        <div class="space-y-1.5 flex flex-col">
-                            <label class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1">Monto
+                        <div class="space-y-1 flex flex-col">
+                            <label
+                                class="text-[9px] md:text-[10px] font-black tracking-normal md:tracking-[0.2em] text-slate-400 uppercase pl-1 block mb-1 md:mb-2">Monto
                                 Asignado <span class="text-red-400">*</span></label>
                             <div class="relative group">
                                 <input type="number" formControlName="amount"
@@ -170,9 +173,8 @@
 
             </div>
 
-            <!-- Footer -->
             <div class="px-6 py-5 border-t border-white/5 bg-[#1f222e] flex gap-3">
-                <button type="button" (click)="close.emit()"
+                <button type="button" (click)="closeModal()" [disabled]="isLoading"
                     class="flex-1 py-3.5 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase bg-[#151821] text-slate-500 hover:text-white transition-all">
                     Cancelar
                 </button>

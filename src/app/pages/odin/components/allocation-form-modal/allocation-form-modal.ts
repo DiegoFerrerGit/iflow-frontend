@@ -6,10 +6,13 @@ import { ThemeColor } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 
+import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
+
+
 @Component({
   selector: 'app-allocation-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCurrencyPipe, DynamicCurrencySymbolPipe],
+  imports: [CommonModule, FormsModule, DynamicCurrencyPipe, DynamicCurrencySymbolPipe, ToggleComponent],
   templateUrl: './allocation-form-modal.html',
   styleUrl: './allocation-form-modal.scss'
 })
@@ -22,6 +25,16 @@ export class AllocationFormModalComponent implements OnInit {
   @Input() onboardingMode: boolean = false;
   @Output() save = new EventEmitter<AllocationBox>();
   @Output() cancel = new EventEmitter<void>();
+
+  public calculationTypeOptions: ToggleOption[] = [
+    { label: 'Suma de Ítems', value: 'absolute', icon: 'list_alt' },
+    { label: 'Porcentaje', value: 'percentage', icon: 'percent' }
+  ];
+
+  public typeOptions: ToggleOption[] = [
+    { label: 'Permanente (Fijo)', value: 'permanent', icon: 'lock' },
+    { label: 'Temporal (Objetivo)', value: 'temporary', icon: 'flag' }
+  ];
 
   Math = Math; // To expose Math floor/min max to template if needed
 

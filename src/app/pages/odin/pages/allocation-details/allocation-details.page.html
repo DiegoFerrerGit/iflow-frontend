@@ -1,79 +1,165 @@
-<div class="h-full flex flex-col p-4 sm:p-6 md:p-8 lg:p-12 mb-32 max-w-[1600px] mx-auto overflow-y-auto">
+<div
+    class="min-h-screen flex flex-col p-4 sm:p-6 md:p-8 lg:p-12 pb-32 max-w-[1600px] mx-auto overflow-y-auto overflow-x-hidden bg-[#0a0710]">
 
     @if (allocationData() !== null) {
-    <!-- Breadcrumbs -->
-    <div class="flex items-center gap-2 mb-2">
-        <button (click)="goBack()"
-            class="text-slate-500 hover:text-white transition-colors text-xs font-black tracking-widest uppercase">DASHBOARD</button>
-        <span class="text-slate-500 text-xs font-black tracking-widest uppercase">&gt;</span>
-        <span class="text-indigo-400 text-xs font-black tracking-widest uppercase">{{ getBoxName() }}</span>
-    </div>
-
-    <!-- Header: Title & Amount -->
-    <div class="flex items-end justify-between mb-8">
-        <div class="flex items-center gap-4">
-            <app-back-button></app-back-button>
-            <h1 class="text-5xl font-extrabold text-white tracking-tight">{{ getBoxName() }}</h1>
+    <!-- DESKTOP HEADER -->
+    <div *iflowResponsive="'DESKTOP'">
+        <!-- Breadcrumbs -->
+        <div
+            class="flex items-center flex-wrap gap-2 mb-4 md:mb-2 text-slate-500 uppercase font-black text-xs tracking-widest">
+            <button (click)="goBack()" class="hover:text-white transition-colors">DASHBOARD</button>
+            <span class="opacity-50">&gt;</span>
+            <span class="text-indigo-400">{{ getBoxName() }}</span>
         </div>
 
-        <div class="flex flex-col items-end">
-            <span class="text-[10px] text-slate-400 font-black tracking-widest uppercase mb-1">
-                @if (parentBoxType() === 'percentage') {
-                <span class="text-indigo-400">PORCENTAJE</span> DEL POOL DESTINADO A ESTA CAJA
-                } @else {
-                MONTO <span class="text-indigo-400">ABSOLUTO</span> POR SUMA DE CATEGORÍAS
-                }
-            </span>
+        <!-- Header: Title & Amount -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6 md:gap-4">
+            <div class="flex items-center gap-3 md:gap-4">
+                <app-back-button></app-back-button>
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                    {{ getBoxName() }}
+                </h1>
+            </div>
 
-            <div class="flex items-end gap-5">
-                <!-- Sin Asignar Block (Repositioned precisely) -->
-                @if (parentBoxType() === 'percentage' && getMissingAmount() !== null) {
-                <div class="flex flex-col items-end text-cyan-400 animate-fade-in-right pb-1">
-                    <span class="text-[9px] font-black tracking-widest uppercase mb-0.5 opacity-80">Dinero disponible
-                        sin asignar</span>
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-sm font-bold leading-none opacity-80">{{ '' | dynamicCurrencySymbol }}</span>
-                        <span class="text-2xl font-black tracking-tighter leading-none">
-                            {{ getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }}
+            <div class="flex flex-col items-start md:items-end">
+                <span
+                    class="text-[9px] md:text-[10px] text-slate-400 font-black tracking-[0.15em] md:tracking-widest uppercase mb-2 md:mb-1">
+                    @if (parentBoxType() === 'percentage') {
+                    <span class="text-indigo-400">PORCENTAJE</span> DEL POOL DESTINADO A ESTA CAJA
+                    } @else {
+                    MONTO <span class="text-indigo-400">ABSOLUTO</span> POR SUMA DE CATEGORÍAS
+                    }
+                </span>
+
+                <div
+                    class="flex flex-row-reverse md:flex-row items-end md:items-end gap-4 md:gap-5 w-full md:w-auto justify-between md:justify-end">
+                    @if (parentBoxType() === 'percentage' && getMissingAmount() !== null) {
+                    <div class="flex flex-col items-end text-cyan-400 animate-fade-in-right pb-1">
+                        <span
+                            class="text-[8px] md:text-[9px] font-black tracking-widest uppercase mb-0.5 opacity-80 text-right">Dinero
+                            disponible sin asignar</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-xs md:text-sm font-bold leading-none opacity-80">{{ '' |
+                                dynamicCurrencySymbol }}</span>
+                            <span class="text-xl md:text-2xl font-black tracking-tighter leading-none">
+                                {{ getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }}
+                            </span>
+                        </div>
+                    </div>
+                    }
+
+                    <div class="flex items-start gap-1">
+                        <span class="text-emerald-400 text-2xl md:text-3xl font-bold mt-1 md:mt-1">{{ '' |
+                            dynamicCurrencySymbol }}</span>
+                        <span
+                            class="text-emerald-400 text-4xl md:text-6xl font-black tracking-tighter drop-shadow-xl text-center leading-[0.8] md:leading-[0.8]">
+                            @if (parentBoxType() === 'percentage') {
+                            {{ getAssignedAmountFromPool() | dynamicCurrency:currencyState.currentCurrency() }}
+                            } @else {
+                            {{ assignedTotal() | dynamicCurrency:currencyState.currentCurrency() }}
+                            }
                         </span>
                     </div>
                 </div>
-                }
+            </div>
+        </div>
+    </div>
 
-                <!-- Main Amount -->
-                <div class="flex items-start gap-1">
-                    <span class="text-emerald-400 text-3xl font-bold mt-1">{{ '' | dynamicCurrencySymbol }}</span>
-                    <span
-                        class="text-emerald-400 text-6xl font-black tracking-tighter drop-shadow-xl text-center leading-[0.8]">
-                        @if (parentBoxType() === 'percentage') {
-                        {{ getAssignedAmountFromPool() | dynamicCurrency:currencyState.currentCurrency() }}
-                        } @else {
-                        {{ assignedTotal() | dynamicCurrency:currencyState.currentCurrency() }}
-                        }
-                    </span>
+    <!-- MOBILE HEADER (Structural Change) -->
+    <div *iflowResponsive="'MOBILE'" class="mb-12">
+        <!-- Row 1: Back + Breadcrumbs (Fixed to absolute top) -->
+        <div
+            class="fixed top-0 left-0 w-full z-[100] bg-[#0f0a15] px-4 py-3 flex items-center gap-3 border-b border-white/5 shadow-2xl">
+            <button (click)="goBack()" class="text-rose-400 hover:text-rose-300 transition-colors flex items-center">
+                <span class="material-symbols-outlined text-[28px]">chevron_left</span>
+            </button>
+            <div class="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase">
+                <span class="text-slate-400">ODIN</span>
+                <span class="text-slate-400 opacity-20">/</span>
+                <span class="text-rose-400 truncate max-w-[200px]">{{ getBoxName() }}</span>
+            </div>
+        </div>
+
+        <!-- Spacer for Fixed Header -->
+        <div class="h-16"></div>
+
+        <div class="flex flex-col items-center text-center gap-3 px-2">
+            <!-- Row 2: Title (Centered) -->
+            <div class="flex flex-col items-center">
+                <h1 class="text-white text-[40px] font-black tracking-tighter uppercase leading-none">{{ getBoxName() }}
+                </h1>
+            </div>
+
+            <!-- Row 3: Pool Info (Integrated Amount) -->
+            <div class="w-full px-2">
+                @if (parentBoxType() === 'percentage') {
+                <div class="flex flex-col items-center gap-1.5">
+                    <p class="text-[10px] font-bold tracking-[0.15em] uppercase text-center leading-tight">
+                        <span class="text-rose-400">Porcentaje</span>
+                        <span class="text-slate-400 ml-1">del pool destinado a esta caja:</span>
+                    </p>
+                    <div class="flex items-baseline justify-center gap-1">
+                        <span class="text-slate-500 text-[9px] font-black uppercase">u$d</span>
+                        <span class="text-emerald-400 font-black text-sm">{{ (getAssignedAmountFromPool() |
+                            dynamicCurrency:currencyState.currentCurrency()) }}</span>
+                    </div>
+                </div>
+                } @else {
+                <div class="flex flex-col items-center gap-1">
+                    <p class="text-[10px] font-bold tracking-[0.15em] uppercase text-center leading-tight">
+                        <span class="text-slate-400">Monto</span>
+                        <span class="text-rose-400 ml-1">Absoluto</span>
+                        <span class="text-slate-400 ml-1">por suma de categorías</span>
+                    </p>
+                </div>
+                }
+            </div>
+
+            <!-- Row 4: Amounts Grid (Balanced) -->
+            <div class="w-full flex justify-center gap-8 mt-1">
+                <!-- Sin Asignar (Left) -->
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-cyan-500 font-black tracking-widest uppercase mb-1">Sin Asignar</span>
+                    <div class="flex items-baseline gap-0.5">
+                        <span class="text-slate-400 text-[10px] font-bold leading-none">u$d</span>
+                        <span class="text-cyan-400 text-2xl font-black tracking-tighter leading-none">{{
+                            getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }}</span>
+                    </div>
+                </div>
+
+                <div class="w-[1px] h-6 bg-white/10 self-center"></div>
+
+                <!-- Dinero Asignado (Right) -->
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 font-black tracking-widest uppercase mb-1">Dinero
+                        Asignado</span>
+                    <div class="flex items-baseline gap-0.5">
+                        <span class="text-slate-400 text-[10px] font-bold leading-none">u$d</span>
+                        <span class="text-white text-2xl font-black tracking-tighter leading-none">{{ assignedTotal() |
+                            dynamicCurrency:currencyState.currentCurrency() }}</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Flex Layout: Left Donut Sidebar + Right Categories Grid -->
-    <div class="flex flex-col xl:flex-row gap-6 lg:gap-8 w-full" [class.items-start]="parentBoxType() === 'percentage'"
-        [class.items-stretch]="parentBoxType() !== 'percentage'">
+    <div class="flex flex-col xl:flex-row gap-0 xl:gap-6 lg:gap-8 w-full items-stretch">
 
         <!-- Left Sidebar (Donut Chart) -->
         <div
-            class="w-[280px] xl:w-[280px] 2xl:w-[300px] shrink-0 border border-[rgba(225,29,72,0.15)] bg-[#0d1017] rounded-[32px] p-4 lg:p-6 relative overflow-hidden shadow-[0_0_80px_rgba(225,29,72,0.1)] flex flex-col items-center justify-center gap-6">
+            class="w-full xl:w-[280px] 2xl:w-[300px] shrink-0 xl:border xl:border-[rgba(225,29,72,0.15)] xl:bg-[#0d1017] xl:rounded-[32px] p-0 xl:p-4 lg:p-6 relative overflow-visible xl:overflow-hidden xl:shadow-[0_0_80px_rgba(225,29,72,0.1)] flex flex-col items-center justify-center gap-0 xl:gap-6">
             <!-- Background subtle glow -->
             <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-rose-500/5 rounded-full blur-[80px] pointer-events-none">
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-rose-500/10 rounded-full blur-[80px] pointer-events-none">
             </div>
 
             <!-- Top: Donut Chart -->
             <div
-                class="donut-chart-wrapper relative shrink-0 z-10 w-[220px] h-[220px] [&_div.relative]:!w-[220px] [&_div.relative]:!h-[220px] [&_svg]:!w-[220px] [&_svg]:!h-[220px]">
+                class="donut-chart-wrapper relative shrink-0 z-10 w-[180px] h-[180px] md:w-[220px] md:h-[220px] [&_div.relative]:!w-[180px] [&_div.relative]:!h-[180px] [&_svg]:!w-[180px] [&_svg]:!h-[180px] md:[&_div.relative]:!w-[220px] md:[&_div.relative]:!h-[220px] md:[&_svg]:!w-[220px] md:[&_svg]:!h-[220px]">
                 @if (donutSegments().length > 0) {
                 @if (parentBoxType() === 'percentage') {
-                <app-donut-chart [segments]="donutChartSegments()" title=""
+                <app-donut-chart [segments]="donutChartSegments()" title="" [hideLegendOnMobile]="true"
                     [subtitle]="(getAssignedPercentage() | number:'1.0-1') + '%'"></app-donut-chart>
                 } @else {
                 <app-donut-chart [segments]="donutChartSegments()" title="SUMA TOTAL"
@@ -84,7 +170,8 @@
 
             <!-- Bottom: Summary -->
             @if (parentBoxType() === 'percentage') {
-            <div class="flex flex-col items-center justify-center gap-2 z-10 w-full border-t border-white/10 pt-8 mt-2">
+            <div *iflowResponsive="'DESKTOP'"
+                class="flex flex-col items-center justify-center gap-2 z-10 w-full border-t border-white/10 pt-8 mt-2">
                 <span class="text-[10px] text-slate-400 font-black tracking-widest uppercase text-center">DINERO
                     ASIGNADO</span>
                 <div class="flex items-baseline justify-center gap-1">
@@ -105,18 +192,98 @@
             }
         </div>
 
-        <!-- Main Container (Categories Grid) -->
+        <!-- Main Container (Categories Grid/List) -->
         <div
-            class="flex-grow w-full border border-[rgba(225,29,72,0.15)] bg-[#0d1017] rounded-[32px] p-6 lg:p-8 relative overflow-hidden shadow-[0_0_80px_rgba(225,29,72,0.1)]">
+            class="flex-grow w-full xl:border xl:border-[rgba(225,29,72,0.15)] xl:bg-[#0d1017] xl:rounded-[32px] p-0 lg:p-8 relative overflow-visible xl:overflow-hidden xl:shadow-[0_0_80px_rgba(225,29,72,0.1)]">
 
             <!-- Background subtle glow -->
             <div
-                class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-[120px] pointer-events-none">
+                class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[120px] pointer-events-none">
             </div>
 
-            <!-- Add Button (when ALL rows are full) - positioned top-right ABOVE the grid -->
+            <!-- Mobile Categories List -->
+            <!-- Mobile Action Menu Backdrop -->
+            @if (activeMobileMenuId()) {
+            <div class="fixed inset-0 z-[105] bg-transparent" (click)="closeMobileMenu()"></div>
+            }
+
+            <div *iflowResponsive="'MOBILE'" class="flex flex-col gap-3 relative z-10 px-0"
+                [class.z-[110]]="activeMobileMenuId()">
+                @for (segment of donutSegments(); track segment.id) {
+                @if (segment.id !== 'unassigned') {
+                <div (click)="segment.type === 'sum_items' ? navigateToSubCategory(segment.id) : null"
+                    class="bg-[#141722]/50 border border-white/5 rounded-2xl py-2.5 px-3 flex items-center justify-between group active:bg-[#1a1e2d] transition-all"
+                    [class.cursor-pointer]="segment.type === 'sum_items'">
+
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[22px]" [ngClass]="segment.amountColorClass">
+                                {{ segment.icon || 'category' }}
+                            </span>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-1.5 min-h-[1.25em]">
+                                <h3 class="font-black text-[13px] tracking-wide text-white uppercase leading-none">
+                                    {{ segment.name }}
+                                </h3>
+                                @if (segment.type === 'sum_items') {
+                                <span
+                                    class="text-rose-400 font-black text-[18px] leading-[0.8] select-none translate-y-[-0.5px]">></span>
+                                }
+                            </div>
+                            <span class="text-slate-400 text-[9px] font-bold tracking-wider uppercase leading-tight">
+                                {{ segment.percentage | number:'1.0-1' }}% de esta caja
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-right">
+                        <div class="flex items-baseline justify-end gap-0.5">
+                            <span class="text-slate-400 text-[10px] font-bold">u$d</span>
+                            <span class="text-white text-lg font-black tracking-tighter">
+                                {{ segment.amount | dynamicCurrency:currencyState.currentCurrency() }}
+                            </span>
+                        </div>
+                        <div class="relative">
+                            <button (click)="toggleMobileMenu(segment.id, $event)"
+                                class="w-9 h-9 rounded-full flex items-center justify-center border-2 border-white/10 border-opacity-20 transition-all"
+                                [class.border-indigo-500/50]="activeMobileMenuId() === segment.id"
+                                [class.bg-indigo-500/10]="activeMobileMenuId() === segment.id">
+                                <span class="material-symbols-outlined text-[20px]"
+                                    [class.text-indigo-400]="activeMobileMenuId() === segment.id"
+                                    [class.text-slate-400]="activeMobileMenuId() !== segment.id">
+                                    {{ activeMobileMenuId() === segment.id ? 'close' : 'more_horiz' }}
+                                </span>
+                            </button>
+
+                            <!-- Action Menu Overlay -->
+                            @if (activeMobileMenuId() === segment.id) {
+                            <div
+                                class="absolute right-0 top-11 min-w-[140px] bg-[#1a1e2d] border border-white/10 rounded-xl shadow-2xl z-[120] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                <button
+                                    (click)="openSubCategoryModal(undefined, segment); closeMobileMenu(); $event.stopPropagation()"
+                                    class="w-full flex items-center gap-2 px-4 py-3 text-white hover:bg-white/5 transition-colors border-b border-white/5">
+                                    <span class="material-symbols-outlined text-[18px] text-indigo-400">edit</span>
+                                    <span class="text-[11px] font-bold tracking-widest uppercase">Editar</span>
+                                </button>
+                                <button
+                                    (click)="deleteSubCategory(segment.id); closeMobileMenu(); $event.stopPropagation()"
+                                    class="w-full flex items-center gap-2 px-4 py-3 text-rose-500 hover:bg-rose-500/5 transition-colors">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    <span class="text-[11px] font-bold tracking-widest uppercase">Eliminar</span>
+                                </button>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                }
+                }
+            </div>
+
+            <!-- Desktop Add Button (when ALL rows are full) - positioned top-right ABOVE the grid -->
             @if (subCategoryCount() % 4 === 0) {
-            <div class="flex justify-end mb-4 relative z-10">
+            <div *iflowResponsive="'DESKTOP'" class="flex justify-end mb-4 relative z-10">
                 <button (click)="openSubCategoryModal()"
                     class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors group">
                     <span
@@ -126,9 +293,9 @@
             </div>
             }
 
-            <!-- Subcategories Grid -->
+            <!-- Desktop Subcategories Grid -->
             <!-- Adjusted column counts slightly since container is narrrower alongside the sidebar -->
-            <div
+            <div *iflowResponsive="'DESKTOP'"
                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 relative z-10 lg:mt-4">
                 @for (segment of donutSegments(); track segment.id) {
                 @if (segment.id !== 'unassigned') {
@@ -139,7 +306,7 @@
                     <!-- Actions (visible on hover) -->
                     <div
                         class="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                        <button (click)="openSubCategoryModal(segment); $event.stopPropagation()"
+                        <button (click)="openSubCategoryModal(undefined, segment); $event.stopPropagation()"
                             class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
                             <span class="material-symbols-outlined text-[18px]">edit</span>
                         </button>
@@ -212,10 +379,65 @@
     </div>
     }
 
+    <!-- Mobile Floating Action Button (FAB) -->
+    <div *iflowResponsive="'MOBILE'" class="fixed bottom-[80px] right-6 z-[50] flex flex-col items-end"
+        [class.pointer-events-none]="isSubCategoryModalOpen()" [class.opacity-0]="isSubCategoryModalOpen()"
+        [class.invisible]="isSubCategoryModalOpen()">
+
+        <!-- FAB Backdrop (when menu is open) -->
+        @if (isFabMenuOpen()) {
+        <div class="fixed inset-0 bg-[#070509]/60 backdrop-blur-[3px] z-[-1] animate-fade-in" (click)="toggleFabMenu()">
+        </div>
+        }
+
+        <!-- Menu Options (Arched Layout) -->
+        <div class="flex flex-col items-end mb-4 pr-1" [class.hidden]="!isFabMenuOpen()">
+            <!-- Category with Items (Top-most) -->
+            <button (click)="openSubCategoryModal('sum_items'); toggleFabMenu()"
+                class="flex items-center gap-3 mb-5 translate-x-[-12px] animate-in slide-in-from-bottom-6 duration-500 delay-150 group">
+                <div
+                    class="w-12 h-12 rounded-full border-2 border-rose-500/50 bg-[#16121d] flex items-center justify-center text-rose-400 shadow-lg group-active:scale-95 transition-transform">
+                    <span class="material-symbols-outlined text-2xl">list_alt</span>
+                </div>
+                <span
+                    class="bg-[#1f222e] text-white/90 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase shadow-xl border border-white/5">Categoría
+                    con ítems</span>
+            </button>
+
+            <!-- Categoría única / Monto Fijo (Bottom) -->
+            <button (click)="openSubCategoryModal('fixed_amount'); toggleFabMenu()"
+                class="flex items-center gap-3 translate-x-[-45px] animate-in slide-in-from-bottom-6 duration-500 group">
+                <div
+                    class="w-12 h-12 rounded-full border-2 border-emerald-500/50 bg-[#16121d] flex items-center justify-center text-emerald-400 shadow-lg group-active:scale-95 transition-transform">
+                    <span class="material-symbols-outlined text-2xl">payments</span>
+                </div>
+                <span
+                    class="bg-[#1f222e] text-white/90 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase shadow-xl border border-white/5">Categoría
+                    única</span>
+            </button>
+        </div>
+
+        <!-- Main Toggle Button -->
+        <div class="relative flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full blur-[40px] animate-pulse pointer-events-none transition-all duration-700"
+                style="background-color: #e11d48;" [class.scale-[4]]="isFabMenuOpen()"
+                [class.opacity-100]="isFabMenuOpen()" [class.opacity-50]="!isFabMenuOpen()">
+            </div>
+
+            <button (click)="toggleFabMenu()"
+                class="relative w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-95 z-10 focus:outline-none"
+                style="background-color: #e11d48; box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 15px inset;"
+                [class.rotate-45]="isFabMenuOpen()">
+                <span class="material-symbols-outlined text-4xl">add</span>
+            </button>
+        </div>
+    </div>
+
     @if (isSubCategoryModalOpen()) {
     <app-sub-category-form-modal [allocationBoxId]="boxId()!" [initialSubCategory]="subCategoryToEdit()"
         [availableAmountToAssign]="getUnassignedAmountInBase()" [isLoading]="isSubCategoryModalSaving()"
-        [usedColors]="usedColors()" (close)="closeSubCategoryModal()" (save)="handleSaveSubCategory($event)">
+        [usedColors]="usedColors()" [forcedType]="forcedSubCategoryType()" (close)="closeSubCategoryModal()"
+        (save)="handleSaveSubCategory($event)">
     </app-sub-category-form-modal>
     }
 

@@ -33,6 +33,7 @@ export class DonutChartComponent {
     @Input() size: 'sm' | 'md' | 'lg' = 'md';
     @Input() title?: string;
     @Input() subtitle?: string;
+    @Input() hideLegendOnMobile: boolean = false;
 
     activeSegment: DonutChartSegment | null = null;
 

@@ -94,7 +94,7 @@
     </div>
 
     <!-- Mobile Legend -->
-    @if (responsiveState.isMobile()) {
+    @if (responsiveState.isMobile() && !hideLegendOnMobile) {
     <div class="w-full flex flex-wrap justify-center gap-2 mt-6 px-2 pb-2">
         @for (segment of segments; track segment.id) {
         <div class="flex items-center gap-1.5 cursor-pointer transition-opacity px-3 py-1.5 rounded-full bg-white/5 border border-white/5"

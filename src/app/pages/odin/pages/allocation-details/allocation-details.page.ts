@@ -14,6 +14,8 @@ import { CurrencyManager } from '../../../../core/currency-manager/currency-mana
 import { LoaderManager } from '../../../../core/loader-manager/loader.manager';
 import { SubCategoryFormModal } from '../../components/sub-category-form-modal/sub-category-form-modal';
 import { DeleteConfirmationModal } from '../../components/delete-confirmation-modal/delete-confirmation-modal';
+import { ResponsiveDirective } from '../../../../shared/directives/responsive.directive';
+import { ResponsiveState } from '../../../../core/responsive/responsive.state';
 
 // Map ThemeColor to valid Tailwind text class
 const TEXT_CLASS_MAP: Record<string, string> = {
@@ -48,7 +50,8 @@ const TEXT_CLASS_MAP: Record<string, string> = {
     DonutChartComponent,
     BackButtonComponent,
     SubCategoryFormModal,
-    DeleteConfirmationModal
+    DeleteConfirmationModal,
+    ResponsiveDirective
   ],
   templateUrl: './allocation-details.page.html',
   styleUrl: './allocation-details.page.scss'
@@ -74,8 +77,12 @@ export class AllocationDetailsPage implements OnInit {
   isSubCategoryModalOpen = signal(false);
   isSubCategoryModalSaving = signal(false);
   subCategoryToEdit = signal<IAllocationSubCategoryDto | null>(null);
+  forcedSubCategoryType = signal<'fixed_amount' | 'sum_items' | null>(null);
 
-  // Delete Modal State
+  // FAB State (Mobile Only)
+  isFabMenuOpen = signal(false);
+  activeMobileMenuId = signal<string | null>(null);
+
   isDeleteModalOpen = signal(false);
   isDeletingSubCategory = signal(false);
   subCategoryToDelete = signal<IAllocationSubCategoryDto | null>(null);
@@ -346,13 +353,32 @@ export class AllocationDetailsPage implements OnInit {
 
   // --- Modal Handlers ---
 
-  openSubCategoryModal(segment?: DonutChartSegment) {
+  toggleFabMenu() {
+    this.isFabMenuOpen.update(v => !v);
+  }
+
+  toggleMobileMenu(id: string, event: Event) {
+    event.stopPropagation();
+    if (this.activeMobileMenuId() === id) {
+      this.activeMobileMenuId.set(null);
+    } else {
+      this.activeMobileMenuId.set(id);
+    }
+  }
+
+  closeMobileMenu() {
+    this.activeMobileMenuId.set(null);
+  }
+
+  openSubCategoryModal(type?: 'fixed_amount' | 'sum_items', segment?: DonutChartSegment) {
     if (segment && segment.id !== 'unassigned') {
       const data = this.allocationData();
       const sub = data?.sub_categories.find(s => s.id === segment.id);
       this.subCategoryToEdit.set(sub || null);
+      this.forcedSubCategoryType.set(null);
     } else {
       this.subCategoryToEdit.set(null);
+      this.forcedSubCategoryType.set(type || null);
     }
     this.isSubCategoryModalOpen.set(true);
   }

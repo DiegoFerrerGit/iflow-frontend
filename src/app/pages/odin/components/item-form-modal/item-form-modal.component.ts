@@ -32,6 +32,7 @@ export class ItemFormModalComponent implements OnInit {
     @Output() close = new EventEmitter<void>();
     @Output() save = new EventEmitter<IAllocationItemDto>();
 
+    public isClosing = false;
     public form!: FormGroup;
     public allThemeColors = THEME_COLORS;
 
@@ -133,6 +134,14 @@ export class ItemFormModalComponent implements OnInit {
         const amountControl = this.form.get('amount');
         amountControl?.setValidators([Validators.required, Validators.min(0), Validators.max(this.maxAllowedAmount)]);
         amountControl?.updateValueAndValidity();
+    }
+
+    public closeModal(): void {
+        this.isClosing = true;
+        setTimeout(() => {
+            this.close.emit();
+            this.isClosing = false;
+        }, 300);
     }
 
     public ngOnDestroy(): void {
