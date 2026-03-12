@@ -15,3 +15,74 @@
     }
   }
 }
+
+// Mobile Drag-to-Delete Animations
+@keyframes ghost-wobble {
+  0% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(1deg);
+  }
+
+  75% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(-1deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(0deg);
+  }
+}
+
+.ghost-item {
+  animation: ghost-wobble 0.3s infinite ease-in-out;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(128px);
+    opacity: 0;
+  }
+}
+
+.trash-zone {
+  animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+
+  &.active {
+    background: radial-gradient(circle at center bottom, rgba(244, 63, 94, 0.45) 0%, transparent 80%);
+    box-shadow: 0 -30px 100px rgba(244, 63, 94, 0.3);
+  }
+}
+
+.animate-scanline {
+  animation: scanline 2s ease-in-out infinite;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}

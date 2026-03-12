@@ -88,8 +88,20 @@ export class AllocationDetailsPage implements OnInit {
   isDeletingSubCategory = signal(false);
   subCategoryToDelete = signal<IAllocationSubCategoryDto | null>(null);
 
+  // Drag-to-Delete State (Mobile Only)
+  activeDraggingId = signal<string | null>(null);
+  dragPosition = signal({ x: 0, y: 0 });
+  isTrashZoneActive = signal(false);
+  private longPressTimer: any;
+
   // Computed helper for box type
   parentBoxType = computed(() => this.allocationData()?.calculation_type || this.initialType() || 'absolute');
+
+  activeDraggingSubCategory = computed<DonutChartSegment | null>(() => {
+    const id = this.activeDraggingId();
+    if (!id) return null;
+    return this.donutSegments().find(s => s.id === id) || null;
+  });
 
   assignedTotal = computed(() => {
     const data = this.allocationData();
@@ -503,6 +515,61 @@ export class AllocationDetailsPage implements OnInit {
     }, 0);
 
     return Math.max(0, capacity - totalAssignedInUsd);
+  }
+
+  onItemTouchStart(id: string, event: TouchEvent) {
+    if (!this.responsiveState.isMobile()) return;
+
+    // Clear any existing timer
+    if (this.longPressTimer) clearTimeout(this.longPressTimer);
+
+    const touch = event.touches[0];
+    const initialX = touch.clientX;
+    const initialY = touch.clientY;
+
+    this.longPressTimer = setTimeout(() => {
+      this.activeDraggingId.set(id);
+      this.dragPosition.set({ x: initialX, y: initialY });
+
+      // Haptic feedback if available
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
+    }, 500); // 500ms for long press
+  }
+
+  onItemTouchMove(event: TouchEvent) {
+    if (!this.activeDraggingId()) {
+      // If we move before the long press triggers, cancel the timer
+      if (this.longPressTimer) clearTimeout(this.longPressTimer);
+      return;
+    }
+
+    const touch = event.touches[0];
+    this.dragPosition.set({ x: touch.clientX, y: touch.clientY });
+
+    // Check if we are over the trash zone (positioned at bottom-[80px], height ~128px / h-32)
+    // We check if Y is between (innerHeight - 200) and (innerHeight - 80)
+    const overTrash = touch.clientY > window.innerHeight - 200 && touch.clientY < window.innerHeight - 80;
+    this.isTrashZoneActive.set(overTrash);
+
+    // Prevent scrolling while dragging
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+  }
+
+  onItemTouchEnd(event: TouchEvent) {
+    if (this.longPressTimer) clearTimeout(this.longPressTimer);
+
+    const draggingId = this.activeDraggingId();
+    if (draggingId && this.isTrashZoneActive()) {
+      this.deleteSubCategory(draggingId);
+    }
+
+    // Reset state
+    this.activeDraggingId.set(null);
+    this.isTrashZoneActive.set(false);
   }
 
   navigateToSubCategory(subCategoryId: string) {
