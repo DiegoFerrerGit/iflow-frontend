@@ -33,7 +33,11 @@ export class DonutChartComponent {
     @Input() size: 'sm' | 'md' | 'lg' = 'md';
     @Input() title?: string;
     @Input() subtitle?: string;
+    @Input() subtitleSymbol?: string | null;
+    @Input() subtitleValue?: string | null;
     @Input() hideLegendOnMobile: boolean = false;
+    @Input() invertLabels: boolean = false;
+    @Input() titleUppercase: boolean = true;
 
     activeSegment: DonutChartSegment | null = null;
 
@@ -63,15 +67,16 @@ export class DonutChartComponent {
     get titleClass(): string {
         const isMobile = this.responsiveState.isMobile();
         switch (this.size) {
-            case 'lg': return isMobile ? 'text-[7px]' : 'text-[12px]';
-            case 'sm': return 'text-[7px]';
-            default: return isMobile ? 'text-[7px]' : 'text-[8px]';
+            case 'lg': return isMobile ? 'text-[10px]' : 'text-[15px]';
+            case 'sm': return 'text-[8px]';
+            default: return isMobile ? 'text-[9px]' : 'text-[12px]';
         }
     }
 
     get subtitleClass(): any {
-        if (!this.subtitle) return {};
-        const len = this.subtitle.length;
+        const text = this.subtitleValue || this.subtitle;
+        if (!text) return {};
+        const len = text.length;
         if (this.size === 'lg') {
             return {
                 'text-4xl': len <= 11,
@@ -94,26 +99,28 @@ export class DonutChartComponent {
     }
 
     get hoverNameClass(): string {
+        const isMobile = this.responsiveState.isMobile();
         switch (this.size) {
-            case 'lg': return 'text-[12px]';
-            case 'sm': return 'text-[7px]';
-            default: return 'text-[8px]';
+            case 'lg': return isMobile ? 'text-[12px]' : 'text-[16px]';
+            case 'sm': return 'text-[8px]';
+            default: return isMobile ? 'text-[9px]' : 'text-[12px]';
         }
     }
 
     get hoverAmountClass(): string {
         switch (this.size) {
-            case 'lg': return 'text-3xl';
-            case 'sm': return 'text-lg';
-            default: return 'text-xl';
+            case 'lg': return 'text-4xl';
+            case 'sm': return 'text-xl';
+            default: return 'text-2xl';
         }
     }
 
     get hoverPercentageClass(): string {
+        const isMobile = this.responsiveState.isMobile();
         switch (this.size) {
-            case 'lg': return 'text-[14px]';
-            case 'sm': return 'text-[9px]';
-            default: return 'text-[10px]';
+            case 'lg': return isMobile ? 'text-[14px]' : 'text-[18px]';
+            case 'sm': return 'text-[10px]';
+            default: return isMobile ? 'text-[10px]' : 'text-[14px]';
         }
     }
 

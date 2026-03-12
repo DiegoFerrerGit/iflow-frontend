@@ -217,6 +217,10 @@ export class SubCategoryDetailsPage implements OnInit {
         }
     }
 
+    goToDashboard() {
+        this.router.navigate(['/odin']);
+    }
+
     togglePaidStatus(id: string) {
         const boxId = this.boxId();
         const subId = this.subCategoryId();

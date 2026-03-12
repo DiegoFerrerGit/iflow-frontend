@@ -65,35 +65,31 @@
         </div>
     </div>
 
-    <!-- MOBILE HEADER (Structural Change) -->
-    <div *iflowResponsive="'MOBILE'" class="mb-12">
-        <!-- Row 1: Back + Breadcrumbs (Fixed to absolute top) -->
+    <!-- MOBILE HEADER -->
+    <div *iflowResponsive="'MOBILE'" class="mb-2">
+        <!-- Row 1: Fixed Header -->
         <div
             class="fixed top-0 left-0 w-full z-[100] bg-[#0f0a15] px-4 py-3 flex items-center gap-3 border-b border-white/5 shadow-2xl">
             <button (click)="goBack()" class="text-rose-400 hover:text-rose-300 transition-colors flex items-center">
                 <span class="material-symbols-outlined text-[28px]">chevron_left</span>
             </button>
             <div class="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase">
-                <span class="text-slate-400">ODIN</span>
+                <span (click)="goBack()"
+                    class="text-slate-400 cursor-pointer hover:text-white transition-colors">ODIN</span>
                 <span class="text-slate-400 opacity-20">/</span>
                 <span class="text-rose-400 truncate max-w-[200px]">{{ getBoxName() }}</span>
             </div>
         </div>
 
-        <!-- Spacer for Fixed Header -->
+        <!-- Header Content -->
         <div class="h-16"></div>
+        <div class="flex flex-col items-center text-center gap-1 px-2">
+            <h1 class="text-white text-[40px] font-black tracking-tighter uppercase leading-none">{{ getBoxName() }}
+            </h1>
 
-        <div class="flex flex-col items-center text-center gap-3 px-2">
-            <!-- Row 2: Title (Centered) -->
-            <div class="flex flex-col items-center">
-                <h1 class="text-white text-[40px] font-black tracking-tighter uppercase leading-none">{{ getBoxName() }}
-                </h1>
-            </div>
-
-            <!-- Row 3: Pool Info (Integrated Amount) -->
             <div class="w-full px-2">
                 @if (parentBoxType() === 'percentage') {
-                <div class="flex flex-col items-center gap-1.5">
+                <div class="flex flex-col items-center gap-1">
                     <p class="text-[10px] font-bold tracking-[0.15em] uppercase text-center leading-tight">
                         <span class="text-rose-400">Porcentaje</span>
                         <span class="text-slate-400 ml-1">del pool destinado a esta caja:</span>
@@ -105,19 +101,16 @@
                     </div>
                 </div>
                 } @else {
-                <div class="flex flex-col items-center gap-1">
-                    <p class="text-[10px] font-bold tracking-[0.15em] uppercase text-center leading-tight">
-                        <span class="text-slate-400">Monto</span>
-                        <span class="text-rose-400 ml-1">Absoluto</span>
-                        <span class="text-slate-400 ml-1">por suma de categorías</span>
-                    </p>
-                </div>
+                <p class="text-[10px] font-bold tracking-[0.15em] uppercase text-center leading-tight">
+                    <span class="text-slate-400">Monto</span>
+                    <span class="text-rose-400 ml-1">Absoluto</span>
+                    <span class="text-slate-400 ml-1">por suma de categorías</span>
+                </p>
                 }
             </div>
 
-            <!-- Row 4: Amounts Grid (Balanced) -->
+            @if (!responsiveState.isMobile() || parentBoxType() !== 'absolute') {
             <div class="w-full flex justify-center gap-8 mt-1">
-                <!-- Sin Asignar (Left) -->
                 <div class="flex flex-col items-center">
                     <span class="text-[9px] text-cyan-500 font-black tracking-widest uppercase mb-1">Sin Asignar</span>
                     <div class="flex items-baseline gap-0.5">
@@ -126,10 +119,7 @@
                             getMissingAmount() | dynamicCurrency:currencyState.currentCurrency() }}</span>
                     </div>
                 </div>
-
                 <div class="w-[1px] h-6 bg-white/10 self-center"></div>
-
-                <!-- Dinero Asignado (Right) -->
                 <div class="flex flex-col items-center">
                     <span class="text-[9px] text-slate-400 font-black tracking-widest uppercase mb-1">Dinero
                         Asignado</span>
@@ -140,30 +130,36 @@
                     </div>
                 </div>
             </div>
+            @if (parentBoxType() === 'percentage') {
+            <div class="mt-4"></div>
+            }
+            }
         </div>
     </div>
 
     <!-- Flex Layout: Left Donut Sidebar + Right Categories Grid -->
-    <div class="flex flex-col xl:flex-row gap-0 xl:gap-6 lg:gap-8 w-full items-stretch xl:items-start">
+    <div class="flex flex-col xl:flex-row gap-0 xl:gap-6 lg:gap-8 w-full items-stretch">
 
         <!-- Left Sidebar (Donut Chart) -->
         <div
-            class="w-full xl:w-[280px] 2xl:w-[300px] shrink-0 xl:bg-[#0d1017] xl:border xl:border-white/5 xl:rounded-[32px] xl:shadow-2xl p-0 lg:p-6 relative overflow-visible xl:overflow-hidden flex flex-col items-center justify-center gap-0 xl:gap-6">
+            class="w-full xl:w-[280px] 2xl:w-[300px] shrink-0 xl:bg-[#0c0e14] xl:border xl:border-white/5 xl:rounded-[32px] p-0 lg:p-6 relative overflow-visible flex flex-col items-center justify-center gap-0 xl:gap-6">
             <!-- Background subtle glow -->
             <div
                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-rose-500/10 rounded-full blur-[80px] pointer-events-none">
             </div>
 
             <!-- Top: Donut Chart -->
-            <div
+            <div [class.mt-[10px]]="responsiveState.isMobile() && parentBoxType() === 'absolute'"
                 class="donut-chart-wrapper relative shrink-0 z-10 w-[180px] h-[180px] md:w-[220px] md:h-[220px] [&_div.relative]:!w-[180px] [&_div.relative]:!h-[180px] [&_svg]:!w-[180px] [&_svg]:!h-[180px] md:[&_div.relative]:!w-[220px] md:[&_div.relative]:!h-[220px] md:[&_svg]:!w-[220px] md:[&_svg]:!h-[220px]">
                 @if (donutSegments().length > 0) {
                 @if (parentBoxType() === 'percentage') {
-                <app-donut-chart [segments]="donutChartSegments()" title="" [hideLegendOnMobile]="true"
+                <app-donut-chart [segments]="donutChartSegments()" [title]="'Asignado'" [invertLabels]="true"
+                    [titleUppercase]="false" [hideLegendOnMobile]="true"
                     [subtitle]="(getAssignedPercentage() | number:'1.0-1') + '%'"></app-donut-chart>
                 } @else {
-                <app-donut-chart [segments]="donutChartSegments()" title="SUMA TOTAL"
-                    [subtitle]="('' | dynamicCurrencySymbol) + (assignedTotal() | dynamicCurrency:currencyState.currentCurrency())"></app-donut-chart>
+                <app-donut-chart [segments]="donutChartSegments()" title="SUMA TOTAL" [hideLegendOnMobile]="true"
+                    [subtitleSymbol]="'' | dynamicCurrencySymbol"
+                    [subtitleValue]="assignedTotal() | dynamicCurrency:currencyState.currentCurrency()"></app-donut-chart>
                 }
                 }
             </div>
@@ -175,7 +171,8 @@
                 <span class="text-[10px] text-slate-400 font-black tracking-widest uppercase text-center">DINERO
                     ASIGNADO</span>
                 <div class="flex items-baseline justify-center gap-1">
-                    <span class="text-slate-500 text-lg font-bold leading-none">{{ '' | dynamicCurrencySymbol }}</span>
+                    <span class="text-slate-500 text-lg font-bold leading-none">{{ '' | dynamicCurrencySymbol
+                        }}</span>
                     <span class="text-white text-3xl font-black tracking-tighter leading-none text-center">{{
                         assignedTotal() | dynamicCurrency:currencyState.currentCurrency() }}</span>
                 </div>
@@ -194,7 +191,7 @@
 
         <!-- Main Container (Categories Grid/List) -->
         <div
-            class="flex-grow w-full xl:bg-[#0d1017] xl:border xl:border-white/5 xl:rounded-[32px] xl:shadow-2xl p-0 lg:p-8 xl:p-8 relative overflow-visible">
+            class="flex-grow w-full xl:h-fit xl:bg-[#0c0e14] xl:border xl:border-white/5 xl:rounded-[32px] p-0 lg:p-8 xl:p-8 relative overflow-visible">
 
             <!-- Background subtle glow -->
             <div
@@ -338,7 +335,8 @@
                         @if (segment.type === 'sum_items') {
                         <div
                             class="flex items-center gap-2 mb-4 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 ease-out">
-                            <span class="text-[9px] font-black tracking-[0.2em] uppercase text-primary/90">Click para
+                            <span class="text-[9px] font-black tracking-[0.2em] uppercase text-primary/90">Click
+                                para
                                 ver
                                 ítems</span>
                             <span

@@ -49,17 +49,47 @@
             <div class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300"
                 [class.opacity-100]="!activeSegment" [class.scale-100]="!activeSegment"
                 [class.opacity-0]="activeSegment" [class.scale-95]="activeSegment">
+
+                @if (invertLabels) {
+                <!-- Inverted: Subtitle (Hero) on top, Title (Label) below -->
+                @if (subtitleSymbol && subtitleValue) {
+                <div class="flex items-baseline justify-center gap-1 mb-1">
+                    <span class="text-slate-500 font-bold drop-shadow-md text-[0.6em]">{{ subtitleSymbol }}</span>
+                    <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none"
+                        [ngClass]="subtitleClass">{{ subtitleValue }}</span>
+                </div>
+                } @else if (subtitle) {
+                <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none mb-1"
+                    [ngClass]="subtitleClass">
+                    {{ subtitle }}
+                </span>
+                }
+                @if (title) {
+                <span class="text-slate-400 font-bold tracking-[0.15em] text-center px-4 leading-relaxed"
+                    [ngClass]="[titleClass, titleUppercase ? 'uppercase' : '']">
+                    {{ title }}
+                </span>
+                }
+                } @else {
+                <!-- Normal: Title (Label) on top, Subtitle (Hero) below -->
                 @if (title) {
                 <span class="text-slate-400 font-black tracking-[0.2em] uppercase text-center px-4 leading-relaxed"
                     [ngClass]="titleClass">
                     {{ title }}
                 </span>
                 }
-                @if (subtitle) {
+                @if (subtitleSymbol && subtitleValue) {
+                <div class="flex items-baseline justify-center gap-1 mt-0.5">
+                    <span class="text-slate-500 font-bold drop-shadow-md text-[0.6em]">{{ subtitleSymbol }}</span>
+                    <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none"
+                        [ngClass]="subtitleClass">{{ subtitleValue }}</span>
+                </div>
+                } @else if (subtitle) {
                 <span class="text-white font-black tracking-tighter drop-shadow-lg leading-none mt-0.5"
                     [ngClass]="subtitleClass">
                     {{ subtitle }}
                 </span>
+                }
                 }
             </div>
 
@@ -76,7 +106,7 @@
                         {{ activeSegment.name }}
                     </span>
                     <div class="flex items-baseline justify-center gap-1.5 mb-0.5">
-                        <span class="text-slate-400 text-sm font-bold drop-shadow-md">{{ '' |
+                        <span class="text-slate-500 text-[0.7em] font-bold drop-shadow-md">{{ '' |
                             dynamicCurrencySymbol }}</span>
                         <span class="font-black tracking-tighter drop-shadow-md transition-colors"
                             [ngClass]="hoverAmountClass + ' ' + (activeSegment.amountColorClass || 'text-white')">{{

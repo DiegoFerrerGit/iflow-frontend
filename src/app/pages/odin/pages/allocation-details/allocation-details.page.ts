@@ -61,6 +61,7 @@ export class AllocationDetailsPage implements OnInit {
   private router = inject(Router);
   private odinApi = inject(OdinApiService);
   public currencyState = inject(CurrencyManager);
+  public responsiveState = inject(ResponsiveState);
   private loaderService = inject(LoaderManager);
 
   trueBoxCapacity = signal<number | null>(null);
@@ -114,16 +115,18 @@ export class AllocationDetailsPage implements OnInit {
     const data = this.allocationData();
     if (!data || !data.sub_categories) return [];
 
-    const mappedCategories = data.sub_categories.map((sub: IAllocationSubCategoryDto) => {
-      const isFixedArs = sub.display_amount.currency === 'ARS';
-      const parsedAmount = (isFixedArs && this.currencyState.currentCurrency() === 'USD')
-        ? sub.display_amount.amount / this.currencyState.exchangeRate()
-        : (sub.display_amount.currency === 'USD' && this.currencyState.currentCurrency() === 'ARS')
-          ? sub.display_amount.amount * this.currencyState.exchangeRate()
-          : sub.display_amount.amount;
+    const mappedCategories = data.sub_categories
+      .map((sub: IAllocationSubCategoryDto) => {
+        const isFixedArs = sub.display_amount.currency === 'ARS';
+        const parsedAmount = (isFixedArs && this.currencyState.currentCurrency() === 'USD')
+          ? sub.display_amount.amount / this.currencyState.exchangeRate()
+          : (sub.display_amount.currency === 'USD' && this.currencyState.currentCurrency() === 'ARS')
+            ? sub.display_amount.amount * this.currencyState.exchangeRate()
+            : sub.display_amount.amount;
 
-      return { ...sub, calculatedAmount: parsedAmount };
-    });
+        return { ...sub, calculatedAmount: parsedAmount };
+      })
+      .sort((a, b) => b.calculatedAmount - a.calculatedAmount);
 
     const totalCalculatedAmount = mappedCategories.reduce((sum, sub) => sum + sub.calculatedAmount, 0);
     const parsedAvailableAmount = this.parentBoxType() === 'absolute' ? totalCalculatedAmount : this.totalAvailableAmountForDonut();

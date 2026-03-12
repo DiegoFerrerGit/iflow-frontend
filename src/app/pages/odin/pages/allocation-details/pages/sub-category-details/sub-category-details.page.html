@@ -63,9 +63,12 @@
                 <span class="material-symbols-outlined text-[28px]">chevron_left</span>
             </button>
             <div class="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase">
-                <span class="text-slate-400">ODIN</span>
+                <span (click)="goToDashboard()"
+                    class="text-slate-400 cursor-pointer hover:text-white transition-colors">ODIN</span>
                 <span class="text-slate-400 opacity-20">/</span>
-                <span class="text-slate-400 truncate max-w-[100px]">{{ boxName() }}</span>
+                <span (click)="goBack()"
+                    class="text-slate-400 truncate max-w-[100px] cursor-pointer hover:text-white transition-colors">{{
+                    boxName() }}</span>
                 <span class="text-slate-400 opacity-20">/</span>
                 <span class="text-orange-500 truncate max-w-[120px]">{{ subCategoryName() }}</span>
             </div>
