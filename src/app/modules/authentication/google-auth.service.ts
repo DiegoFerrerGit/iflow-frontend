@@ -47,8 +47,19 @@ export class GoogleAuthService {
 
     /**
      * Initializes Google Identity Services with the OAuth client ID.
+     * Includes a retry mechanism if the Google script isn't ready yet.
      */
-    initialize(): void {
+    initialize(retries = 0): void {
+        if (typeof google === 'undefined' || !google.accounts?.id) {
+            if (retries < 10) {
+                console.warn(`[GoogleAuth] Google script not ready, retrying in 200ms... (attempt ${retries + 1})`);
+                setTimeout(() => this.initialize(retries + 1), 200);
+            } else {
+                console.error('[GoogleAuth] Could not load Google Identity Services after multiple attempts.');
+            }
+            return;
+        }
+
         google.accounts.id.initialize({
             client_id: environment.googleOAuthClientId,
             callback: (response) => this.handleCredentialResponse(response),

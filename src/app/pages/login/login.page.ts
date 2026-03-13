@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { GoogleAuthService } from '../../modules/authentication/google-auth.service';
 import { selectLoader } from '../../core/loader-manager/state/loader.selectors';
+import { selectIsLoggingIn } from '../../modules/authentication/state/authentication.selectors';
 
 @Component({
     selector: 'app-login-page',
@@ -20,13 +21,13 @@ export class LoginPage implements OnInit, OnDestroy {
     private store = inject(Store);
     private googleAuthService = inject(GoogleAuthService);
 
-    // Global state (backend login + profile calls)
+    // Global auth loading state
+    private isAuthLoading = this.store.selectSignal(selectIsLoggingIn);
+    // Global generic loader (API calls)
     private isGlobalLoading = this.store.selectSignal(selectLoader);
-    // Local state (immediate button click reaction before API starts)
-    private isLocalLoading = signal(false);
 
     // Combined loading state for the template
-    isLoading = computed(() => this.isLocalLoading() || this.isGlobalLoading());
+    isLoading = computed(() => this.isAuthLoading() || this.isGlobalLoading());
 
     private subscriptions: Subscription[] = [];
 
@@ -41,12 +42,6 @@ export class LoginPage implements OnInit, OnDestroy {
     }
 
     signInWithGoogle(): void {
-        // Show loader instantly on click while Google's prompt opens
-        this.isLocalLoading.set(true);
-
-        // Fallback reset in case the user closes the Google window without completing
-        setTimeout(() => this.isLocalLoading.set(false), 3000);
-
         this.googleAuthService.signIn();
     }
 }

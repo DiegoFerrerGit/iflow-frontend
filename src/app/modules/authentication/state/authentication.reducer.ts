@@ -7,6 +7,7 @@ export const authenticationReducer = createReducer(
 
     on(AuthActions.loginStart, (state): AuthenticationState => ({
         ...state,
+        isLoggingIn: true,
     })),
 
     on(AuthActions.setResolvedUnauthenticated, (state): AuthenticationState => ({
@@ -17,24 +18,28 @@ export const authenticationReducer = createReducer(
 
     on(AuthActions.loginSuccess, (state): AuthenticationState => ({
         ...state,
+        isLoggingIn: true,
     })),
 
     on(AuthActions.loginFailure, (state, { error }): AuthenticationState => ({
         ...state,
         isAuthenticated: false,
         isAuthResolved: true,
+        isLoggingIn: false,
     })),
 
     on(AuthActions.loadProfileSuccess, (state): AuthenticationState => ({
         ...state,
         isAuthenticated: true,
         isAuthResolved: true,
+        isLoggingIn: false,
     })),
 
     on(AuthActions.loadProfileFailure, (state, { error }): AuthenticationState => ({
         ...state,
         isAuthenticated: false,
         isAuthResolved: true,
+        isLoggingIn: false,
     })),
 
     on(AuthActions.refreshSuccess, (state): AuthenticationState => ({

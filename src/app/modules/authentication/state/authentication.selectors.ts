@@ -13,6 +13,11 @@ export const selectIsAuthResolved = createSelector(
     (auth: AuthenticationState) => auth.isAuthResolved,
 );
 
+export const selectIsLoggingIn = createSelector(
+    selectAuthenticationState,
+    (auth: AuthenticationState) => auth.isLoggingIn,
+);
+
 
 
 export {
