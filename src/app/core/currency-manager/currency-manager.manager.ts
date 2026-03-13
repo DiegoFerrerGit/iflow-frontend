@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { Injectable, inject, signal, computed, effect, NgZone, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -15,10 +15,12 @@ export type CurrencyType = 'USD' | 'ARS';
 @Injectable({
     providedIn: 'root',
 })
-export class CurrencyManager {
+export class CurrencyManager implements OnDestroy {
     private http = inject(HttpClient);
     private store = inject(Store);
     private currencyApi = inject(CurrencyApi);
+    private ngZone = inject(NgZone);
+    private refreshInterval: any;
 
     // #region STATE (from old CurrencyState)
 
@@ -55,6 +57,21 @@ export class CurrencyManager {
 
         // Initial refresh check
         this.tryRefreshIfNeeded();
+
+        // Background polling: check if a refresh is needed every 15 minutes
+        // This ensures the rate stays updated even if the app remains open in a tab.
+        // We run this OUTSIDE Angular zone to avoid triggering change detection every 15 mins.
+        this.ngZone.runOutsideAngular(() => {
+            this.refreshInterval = setInterval(() => {
+                this.tryRefreshIfNeeded();
+            }, 15 * 60 * 1000);
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
     }
 
     // #region STATE METHODS
@@ -146,7 +163,8 @@ export class CurrencyManager {
     private saveRefreshSuccess(): void {
         const state: CurrencyRefreshState = {
             lastRefreshDate: CurrencyManagerUtils.nowInArgentina().toISODate()!,
-            lastRefreshSlot: CurrencyManagerUtils.getCurrentSlot()
+            lastRefreshSlot: CurrencyManagerUtils.getCurrentSlot(),
+            lastRefreshTimestamp: Date.now()
         };
         localStorage.setItem(STORAGE_KEYS.CURRENCY_REFRESH_STATE, JSON.stringify(state));
     }

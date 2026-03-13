@@ -33,6 +33,11 @@ export class CurrencyManagerUtils {
 
     /**
      * Check if a refresh is needed based on stored state.
+     * We refresh if:
+     * - No stored state exists.
+     * - Day has changed.
+     * - Slot has changed (e.g., from Pre-market to Market).
+     * - More than 30 minutes have passed since last refresh (if in a valid slot).
      */
     static shouldRefresh(storedState: CurrencyRefreshState | null): boolean {
         const currentSlot = this.getCurrentSlot();
@@ -42,7 +47,7 @@ export class CurrencyManagerUtils {
             return false;
         }
 
-        if (!storedState) {
+        if (!storedState || !storedState.lastRefreshTimestamp) {
             return true;
         }
 
@@ -53,7 +58,15 @@ export class CurrencyManagerUtils {
             return true;
         }
 
-        // If it's the same day, we only refresh if the slot has changed
-        return storedState.lastRefreshSlot !== currentSlot;
+        // Check if the slot changed (transition from pre-market to market, etc)
+        if (storedState.lastRefreshSlot !== currentSlot) {
+            return true;
+        }
+
+        // Finally, check time interval: 30 minutes = 1800000ms
+        const thirtyMinutes = 30 * 60 * 1000;
+        const timeSinceLastRefresh = Date.now() - storedState.lastRefreshTimestamp;
+
+        return timeSinceLastRefresh >= thirtyMinutes;
     }
 }

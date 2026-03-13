@@ -338,21 +338,8 @@ export class AllocationDetailsPage implements OnInit {
   getUnassignedAmountInBase(): number {
     const data = this.allocationData();
     if (!data) return 0;
-
-    const capacityInBase = this.trueBoxCapacity();
-    if (capacityInBase !== null) {
-      let totalAssignedInBase = 0;
-      data.sub_categories.forEach(sub => {
-        if (sub.display_amount.currency === 'USD') {
-          totalAssignedInBase += sub.display_amount.amount;
-        } else {
-          totalAssignedInBase += sub.display_amount.amount / this.currencyState.exchangeRate();
-        }
-      });
-      return Math.max(0, capacityInBase - totalAssignedInBase);
-    }
-
-    // Fallback: If we don't have the capacity yet, trust the remainder sent by the backend.
+    
+    // Always trust the value directly from the backend (or our local memory-update)
     return data.available_amount_to_assign;
   }
 
@@ -442,11 +429,24 @@ export class AllocationDetailsPage implements OnInit {
         next: () => {
           this.allocationData.update(data => {
             if (!data) return null;
+
+            // Find existing subcategory to calculate the delta
+            const existingSub = data.sub_categories.find(s => s.id === subCategory.id);
+            const oldAmountInUsd = existingSub 
+              ? (existingSub.display_amount.currency === 'USD' ? existingSub.display_amount.amount : existingSub.display_amount.amount / this.currencyState.exchangeRate())
+              : 0;
+            
+            const newAmountInUsd = subCategory.display_amount.currency === 'USD' 
+              ? subCategory.display_amount.amount 
+              : subCategory.display_amount.amount / this.currencyState.exchangeRate();
+
+            const delta = newAmountInUsd - oldAmountInUsd;
+
             const updated = {
               ...data,
-              sub_categories: data.sub_categories.map(s => s.id === subCategory.id ? { ...s, ...subCategory } : s)
+              sub_categories: data.sub_categories.map(s => s.id === subCategory.id ? { ...s, ...subCategory } : s),
+              available_amount_to_assign: Math.max(0, data.available_amount_to_assign - delta)
             };
-            updated.available_amount_to_assign = this.recalcAvailable(updated.sub_categories);
             return updated;
           });
           this.isSubCategoryModalSaving.set(false);
@@ -459,11 +459,16 @@ export class AllocationDetailsPage implements OnInit {
         next: (newSub) => {
           this.allocationData.update(data => {
             if (!data) return null;
+
+            const newAmountInUsd = newSub.display_amount.currency === 'USD' 
+              ? newSub.display_amount.amount 
+              : newSub.display_amount.amount / this.currencyState.exchangeRate();
+
             const updated = {
               ...data,
-              sub_categories: [...data.sub_categories, newSub]
+              sub_categories: [...data.sub_categories, newSub],
+              available_amount_to_assign: Math.max(0, data.available_amount_to_assign - newAmountInUsd)
             };
-            updated.available_amount_to_assign = this.recalcAvailable(updated.sub_categories);
             return updated;
           });
           this.isSubCategoryModalSaving.set(false);
@@ -501,11 +506,16 @@ export class AllocationDetailsPage implements OnInit {
       next: () => {
         this.allocationData.update(data => {
           if (!data) return null;
+
+          const removedAmountInUsd = sub.display_amount.currency === 'USD' 
+            ? sub.display_amount.amount 
+            : sub.display_amount.amount / this.currencyState.exchangeRate();
+
           const updated = {
             ...data,
-            sub_categories: data.sub_categories.filter(s => s.id !== sub.id)
+            sub_categories: data.sub_categories.filter(s => s.id !== sub.id),
+            available_amount_to_assign: data.available_amount_to_assign + removedAmountInUsd
           };
-          updated.available_amount_to_assign = this.recalcAvailable(updated.sub_categories);
           return updated;
         });
         this.isDeletingSubCategory.set(false);
@@ -515,23 +525,6 @@ export class AllocationDetailsPage implements OnInit {
     });
   }
 
-  /**
-   * Recalculates available_amount_to_assign locally using trueBoxCapacity.
-   * available = capacity - sum(all subcategories in USD)
-   */
-  private recalcAvailable(subCategories: IAllocationSubCategoryDto[]): number {
-    const capacity = this.trueBoxCapacity();
-    if (capacity === null) return 0;
-
-    const totalAssignedInUsd = subCategories.reduce((sum, sub) => {
-      if (sub.display_amount.currency === 'ARS') {
-        return sum + sub.display_amount.amount / this.currencyState.exchangeRate();
-      }
-      return sum + sub.display_amount.amount;
-    }, 0);
-
-    return Math.max(0, capacity - totalAssignedInUsd);
-  }
 
   onItemTouchStart(id: string, event: TouchEvent) {
     if (!this.responsiveState.isMobile()) return;
