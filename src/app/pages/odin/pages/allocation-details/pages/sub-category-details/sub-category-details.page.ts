@@ -252,6 +252,11 @@ export class SubCategoryDetailsPage implements OnInit {
         return amount;
     }
 
+    private convertToUsd(amount: number, currency: 'USD' | 'ARS'): number {
+        if (currency === 'USD') return amount;
+        return amount / this.currencyState.exchangeRate();
+    }
+
     // --- Modals ---
 
     openItemModal(item?: IAllocationItemDto) {
@@ -311,12 +316,12 @@ export class SubCategoryDetailsPage implements OnInit {
             if (!data) return null;
 
             let amountChange = 0;
-            const incomingAmountUsd = this.getConvertedAmount(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS');
+            const incomingAmountUsd = this.convertToUsd(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS');
 
             if (isEdit) {
                 const oldItem = data.items.find(i => i.id === item.id);
                 if (oldItem) {
-                    const oldAmountUsd = this.getConvertedAmount(oldItem.amount_with_currency.amount, oldItem.amount_with_currency.currency as 'USD' | 'ARS');
+                    const oldAmountUsd = this.convertToUsd(oldItem.amount_with_currency.amount, oldItem.amount_with_currency.currency as 'USD' | 'ARS');
                     amountChange = incomingAmountUsd - oldAmountUsd;
                     data.items = data.items.map(i => i.id === item.id ? item : i);
                 }
@@ -355,7 +360,7 @@ export class SubCategoryDetailsPage implements OnInit {
             next: () => {
                 this.pageData.update(data => {
                     if (!data) return null;
-                    const itemAmountUsd = this.getConvertedAmount(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS');
+                    const itemAmountUsd = this.convertToUsd(item.amount_with_currency.amount, item.amount_with_currency.currency as 'USD' | 'ARS');
                     return {
                         ...data,
                         available_amount_to_assign: data.available_amount_to_assign + itemAmountUsd,

@@ -210,7 +210,7 @@
                 <div (click)="!activeDraggingId() && segment.type === 'sum_items' ? navigateToSubCategory(segment.id) : null"
                     (touchstart)="onItemTouchStart(segment.id, $event)" (touchmove)="onItemTouchMove($event)"
                     (touchend)="onItemTouchEnd($event)" (touchcancel)="onItemTouchEnd($event)"
-                    class="bg-[#141722]/50 border border-white/5 rounded-2xl py-2.5 px-3 flex items-center justify-between group active:bg-[#1a1e2d] transition-all relative overflow-hidden"
+                    class="bg-[#141722]/50 border border-white/5 rounded-2xl py-2.5 px-3 flex items-center justify-between group active:bg-[#1a1e2d] transition-all relative overflow-hidden select-none"
                     [class.opacity-50]="activeDraggingId() === segment.id"
                     [class.cursor-pointer]="segment.type === 'sum_items' && !activeDraggingId()">
 

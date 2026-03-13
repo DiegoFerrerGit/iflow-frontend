@@ -84,7 +84,7 @@
                                 <span class="text-[10px] font-black tabular-nums tracking-widest text-cyan-400">
                                     <span class="text-[9px] text-slate-500">{{ form.get('currency')?.value |
                                         dynamicCurrencySymbol }}</span>
-                                    {{ maxAllowedAmount | dynamicCurrency:form.get('currency')?.value }}
+                                    {{ totalAvailableInBase | dynamicCurrency:'USD':form.get('currency')?.value }}
                                 </span>
                             </div>
 

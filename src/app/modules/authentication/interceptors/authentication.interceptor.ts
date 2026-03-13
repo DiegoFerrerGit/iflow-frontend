@@ -23,13 +23,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(credReq).pipe(
         catchError((error: HttpErrorResponse) => {
             if (error.status === 401) {
+                console.warn('[AuthInterceptor] 401 Unauthorized detected. Attempting to refresh session...', req.url);
                 // Attempt to refresh the session
                 return authApi.refreshSession().pipe(
                     switchMap(() => {
+                        console.log('[AuthInterceptor] Session refresh successful. Retrying original request.');
                         // Retry the original request once
                         return next(credReq);
                     }),
-                    catchError(() => {
+                    catchError((refreshErr) => {
+                        console.error('[AuthInterceptor] Session refresh failed:', refreshErr);
                         // Refresh failed → clear state and redirect to login
                         store.dispatch(AuthActions.clearAuth());
                         router.navigate(['/login']);

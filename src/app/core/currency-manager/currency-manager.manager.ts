@@ -25,7 +25,9 @@ export class CurrencyManager implements OnDestroy {
     // #region STATE (from old CurrencyState)
 
     /** The currently selected currency (user can toggle) */
-    readonly currentCurrency = signal<CurrencyType>('USD');
+    readonly currentCurrency = signal<CurrencyType>(
+        (localStorage.getItem('iflow_display_currency') as CurrencyType) || 'USD'
+    );
 
     /** Exchange rate from the NgRx store (set by profile response) */
     private storeRate = toSignal(this.store.select(selectUsdToArsRate), { initialValue: null });
@@ -77,11 +79,16 @@ export class CurrencyManager implements OnDestroy {
     // #region STATE METHODS
 
     toggleCurrency(): void {
-        this.currentCurrency.update(curr => curr === 'USD' ? 'ARS' : 'USD');
+        this.currentCurrency.update(curr => {
+            const next = curr === 'USD' ? 'ARS' : 'USD';
+            localStorage.setItem('iflow_display_currency', next);
+            return next;
+        });
     }
 
     setCurrency(currency: CurrencyType): void {
         this.currentCurrency.set(currency);
+        localStorage.setItem('iflow_display_currency', currency);
     }
 
     updateRate(rate: number): void {

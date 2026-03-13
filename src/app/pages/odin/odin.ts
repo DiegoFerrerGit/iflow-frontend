@@ -257,19 +257,27 @@ export class OdinPageComponent implements OnInit {
    * freeMoney: totalPool - totalAllocated.
    */
   public recalculateSummaries() {
-    this.totalPool = this.incomes.reduce((sum, income) =>
-      sum + this.currencyState.convert(income.amount, income.currency || 'USD'), 0);
+    // Standardize math: everything in USD (base)
+    // 1. totalPool in USD from source incomes
+    this.totalPool = this.incomes.reduce((sum, income) => {
+        // Source amount is already in its 'currency', we convert it to USD
+        const inUsd = income.currency === 'USD' ? income.amount : income.amount / this.currencyState.exchangeRate();
+        return sum + inUsd;
+    }, 0);
 
-    const pool = this.totalPool;
+    const poolInUsd = this.totalPool;
+
+    // 2. totalAllocated in USD
     this.totalAllocated = this.allocations.reduce((sum, box) => {
       if (box.calculationType === 'absolute') {
-        return sum + box.targetAmount;
+        return sum + box.targetAmount; // targetAmount for absolute boxes is already USD on the backend/mapper
       } else {
-        return sum + ((box.targetAmount / 100) * pool);
+        return sum + ((box.targetAmount / 100) * poolInUsd);
       }
     }, 0);
 
-    this.freeMoney = Math.max(0, this.totalPool - this.totalAllocated);
+    // 3. freeMoney in USD
+    this.freeMoney = Math.max(0, poolInUsd - this.totalAllocated);
   }
   // #endregion
 

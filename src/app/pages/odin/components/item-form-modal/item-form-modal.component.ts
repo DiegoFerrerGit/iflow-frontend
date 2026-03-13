@@ -57,6 +57,7 @@ export class ItemFormModalComponent implements OnInit {
     ];
 
     public maxAllowedAmount: number = 0;
+    public totalAvailableInBase: number = 0;
 
     public ngOnInit(): void {
         const initialAmountInOriginalCurrency = this.initialItem ? this.initialItem.amount_with_currency.amount : 0;
@@ -77,11 +78,12 @@ export class ItemFormModalComponent implements OnInit {
         });
 
         // Dynamic validator setup
-        this.updateMaxValidator(totalAvailableInBase);
+        this.totalAvailableInBase = totalAvailableInBase;
+        this.updateMaxValidator();
 
         this.subs.add(
             this.form.get('currency')?.valueChanges.subscribe(() => {
-                this.updateMaxValidator(totalAvailableInBase);
+                this.updateMaxValidator();
             })
         );
 
@@ -127,13 +129,28 @@ export class ItemFormModalComponent implements OnInit {
         return amount * this.currencyState.exchangeRate();
     }
 
-    private updateMaxValidator(totalAvailableInBase: number): void {
-        const currentCurrency = this.form.get('currency')?.value as 'USD' | 'ARS';
-        this.maxAllowedAmount = this.convertFromBase(totalAvailableInBase, currentCurrency);
-
+    private updateMaxValidator(): void {
         const amountControl = this.form.get('amount');
-        amountControl?.setValidators([Validators.required, Validators.min(0), Validators.max(this.maxAllowedAmount)]);
-        amountControl?.updateValueAndValidity();
+        if (!amountControl) return;
+
+        // Custom validator that checks against USD base
+        amountControl.setValidators([
+            Validators.required,
+            Validators.min(0),
+            (control) => {
+                const val = Number(control.value);
+                if (!val) return null;
+                const currency = this.form.get('currency')?.value as 'USD' | 'ARS';
+                const valInBase = this.convertToBase(val, currency || 'USD');
+
+                // Round to avoid floating point issues (2 decimals in USD)
+                if (Math.round(valInBase * 100) / 100 > Math.round(this.totalAvailableInBase * 100) / 100) {
+                    return { max: true };
+                }
+                return null;
+            }
+        ]);
+        amountControl.updateValueAndValidity();
     }
 
     public closeModal(): void {
