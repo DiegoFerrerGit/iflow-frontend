@@ -127,6 +127,10 @@ export class OdinPageComponent implements OnInit {
           this.incomes.length > 0,
           this.allocations.length > 0
         );
+
+        // Persist summary for deep links (AllocationDetailsPage reloads)
+        sessionStorage.setItem('odin_total_pool', this.totalPool.toString());
+        sessionStorage.setItem('odin_allocation_boxes', JSON.stringify(response.allocation_boxes));
       },
       error: () => {
         // Errors are globally handled by ErrorsManager

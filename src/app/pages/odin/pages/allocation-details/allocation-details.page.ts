@@ -240,6 +240,10 @@ export class AllocationDetailsPage implements OnInit {
     const state = history.state;
     if (state?.name) this.initialName.set(state.name);
     if (state?.type) this.initialType.set(state.type);
+    if (state?.totalPool) {
+      // If we have totalPool, we can pre-calculate some values if we had the box object,
+      // but we'll wait for the loadDetails to get the full box detail.
+    }
 
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
@@ -253,27 +257,39 @@ export class AllocationDetailsPage implements OnInit {
   loadDetails(id: string) {
     this.loaderService.show();
 
-    forkJoin({
-      detail: this.odinApi.getAllocationBoxDetail(id),
-      odin: this.odinApi.getOdin()
-    }).subscribe({
-      next: ({ detail, odin }) => {
+    // Use totalPool from history state (navigation) or sessionStorage (reload/deep link)
+    const state = history.state;
+    let passedTotalPool = state?.totalPool;
+    let passedBox = state?.box;
+
+    if (passedTotalPool === undefined) {
+      const storedPool = sessionStorage.getItem('odin_total_pool');
+      if (storedPool) passedTotalPool = parseFloat(storedPool);
+    }
+
+    this.odinApi.getAllocationBoxDetail(id).subscribe({
+      next: (detail) => {
         this.allocationData.set(detail);
 
-        // Find the box in the summary to get its calculated capacity/percentage
-        const box = odin.allocation_boxes.find(b => b.id === id);
-        if (box) {
-          if (box.calculation_type === 'percentage') {
-            this.boxPercentage.set(box.percentage_of_pool || null);
+        if (passedBox === undefined) {
+          const storedBoxes = sessionStorage.getItem('odin_allocation_boxes');
+          if (storedBoxes) {
+            const boxes = JSON.parse(storedBoxes);
+            passedBox = boxes.find((b: any) => b.id === id);
+          }
+        }
 
-            // Prefer the backend's calculated amount if available
-            if (box.calculated_amount_in_usd) {
-              this.trueBoxCapacity.set(box.calculated_amount_in_usd);
-            } else if (box.percentage_of_pool) {
-              const totalPool = odin.pool_summary.total_amount_in_usd;
-              const capacity = (box.percentage_of_pool / 100) * totalPool;
+        // Calculate trueBoxCapacity and boxPercentage without calling /odin
+        if (passedTotalPool !== undefined && passedBox) {
+          if (detail.calculation_type === 'percentage') {
+            this.boxPercentage.set(passedBox.targetAmount || null);
+
+            if (passedBox.targetAmount) {
+              const capacity = (passedBox.targetAmount / 100) * passedTotalPool;
               this.trueBoxCapacity.set(capacity);
             }
+          } else {
+            this.trueBoxCapacity.set(passedBox.targetAmount);
           }
         }
 

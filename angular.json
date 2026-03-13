@@ -28,11 +28,13 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/manifest.webmanifest"
             ],
             "styles": [
               "src/styles.scss"
-            ]
+            ],
+            "serviceWorker": "src/ngsw-config.json"
           },
           "configurations": {
             "production": {

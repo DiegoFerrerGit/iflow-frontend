@@ -13,11 +13,13 @@ import { ToastService } from './shared/components/toast/toast.service';
 import { ResponsiveDirective } from './shared/directives/responsive.directive';
 import { ResponsiveState } from './core/responsive/responsive.state';
 import { BottomNavComponent } from './core/layout/bottom-nav/bottom-nav';
+import { InstallPromptComponent } from './core/components/install-prompt/install-prompt.component';
+import { PwaService } from './core/services/pwa.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe, ToastComponent, ResponsiveDirective, BottomNavComponent],
+  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe, ToastComponent, ResponsiveDirective, BottomNavComponent, InstallPromptComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -31,6 +33,7 @@ export class AppComponent implements OnInit {
   private store = inject(Store);
   public readonly toastService = inject(ToastService);
   public readonly responsiveState = inject(ResponsiveState);
+  public readonly pwaService = inject(PwaService);
 
   public inProgress$!: Observable<boolean>;
 
