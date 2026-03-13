@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { PwaService } from '../../services/pwa.service';
 
 @Component({
-    selector: 'app-install-prompt',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-install-prompt',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div *ngIf="pwaService.installPrompt$ | async" 
          class="fixed bottom-4 left-4 right-4 z-[9999] bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-500">
       
@@ -36,23 +36,31 @@ import { PwaService } from '../../services/pwa.service';
         </button>
       </div>
 
-      <!-- iOS / Safari -->
+      <!-- iOS / Safari / Brave -->
       <div *ngIf="pwaService.isIOS" class="mt-4 pt-4 border-t border-slate-800">
-        <p class="text-xs text-slate-400 flex items-center gap-2 flex-wrap">
-          Para instalar: Pulsa 
-          <span class="bg-slate-800 px-2 py-1 rounded flex items-center border border-slate-700">
-            <span class="material-symbols-outlined text-sm text-blue-400">ios_share</span>
-          </span>
-          y luego selecciona 
-          <span class="font-bold text-white">"Añadir a la pantalla de inicio"</span>
+        <p class="text-xs text-slate-400 mb-4">
+          En iOS, la instalación es manual:
         </p>
+        <div class="flex items-center gap-3 text-sm text-white bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+          <span class="material-symbols-outlined text-blue-400">ios_share</span>
+          <span>Pulsa el botón de <b>compartir</b> en la barra de tu navegador</span>
+        </div>
+        <div class="mt-3 flex items-center gap-3 text-sm text-white bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+          <span class="material-symbols-outlined text-purple-400">add_box</span>
+          <span>Selecciona <b>"Añadir a la pantalla de inicio"</b></span>
+        </div>
+        
+        <button (click)="pwaService.dismissInstall()" 
+                class="w-full mt-4 bg-slate-800 text-white font-medium py-2 rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors">
+          Entendido
+        </button>
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host { display: block; }
   `]
 })
 export class InstallPromptComponent {
-    public pwaService = inject(PwaService);
+  public pwaService = inject(PwaService);
 }
