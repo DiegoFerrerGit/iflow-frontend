@@ -26,5 +26,24 @@
                 ]
             }
         }
+    ],
+    "dataGroups": [
+        {
+            "name": "api",
+            "urls": [
+                "https://api.iflowmoney.com/**"
+            ],
+            "cacheConfig": {
+                "maxSize": 0,
+                "maxAge": "0u",
+                "strategy": "freshness"
+            }
+        }
+    ],
+    "navigationUrls": [
+        "/**",
+        "!/**/*.*",
+        "!/**/*__*",
+        "!https://api.iflowmoney.com/**"
     ]
 }
