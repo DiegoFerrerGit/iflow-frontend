@@ -1,7 +1,7 @@
 {
     "id": "com.thotifa.iflow",
-    "name": "Iflow Dashboard",
-    "short_name": "Iflow",
+    "name": "IFlow Dashboard",
+    "short_name": "IFlow",
     "theme_color": "#6200ee",
     "background_color": "#ffffff",
     "display": "standalone",

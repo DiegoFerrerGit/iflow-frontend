@@ -16,7 +16,7 @@ import { PwaService } from '../../services/pwa.service';
         </div>
         
         <div class="flex-1 min-w-0">
-          <h3 class="text-white font-bold text-lg mb-1">Instalar Iflow</h3>
+          <h3 class="text-white font-bold text-lg mb-1">Instalar IFlow</h3>
           <p class="text-slate-400 text-sm leading-relaxed">
             Instala nuestra app para una mejor experiencia y acceso rápido desde tu pantalla de inicio.
           </p>
