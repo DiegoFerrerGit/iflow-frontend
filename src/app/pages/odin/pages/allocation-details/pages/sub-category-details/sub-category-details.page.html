@@ -112,15 +112,18 @@
     </div>
 
     <!-- Proportion Bar Chart Section -->
-    <section class="mb-5 w-full">
-        <div
+    <section class="mb-5 w-full" [class.mb-2]="responsiveState.isMobile()">
+        <div [class.py-2]="responsiveState.isMobile()" [class.px-3]="responsiveState.isMobile()"
+            [class.bg-white/[0.03]]="responsiveState.isMobile()"
             class="border border-[rgba(225,29,72,0.15)] bg-[#0d1017] rounded-[24px] p-4 lg:p-5 relative overflow-hidden shadow-[0_0_80px_rgba(225,29,72,0.1)] w-full">
-            <div class="flex justify-between items-end mb-4 flex-wrap gap-4">
+            <div class="flex justify-between items-end mb-4 flex-wrap gap-4"
+                [class.flex-col]="responsiveState.isMobile()" [class.items-center]="responsiveState.isMobile()"
+                [class.mb-1]="responsiveState.isMobile()" [class.gap-2]="responsiveState.isMobile()">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em]">Proporción de Ítems
                 </p>
-                <div class="flex gap-4 flex-wrap">
+                <div class="flex gap-4 flex-wrap justify-center" [class.gap-3]="responsiveState.isMobile()">
                     @for (item of itemsWithDetails(); track item.id) {
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
                         <div class="w-2 h-2 rounded-full" [ngClass]="item.bgColorClass"></div>
                         <span class="text-[10px] text-slate-400 font-bold">{{ item.name }}</span>
                     </div>
@@ -128,8 +131,8 @@
                 </div>
             </div>
 
-            <!-- Custom Stacked Bar -->
-            <div
+            <!-- Custom Stacked Bar (Desktop Only) -->
+            <div *iflowResponsive="'DESKTOP'"
                 class="h-6 w-full flex rounded-full overflow-hidden bg-black/40 border border-white/5 p-1 relative z-10">
                 @for (item of proportionBarItems(); track item.id; let isFirst = $first; let isLast = $last) {
                 <div class="h-full relative border-l border-[#0d1017] cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:scale-y-110 z-10 hover:z-20 origin-bottom"
@@ -140,8 +143,13 @@
                 }
             </div>
 
-            <!-- Dynamic Hover Legend -->
-            <div class="flex justify-center mt-3 h-6 items-center transition-all duration-200 relative z-0">
+            <!-- Polar Area Chart (Mobile Only) -->
+            <div *iflowResponsive="'MOBILE'" class="w-full flex justify-center pt-1 pb-2">
+                <app-polar-area-chart [segments]="polarChartSegments()"></app-polar-area-chart>
+            </div>
+
+            <!-- Dynamic Hover Legend (Desktop Only) -->
+            <div *iflowResponsive="'DESKTOP'" class="flex justify-center mt-3 h-6 items-center transition-all duration-200 relative z-0">
                 @if (hoveredItemDetails()) {
                 <div
                     class="flex items-center gap-2 animate-fade-in-up bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
