@@ -1,4 +1,4 @@
-<div class="premium-picker-container">
+<div class="premium-picker-container" [class.compact]="isCompact">
     <!-- SL Area (Saturation & Lightness) -->
     <div class="sl-area" #slArea
          [style.backgroundColor]="'hsl(' + hue + ', 100%, 50%)'"

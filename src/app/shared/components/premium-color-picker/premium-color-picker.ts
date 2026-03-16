@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class PremiumColorPicker implements OnInit {
   @Input() initialColor: string = '#a855f7';
+  @Input() isCompact: boolean = false;
   @Output() colorChange = new EventEmitter<string>();
 
   hue: number = 270;

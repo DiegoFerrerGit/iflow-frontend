@@ -29,19 +29,21 @@ export class PwaService {
     }
 
     private initializeStepInstaller(): void {
+        const isDismissed = localStorage.getItem('pwa-install-dismissed') === 'true';
+
         window.addEventListener('beforeinstallprompt', (e) => {
             // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
             // Stash the event so it can be triggered later.
             this.deferredPrompt = e;
-            // Only show banner if on mobile
-            if (this.isMobile) {
+            // Only show banner if on mobile and not already dismissed
+            if (this.isMobile && !isDismissed) {
                 this.showInstallBanner$.next(true);
             }
         });
 
         // Special handling for iOS Safari which doesn't support beforeinstallprompt
-        if (this.isIOS && this.isMobile && !this.isStandalone()) {
+        if (this.isIOS && this.isMobile && !this.isStandalone() && !isDismissed) {
             this.showInstallBanner$.next(true);
         }
     }
@@ -60,6 +62,7 @@ export class PwaService {
         this.deferredPrompt.userChoice.then((choiceResult: { outcome: string }) => {
             if (choiceResult.outcome === 'accepted') {
                 console.log('User accepted the install prompt');
+                localStorage.setItem('pwa-install-dismissed', 'true');
             } else {
                 console.log('User dismissed the install prompt');
             }
@@ -69,6 +72,7 @@ export class PwaService {
     }
 
     public dismissInstall(): void {
+        localStorage.setItem('pwa-install-dismissed', 'true');
         this.showInstallBanner$.next(false);
     }
 

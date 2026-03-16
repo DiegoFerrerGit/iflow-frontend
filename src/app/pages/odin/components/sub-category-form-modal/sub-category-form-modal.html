@@ -160,14 +160,20 @@
                                 </div>
                             </button>
 
+                            <!-- Localized Picker (Absolute to button) -->
                             @if (showCustomPicker) {
-                            <div class="absolute bottom-full right-0 mb-3 z-[100]">
+                            <div class="absolute right-0 z-[100] animate-in fade-in zoom-in duration-200"
+                                [ngClass]="{
+                                    'bottom-full mb-4 slide-in-from-bottom-2': !responsiveState.isMobile() || amountType === 'fixed_amount',
+                                    'top-full mt-2 slide-in-from-top-2': responsiveState.isMobile() && amountType === 'sum_items'
+                                }">
                                 <app-premium-color-picker
                                     [initialColor]="isCustomColor(form.get('color')?.value) ? form.get('color')?.value : '#a855f7'"
+                                    [isCompact]="responsiveState.isMobile() && amountType === 'fixed_amount'"
                                     (colorChange)="handleCustomColorChange($event)">
                                 </app-premium-color-picker>
 
-                                <!-- Overlay to close picker -->
+                                <!-- Small Overlay to close -->
                                 <div class="fixed inset-0 z-[-1]" (click)="showCustomPicker = false"></div>
                             </div>
                             }
