@@ -14,6 +14,8 @@ import { DeleteConfirmationModal } from '../../../../components/delete-confirmat
 import { ItemFormModalComponent } from '../../../../components/item-form-modal/item-form-modal.component';
 import { LoaderComponent } from '../../../../../../shared/components/loader/loader.component';
 import { ResponsiveDirective } from '../../../../../../shared/directives/responsive.directive';
+import { PolarAreaChartComponent, PolarAreaSegment } from '../../../../../../shared/components/polar-area-chart/polar-area-chart.component';
+import { ResponsiveState } from '../../../../../../core/responsive/responsive.state';
 
 const TEXT_CLASS_MAP: Record<string, string> = {
     'primary': 'text-purple-400',
@@ -69,7 +71,8 @@ const BG_CLASS_MAP: Record<string, string> = {
         DeleteConfirmationModal,
         ItemFormModalComponent,
         LoaderComponent,
-        ResponsiveDirective
+        ResponsiveDirective,
+        PolarAreaChartComponent
     ],
     templateUrl: './sub-category-details.page.html'
 })
@@ -79,6 +82,7 @@ export class SubCategoryDetailsPage implements OnInit {
     private odinApi = inject(OdinApiService);
     public currencyState = inject(CurrencyManager);
     private loaderService = inject(LoaderManager);
+    public responsiveState = inject(ResponsiveState);
 
     boxId = signal<string | null>(null);
     subCategoryId = signal<string | null>(null);
@@ -155,6 +159,18 @@ export class SubCategoryDetailsPage implements OnInit {
         const id = this.hoveredItem();
         if (!id) return null;
         return this.itemsWithDetails().find(i => i.id === id) || null;
+    });
+
+    polarChartSegments = computed<PolarAreaSegment[]>(() => {
+        return this.itemsWithDetails()
+            .filter(item => item.calculatedAmount > 0)
+            .map(item => ({
+                id: item.id,
+                label: item.name,
+                value: item.calculatedAmount,
+                color: item.color || '#64748b',
+                percentage: item.percentage
+            }));
     });
 
     usedColors = computed(() => {
