@@ -162,18 +162,48 @@
                     }
 
                     @if (formData.type === 'temporary') {
-                    <div class="w-full md:flex-1 flex flex-col space-y-2 animate-in fade-in slide-in-from-right-2 duration-500 ease-out">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">
-                            Objetivo <span class="text-red-400">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                            <input type="number" [(ngModel)]="formData.savingsTarget" name="savingsTarget" required
-                                min="1"
-                                class="w-full h-[46px] bg-[#151821] border border-white/10 rounded-xl pl-8 pr-2 py-2.5 md:py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary transition-all text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-inner"
-                                placeholder="0">
-                        </div>
-                    </div>
+                        @if (initialAllocation) {
+                            <!-- Edit Mode: Ahorrado and Objetivo side-by-side -->
+                            <div class="grid grid-cols-2 gap-4 w-full animate-in fade-in slide-in-from-right-2 duration-500 ease-out">
+                                <div class="flex flex-col space-y-2">
+                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">
+                                        Ahorrado
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                        <input type="number" [(ngModel)]="formData.savedAmount" name="savedAmount"
+                                            class="w-full h-[46px] bg-[#151821] border border-white/10 rounded-xl pl-8 pr-2 py-2.5 md:py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary transition-all text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-inner"
+                                            placeholder="0">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col space-y-2">
+                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">
+                                        Objetivo <span class="text-red-400">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                        <input type="number" [(ngModel)]="formData.savingsTarget" name="savingsTarget" required
+                                            min="1"
+                                            class="w-full h-[46px] bg-[#151821] border border-white/10 rounded-xl pl-8 pr-2 py-2.5 md:py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary transition-all text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-inner"
+                                            placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+                        } @else {
+                            <!-- Create Mode: Just Objetivo -->
+                            <div class="w-full md:flex-1 flex flex-col space-y-2 animate-in fade-in slide-in-from-right-2 duration-500 ease-out">
+                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">
+                                    Objetivo <span class="text-red-400">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                    <input type="number" [(ngModel)]="formData.savingsTarget" name="savingsTarget" required
+                                        min="1"
+                                        class="w-full h-[46px] bg-[#151821] border border-white/10 rounded-xl pl-8 pr-2 py-2.5 md:py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary transition-all text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-inner"
+                                        placeholder="0">
+                                </div>
+                            </div>
+                        }
                     }
                 </div>
 
@@ -234,7 +264,11 @@
 
                                     <!-- Localized Picker (Absolute to button) -->
                                     @if (showCustomPicker) {
-                                    <div class="absolute bottom-full right-0 mb-4 z-[100] animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200">
+                                    <div class="absolute right-0 z-[100] animate-in fade-in zoom-in duration-200"
+                                        [ngClass]="{
+                                            'bottom-full mb-4 slide-in-from-bottom-2': responsiveState.isMobile(),
+                                            'top-full mt-2 slide-in-from-top-2': !responsiveState.isMobile()
+                                        }">
                                         <app-premium-color-picker
                                             [initialColor]="(formData.color && isCustomColor(formData.color)) ? formData.color : '#a855f7'"
                                             (colorChange)="handleCustomColorChange($event)">

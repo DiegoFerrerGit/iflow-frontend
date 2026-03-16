@@ -6,10 +6,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { selectUserFullName, selectUserAvatarUrl } from '../../modules/authentication/state/authentication.selectors';
 import { AuthActions } from '../../modules/authentication/state/authentication.actions';
 
+import { CurrencySwitcherComponent } from '../currency-switcher/currency-switcher';
+ 
 @Component({
   selector: 'app-sidebar-menu',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, CurrencySwitcherComponent],
   templateUrl: './sidebar-menu.html',
   styleUrl: './sidebar-menu.scss',
 })

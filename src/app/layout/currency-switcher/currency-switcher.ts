@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CurrencyManager, CurrencyType } from '../../core/currency-manager/currency-manager.manager';
 
@@ -13,6 +13,9 @@ export class CurrencySwitcherComponent {
   public currencyState = inject(CurrencyManager);
   public currencyManager = inject(CurrencyManager);
   private elementRef = inject(ElementRef);
+
+  @Input() mode: 'fixed' | 'sidebar' = 'fixed';
+  @Input() isSidebarExpanded: boolean = true;
 
   isOpen = signal<boolean>(false);
 

@@ -19,7 +19,7 @@ import { PwaService } from './core/services/pwa.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarMenu, CurrencySwitcherComponent, LoaderComponent, AsyncPipe, ToastComponent, ResponsiveDirective, BottomNavComponent, InstallPromptComponent],
+  imports: [RouterOutlet, SidebarMenu, LoaderComponent, AsyncPipe, ToastComponent, ResponsiveDirective, BottomNavComponent, InstallPromptComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -76,6 +76,9 @@ export class PwaService {
         this.showInstallBanner$.next(false);
     }
 
+    private isUpdatePending = false;
+    private updateReadyTimestamp: number | null = null;
+
     private handleUpdates(): void {
         if (!this.swUpdate.isEnabled) return;
 
@@ -90,10 +93,27 @@ export class PwaService {
 
         this.swUpdate.versionUpdates
             .pipe(filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
-            .subscribe(() => {
+            .subscribe(async () => {
+                this.isUpdatePending = true;
+                this.updateReadyTimestamp = Date.now();
+
+                // Activate update in background so any subsequent reload is definitely fresh
+                await this.swUpdate.activateUpdate();
+
                 if (confirm('Nueva versión disponible. ¿Deseas actualizar?')) {
                     window.location.reload();
                 }
             });
+
+        // Background auto-refresh logic when returning to the app
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && this.isUpdatePending) {
+                const now = Date.now();
+                // If more than 30 minutes passed since update was ready, reload automatically when returning
+                if (this.updateReadyTimestamp && (now - this.updateReadyTimestamp > 30 * 60 * 1000)) {
+                    window.location.reload();
+                }
+            }
+        });
     }
 }
