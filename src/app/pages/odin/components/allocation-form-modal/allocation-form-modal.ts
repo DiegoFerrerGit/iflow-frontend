@@ -67,9 +67,10 @@ export class AllocationFormModalComponent implements OnInit {
   iconsList = [...DEFAULT_ICONS];
 
   get filteredIcons(): string[] {
-    // Show Recents + Defaults (limited to 31 items total to fit Ver más as 32nd)
+    // Show Recents + Defaults (limited based on device)
     const combined = [...new Set([...this.recentIcons, ...this.iconsList])];
-    return combined.slice(0, 31);
+    const limit = this.responsiveState.isMobile() ? 29 : 31;
+    return combined.slice(0, limit);
   }
 
   get iconCategories(): IconCategory[] {
@@ -77,8 +78,13 @@ export class AllocationFormModalComponent implements OnInit {
   }
 
   colorsList: string[] = [
-    'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'orange', 'slate'
+    'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange', 'blue', 'fuchsia', 'violet'
   ];
+
+  get displayColors(): string[] {
+    const limit = this.responsiveState.isMobile() ? 5 : 11;
+    return this.recentColors.slice(0, limit);
+  }
 
   public recentColors: string[] = [];
 
@@ -95,9 +101,11 @@ export class AllocationFormModalComponent implements OnInit {
     this.recentIcons = this.persistenceService.getRecent('allocation', 'icons');
     this.recentColors = this.persistenceService.getRecent('allocation', 'colors');
 
-    // If no recent colors, initialize with defaults
-    if (this.recentColors.length === 0) {
-      this.recentColors = [...this.colorsList];
+    // Ensure recent colors are populated up to 11 items for desktop
+    if (this.recentColors.length < 11) {
+      const remainingSlots = 11 - this.recentColors.length;
+      const defaultPaddings = this.colorsList.filter(c => !this.recentColors.includes(c));
+      this.recentColors.push(...defaultPaddings.slice(0, remainingSlots));
     }
 
     if (this.onboardingMode) {

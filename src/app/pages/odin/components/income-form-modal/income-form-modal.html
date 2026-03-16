@@ -196,9 +196,9 @@
                                     Color para Etiqueta' }}
                                 </span>
                             </div>
-                            <div class="flex flex-wrap gap-2.5 items-center">
+                            <div class="flex flex-wrap gap-2.5 items-center justify-center">
                                 <!-- Frequent Colors Palette (Populated from localStorage/Defaults) -->
-                                @for (color of recentColors; track color) {
+                                @for (color of displayColors; track color) {
                                 <button type="button" (click)="selectThemeColor(color)"
                                     class="w-8 h-8 rounded-full border-2 transition-transform relative group" [ngClass]="{
                                     'bg-primary border-primary': color === 'primary',

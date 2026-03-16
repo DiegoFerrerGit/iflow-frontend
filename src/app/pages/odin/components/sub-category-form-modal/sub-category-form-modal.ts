@@ -39,9 +39,14 @@ export class SubCategoryFormModal implements OnInit {
     @Output() save = new EventEmitter<IAllocationSubCategoryDto>();
 
     public form!: FormGroup;
-    public refinedPalette: (ThemeColor | string)[] = [
-        'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'orange', 'slate'
+    public refinedPalette: string[] = [
+        'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange', 'blue', 'fuchsia'
     ];
+
+    public get displayColors(): string[] {
+        const limit = this.responsiveState.isMobile() ? 5 : 10;
+        return this.recentColors.slice(0, limit);
+    }
     public showCustomPicker = false;
     public showIconExplorer = false;
     public iconSearchQuery = '';
@@ -221,17 +226,17 @@ export class SubCategoryFormModal implements OnInit {
 
     public get filteredIcons(): string[] {
         const combined = [...new Set([...this.recentIcons, ...DEFAULT_ICONS])];
-        return combined.slice(0, 31);
+        const limit = this.responsiveState.isMobile() ? 29 : 31;
+        return combined.slice(0, limit);
     }
 
     private loadPersistence(): void {
         this.recentIcons = this.persistenceService.getRecent(this.CONTEXT, 'icons');
         const savedColors = this.persistenceService.getRecent(this.CONTEXT, 'colors');
         
-        // Ensure we always have a full palette (8 slots)
-        const defaults = ['primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'orange', 'slate'];
-        const uniqueColors = [...new Set([...savedColors, ...defaults])];
-        this.recentColors = uniqueColors.slice(0, 8);
+        // Ensure recent colors are populated up to 10 items for desktop
+        let uniqueColors = [...new Set([...savedColors, ...this.refinedPalette])];
+        this.recentColors = uniqueColors.slice(0, 10);
     }
 
     public get filteredExplorerIcons(): string[] {

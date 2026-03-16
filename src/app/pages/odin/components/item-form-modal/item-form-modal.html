@@ -116,9 +116,9 @@
                 <div class="space-y-4">
                     <label class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase pl-1">Personalización
                         de Color <span class="text-red-400">*</span></label>
-                    <div class="flex flex-wrap gap-2.5 items-center">
+                    <div class="flex flex-wrap gap-2.5 items-center justify-center">
                         <!-- Frequent Colors Palette (Populated from localStorage/Defaults) -->
-                        @for (color of recentColors; track color) {
+                        @for (color of displayColors; track color) {
                         <button type="button" (click)="selectColor(color)"
                             class="w-8 h-8 rounded-full border-2 transition-transform relative group" [ngClass]="{
                             'bg-primary border-primary': color === 'primary',
@@ -129,7 +129,8 @@
                             'bg-indigo-400 border-indigo-400': color === 'indigo',
                             'bg-rose-400 border-rose-400': color === 'rose',
                             'bg-orange-400 border-orange-400': color === 'orange',
-                            'bg-slate-500 border-slate-500': color === 'slate',
+                            'bg-blue-400 border-blue-400': color === 'blue',
+                            'bg-fuchsia-400 border-fuchsia-400': color === 'fuchsia',
                             'ring-2 ring-white ring-offset-2 ring-offset-[#1b202c] shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-110': form.get('color')?.value === color,
                             'border-transparent opacity-60 hover:opacity-100 hover:scale-110': form.get('color')?.value !== color && !isColorUsed(color),
                             'opacity-10 cursor-not-allowed grayscale': isColorUsed(color)

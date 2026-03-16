@@ -138,6 +138,11 @@ export class IncomeFormModal implements OnInit {
     return this.activeColorMode === 'card' ? this.cardColor : this.tagColor;
   }
 
+  get displayColors(): string[] {
+    const limit = this.responsiveState.isMobile() ? 5 : 8;
+    return this.recentColors.slice(0, limit);
+  }
+
   selectColorMode(mode: 'card' | 'category') {
     this.activeColorMode = mode;
     this.showCustomPicker = false;
@@ -255,7 +260,8 @@ export class IncomeFormModal implements OnInit {
 
   get filteredIcons(): string[] {
     const combined = [...new Set([...this.recentIcons, ...DEFAULT_ICONS])];
-    return combined.slice(0, 31);
+    const limit = this.responsiveState.isMobile() ? 29 : 31;
+    return combined.slice(0, limit);
   }
 
   private loadPersistence(): void {
