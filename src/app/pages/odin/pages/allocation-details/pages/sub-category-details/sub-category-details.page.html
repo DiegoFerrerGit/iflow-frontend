@@ -10,9 +10,9 @@
     <div *iflowResponsive="'DESKTOP'">
         <!-- Breadcrumbs -->
         <div class="flex items-center gap-2 mb-2 uppercase font-black text-xs tracking-widest text-slate-500">
-            <button [routerLink]="['/odin']" class="hover:text-white transition-colors">DASHBOARD</button>
+            <button [routerLink]="['/odin']" class="hover:text-white transition-colors">ODIN</button>
             <span class="opacity-50">&gt;</span>
-            <button (click)="goBack()" class="hover:text-white transition-colors">{{ boxName() }}</button>
+            <button (click)="goBack()" class="hover:text-white transition-colors">{{ boxName() | uppercase }}</button>
             <span class="opacity-50">&gt;</span>
             <span class="text-indigo-400">{{ subCategoryName() }}</span>
         </div>
@@ -68,7 +68,7 @@
                 <span class="text-slate-400 opacity-20">/</span>
                 <span (click)="goBack()"
                     class="text-slate-400 truncate max-w-[100px] cursor-pointer hover:text-white transition-colors">{{
-                    boxName() }}</span>
+                    boxName() | uppercase }}</span>
                 <span class="text-slate-400 opacity-20">/</span>
                 <span class="text-orange-500 truncate max-w-[120px]">{{ subCategoryName() }}</span>
             </div>
@@ -166,7 +166,7 @@
                 </span>
             </div>
 
-            @if ((pageData()?.available_amount_to_assign ?? 1) > 0) {
+            @if (parentBoxType() !== 'percentage' || (pageData()?.available_amount_to_assign ?? 0) > 0) {
             <div *iflowResponsive="'DESKTOP'">
                 <button (click)="openItemModal()"
                     class="group relative inline-flex items-center justify-center bg-white/5 border border-white/10 px-6 py-2.5 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
@@ -369,7 +369,7 @@
     }
 
     <!-- Mobile Orange FAB -->
-    @if ((pageData()?.available_amount_to_assign ?? 1) > 0) {
+    @if (parentBoxType() !== 'percentage' || (pageData()?.available_amount_to_assign ?? 0) > 0) {
     <div *iflowResponsive="'MOBILE'"
         class="fixed bottom-[80px] right-6 z-[50] flex flex-col items-end transition-all duration-300 pointer-events-auto"
         [class.opacity-0]="activeMobileMenuId() || isItemFormModalOpen()"

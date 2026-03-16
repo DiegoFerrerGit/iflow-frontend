@@ -65,7 +65,7 @@
                 </span>
                 }
                 @if (title) {
-                <span class="text-slate-400 font-bold tracking-[0.15em] text-center px-4 leading-relaxed"
+                <span class="text-slate-400 font-bold tracking-[0.15em] text-center px-4 leading-snug whitespace-normal max-w-[200px]"
                     [ngClass]="[titleClass, titleUppercase ? 'uppercase' : '']">
                     {{ title }}
                 </span>
@@ -73,7 +73,7 @@
                 } @else {
                 <!-- Normal: Title (Label) on top, Subtitle (Hero) below -->
                 @if (title) {
-                <span class="text-slate-400 font-black tracking-[0.2em] uppercase text-center px-4 leading-relaxed"
+                <span class="text-slate-400 font-black tracking-[0.2em] uppercase text-center px-6 leading-tight whitespace-normal max-w-[220px]"
                     [ngClass]="titleClass">
                     {{ title }}
                 </span>

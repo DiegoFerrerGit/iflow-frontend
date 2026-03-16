@@ -23,9 +23,10 @@
 
         <!-- Form Body -->
         <form [formGroup]="incomeForm" (ngSubmit)="onSubmit()" class="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div class="p-4 md:p-8 space-y-4 md:space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                <!-- Group 1 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div class="p-4 md:p-8 space-y-4 md:space-y-6 overflow-y-auto scroller flex-1">
+                <!-- Información Principal -->
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">
                             Título de fuente <span class="text-red-400">*</span>
@@ -42,10 +43,12 @@
                             class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary px-3 py-2.5 md:px-4 md:py-3 placeholder:text-slate-600 transition-all cursor-text select-text"
                             placeholder="Ej: Ingreso mensual BNA" type="text" />
                     </div>
+                    </div>
                 </div>
 
-                <!-- Group 2 -->
-                <div class="grid grid-cols-[1.4fr_1.6fr] md:grid-cols-2 gap-3 md:gap-6 items-start">
+                <!-- Detalle Monetario -->
+                <div class="space-y-4 pt-2">
+                    <div class="grid grid-cols-[1.4fr_1.6fr] md:grid-cols-2 gap-3 md:gap-6 items-start">
                     <div class="flex flex-col">
                         <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1 mb-2">
                             Moneda <span class="text-red-400">*</span>
@@ -67,10 +70,13 @@
                                 placeholder="0.00" type="number" />
                         </div>
                     </div>
+                    </div>
                 </div>
 
-                <!-- Group 3 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+                <!-- Clasificación y Estética -->
+                <div class="space-y-4 pt-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div class="space-y-2 relative col-span-1 md:col-span-2 xl:col-span-1">
                         <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1">
                             Tag / Categoría <span class="text-red-400">*</span>
@@ -88,7 +94,7 @@
                         <!-- Tag Picker Popover -->
                         @if (showTagPicker) {
                         <div
-                            class="absolute z-50 top-full mt-2 left-0 w-full bg-[#2a2e3d] border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col">
+                            class="absolute z-50 top-full mt-2 left-0 w-full bg-[#2a2e3d] border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
                             <!-- Search / Create input -->
                             <div class="p-2 border-b border-white/10 bg-black/40 flex items-center shadow-inner">
                                 <span class="material-symbols-outlined text-primary text-[20px] ml-2 mr-2">search</span>
@@ -124,15 +130,18 @@
                                 }
                             </div>
                         </div>
+
+                        <!-- Overlay to close picker -->
+                        <div class="fixed inset-0 z-40 bg-transparent" (click)="showTagPicker = false"></div>
                         }
                     </div>
 
-                    <!-- Unified Appearance Control -->
+                    <!-- Unified Appearance Control (Moved up) -->
                     <div
                         class="col-span-1 md:col-span-2 space-y-3 p-3 md:p-4 bg-black/20 rounded-xl border border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
                             <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase">
-                                Apariencia Personalizada <span class="text-red-400">*</span>
+                                Apariencia Estética <span class="text-red-400">*</span>
                             </label>
                         </div>
 
@@ -163,10 +172,11 @@
                                 [class.bg-white/5]="activeColorMode === 'category'"
                                 [class.border-white/20]="activeColorMode === 'category'"
                                 [class.border-transparent]="activeColorMode !== 'category'">
-                                <div class="w-8 h-8 rounded-md border shadow-sm flex items-center justify-center"
+                                <div class="w-8 h-8 rounded-md border shadow-sm flex items-center justify-center min-w-[32px] overflow-hidden truncate"
                                     [style.borderColor]="getTagPreviewColorForColor(tagColor) + '80'"
                                     [style.color]="getTagPreviewColorForColor(tagColor)">
-                                    <span class="text-[8px] font-black uppercase leading-none">{{
+                                    <span
+                                        class="text-[8px] font-black uppercase leading-none px-1 overflow-hidden truncate">{{
                                         incomeForm.get('categoryLabel')?.value || 'Tag' }}</span>
                                 </div>
                                 <div class="text-left">
@@ -186,78 +196,101 @@
                                     Color para Etiqueta' }}
                                 </span>
                             </div>
-                            <div class="flex flex-wrap gap-2">
-                                @for (color of allThemeColors; track color) {
+                            <div class="flex flex-wrap gap-2.5 items-center">
+                                <!-- Frequent Colors Palette (Populated from localStorage/Defaults) -->
+                                @for (color of recentColors; track color) {
                                 <button type="button" (click)="selectThemeColor(color)"
-                                    class="w-8 h-8 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center group disabled:cursor-not-allowed"
-                                    [class.border-white/60]="activeColorSelection === color"
-                                    [class.border-transparent]="activeColorSelection !== color"
-                                    [class.scale-110]="activeColorSelection === color"
-                                    [style.backgroundColor]="getTagPreviewColorForColor(color)"
-                                    [class.opacity-20]="!currentAvailableColors.includes(color) && activeColorSelection !== color"
-                                    [attr.title]="!currentAvailableColors.includes(color) && activeColorSelection !== color ? 'Color ya usado en este contexto' : ''"
-                                    [disabled]="!currentAvailableColors.includes(color) && activeColorSelection !== color">
-                                    @if (activeColorSelection === color) {
-                                    <span
-                                        class="material-symbols-outlined text-white text-[16px] drop-shadow-sm">check</span>
-                                    }
+                                    class="w-8 h-8 rounded-full border-2 transition-transform relative group" [ngClass]="{
+                                    'bg-primary border-primary': color === 'primary',
+                                    'bg-cyan-400 border-cyan-400': color === 'cyan',
+                                    'bg-pink-400 border-pink-400': color === 'pink',
+                                    'bg-emerald-400 border-emerald-400': color === 'emerald',
+                                    'bg-amber-400 border-amber-400': color === 'amber',
+                                    'bg-indigo-400 border-indigo-400': color === 'indigo',
+                                    'bg-rose-400 border-rose-400': color === 'rose',
+                                    'bg-orange-400 border-orange-400': color === 'orange',
+                                    'bg-slate-500 border-slate-500': color === 'slate',
+                                    'ring-2 ring-white ring-offset-2 ring-offset-[#1b202c] shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-110': activeColorSelection === color,
+                                    'border-transparent opacity-60 hover:opacity-100 hover:scale-110': activeColorSelection !== color
+                                    }" [style.backgroundColor]="isCustomColor(color) ? color : ''">
                                 </button>
                                 }
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="col-span-1 md:col-span-2 space-y-2 relative">
-                        <label
-                            class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1 flex items-center">
-                            Icono o URL Imagen <span
-                                class="text-[9px] text-slate-500 font-bold ml-auto md:ml-1.5 tracking-widest">(OPCIONAL)</span>
-                        </label>
-                        <div class="relative">
-                            <div
-                                class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
-                                @if (isImageUrl(incomeForm.get('icon')?.value)) {
-                                <img [src]="incomeForm.get('icon')?.value" class="w-full h-full object-cover"
-                                    alt="icon preview">
-                                } @else if (incomeForm.get('icon')?.value) {
-                                <span class="material-symbols-outlined text-slate-400 text-[20px]">{{
-                                    incomeForm.get('icon')?.value }}</span>
-                                } @else {
-                                <span class="material-symbols-outlined text-slate-600 text-[20px]">help</span>
-                                }
-                            </div>
-                            <input formControlName="icon"
-                                class="w-full bg-[#1f222e] border border-white/5 rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-primary pl-12 pr-10 py-2.5 md:py-3 placeholder:text-slate-600 transition-all cursor-text select-text"
-                                placeholder="ID de icono o URL" type="text" />
-                            <button type="button" (click)="toggleIconPicker()"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded flex items-center justify-center text-primary hover:bg-primary/20 transition-colors">
-                                <span class="material-symbols-outlined text-[18px]">grid_view</span>
-                            </button>
-                        </div>
+                                <!-- Custom RGB Picker Icon (Premium Segmented Design) -->
+                                <div class="relative flex items-center">
+                                    <button type="button" (click)="showCustomPicker = !showCustomPicker"
+                                        class="relative w-9 h-9 rounded-full flex items-center justify-center p-[2px] shadow-2xl hover:scale-110 transition-all group overflow-hidden">
+                                        <!-- The segmented ring background -->
+                                        <div class="absolute inset-0 rounded-full"
+                                            style="background: conic-gradient(#ff5f6d, #ffc371, #85ffbd, #67e8f9, #a855f7, #ff5f6d);">
+                                        </div>
+                                        <!-- The dark center -->
+                                        <div
+                                            class="absolute inset-[2px] rounded-full bg-[#1b202c] flex items-center justify-center z-10">
+                                            <span
+                                                class="material-symbols-outlined text-[18px] text-white group-hover:rotate-12 transition-transform">colorize</span>
+                                        </div>
+                                    </button>
 
-                        <!-- Popover Icon Picker -->
-                        @if (showIconPicker) {
+                                    @if (showCustomPicker) {
+                                    <div class="absolute bottom-full mb-3 z-[100]"
+                                         [ngClass]="responsiveState.isMobile() ? 'fixed inset-x-4 bottom-20 !left-auto !right-auto flex justify-center translate-x-0' : 'left-0'">
+                                        <app-premium-color-picker
+                                            [initialColor]="isCustomColor(activeColorSelection) ? activeColorSelection : '#a855f7'"
+                                            (colorChange)="handleCustomColorChange($event)">
+                                        </app-premium-color-picker>
+
+                                        <!-- Overlay to close -->
+                                        <div class="fixed inset-0 z-[-1]" (click)="showCustomPicker = false"></div>
+                                    </div>
+                                    }
+                                </div> <!-- picker wrapper -->
+                            </div> <!-- color grid -->
+                        </div> <!-- unified grid wrapper (182) -->
+                    </div> <!-- appearance container (132) -->
+
+                    <!-- ICON SECTOR (Moved down) -->
+                    <div class="col-span-1 md:col-span-2 space-y-3 pt-2">
+                        <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
+                            <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase">
+                                Seleccionar Ícono <span class="text-red-400">*</span>
+                            </label>
+                        </div>
                         <div
-                            class="absolute z-50 top-full mt-2 left-0 right-0 bg-[#2a2e3d] border border-white/10 rounded-xl shadow-2xl p-3 grid grid-cols-6 gap-2 max-h-[200px] overflow-y-auto custom-scrollbar">
-                            @for (icon of curatedIcons; track icon) {
+                            class="grid grid-cols-6 md:grid-cols-8 gap-2.5 max-h-[350px] md:max-h-[250px] overflow-hidden pr-2 relative">
+                            @for (icon of filteredIcons; track icon) {
                             <button type="button" (click)="selectIcon(icon)"
-                                class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
-                                [class.bg-primary-20]="incomeForm.get('icon')?.value === icon"
-                                [class.text-primary]="incomeForm.get('icon')?.value === icon">
-                                <span class="material-symbols-outlined text-[20px]">{{ icon }}</span>
+                                class="w-full aspect-square rounded-xl flex items-center justify-center transition-all bg-[#1f222e] border border-transparent hover:bg-white/5 hover:text-slate-300 relative group"
+                                [ngClass]="{
+                                    'bg-primary/20 text-primary border-primary/30 shadow-[0_0_15px_rgba(168,85,247,0.2)]': incomeForm.get('icon')?.value === icon,
+                                    'text-slate-500': incomeForm.get('icon')?.value !== icon
+                                }">
+                                <span class="material-symbols-outlined text-[20px] md:text-[24px]">{{ icon }}</span>
+
+                                @if (recentIcons.includes(icon) && incomeForm.get('icon')?.value !== icon) {
+                                <div class="absolute top-1 right-1 w-1 h-1 rounded-full bg-primary/40"></div>
+                                }
                             </button>
                             }
-                        </div>
-                        }
+
+                            <button type="button" (click)="toggleIconExplorer()"
+                                class="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all bg-primary/5 border border-primary/10 hover:bg-primary/10 text-primary group">
+                                <span
+                                    class="material-symbols-outlined text-[20px] md:text-[24px] group-hover:scale-110 transition-transform">add_circle</span>
+                                <span class="text-[7px] md:text-[8px] font-black uppercase tracking-tighter">Ver más</span>
+                            </button>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Group 4 -->
+
+                <!-- Esfuerzo -->
                 <div class="space-y-4 pt-4 border-t border-white/5">
                     <div class="flex flex-row justify-between items-center w-full">
                         <label
                             class="text-[10px] font-black text-slate-500 tracking-widest uppercase ml-1 flex flex-row items-center whitespace-nowrap gap-1">
-                            Esfuerzo / Dedicación <span
+                            Esfuerzo diario <span
                                 class="text-[9px] text-slate-500 font-bold tracking-widest">(OPCIONAL)</span>
                         </label>
                         <span class="text-xs md:text-sm font-black text-primary ml-auto">{{
@@ -265,8 +298,9 @@
                             }}%</span>
                     </div>
                     <input formControlName="effortPercentage" type="range"
-                        class="w-full h-2 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary" min="0"
-                        max="100" />
+                        class="w-full h-2 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary transition-all"
+                        [style.background]="'linear-gradient(to right, #a855f7 ' + (incomeForm.get('effortPercentage')?.value || 0) + '%, rgba(255, 255, 255, 0.05) ' + (incomeForm.get('effortPercentage')?.value || 0) + '%)'"
+                        min="0" max="100" />
                 </div>
             </div>
 

@@ -83,13 +83,13 @@ export class SubCategoryDetailsPage implements OnInit {
     boxId = signal<string | null>(null);
     subCategoryId = signal<string | null>(null);
 
-    // Fallbacks for breadcrumbs
-    initialBoxName = signal<string | null>(null);
-    initialSubCategoryName = signal<string | null>(null);
-
     pageData = signal<ISubCategoryDetailResponse | null>(null);
     hoveredItem = signal<string | null>(null);
-    parentBoxType = signal<'percentage' | 'absolute'>('percentage');
+    
+    // Computed states from API response
+    parentBoxType = computed(() => this.pageData()?.allocation_box_calculation_type || 'percentage');
+    boxName = computed(() => this.pageData()?.allocation_box_name || 'Cargando...');
+    subCategoryName = computed(() => this.pageData()?.sub_category_name || 'Cargando...');
 
     // Form Modal
     isItemFormModalOpen = signal<boolean>(false);
@@ -109,15 +109,6 @@ export class SubCategoryDetailsPage implements OnInit {
     activeMobileMenuId = signal<string | null>(null);
     isFabMenuOpen = signal<boolean>(false);
 
-    // Gets the box name from signal or fallback
-    boxName = computed(() => {
-        return this.initialBoxName() || 'Cargando...';
-    });
-
-    // Gets the subcategory name from signal or fallback
-    subCategoryName = computed(() => {
-        return this.initialSubCategoryName() || 'Cargando...';
-    });
 
     // Calculate accumulated total based on the items and currency conversion
     accumulatedTotal = computed(() => {
@@ -180,18 +171,7 @@ export class SubCategoryDetailsPage implements OnInit {
                 this.boxId.set(id);
                 this.subCategoryId.set(subId);
 
-                // Recover state for breadcrumbs
-                const state = history.state;
-                if (state?.boxName) this.initialBoxName.set(state.boxName);
-                if (state?.subCategoryName) this.initialSubCategoryName.set(state.subCategoryName);
-
-                let typeStr = state?.['parentBoxType'] || sessionStorage.getItem(`odin_box_type_${id}`);
-
-                if (typeStr === 'percentage' || typeStr === 'absolute') {
-                    this.parentBoxType.set(typeStr as 'percentage' | 'absolute');
-                    sessionStorage.setItem(`odin_box_type_${id}`, typeStr);
-                }
-
+                // Data is now handled by the API response metadata
                 this.loadItems(id, subId);
             }
         });

@@ -1,24 +1,32 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IncomeSource, ThemeColor, COLOR_MAP, THEME_COLORS } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { CategoryColorService } from '../../../../shared/services/category-color.service';
+import { ICON_LIBRARY, DEFAULT_ICONS, IconCategory } from '../../../../shared/constants/icons.constants';
+import { PersistenceService } from '../../../../shared/services/persistence.service';
+import { ResponsiveState } from '../../../../core/responsive/responsive.state';
 
 import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
 import { ResponsiveDirective } from '../../../../shared/directives/responsive.directive';
 import { FormsModule } from '@angular/forms';
 
+import { PremiumColorPicker } from '../../../../shared/components/premium-color-picker/premium-color-picker';
+
 @Component({
   selector: 'app-income-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, DynamicCurrencySymbolPipe, ToggleComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DynamicCurrencySymbolPipe, ToggleComponent, PremiumColorPicker],
   templateUrl: './income-form-modal.html',
   styleUrl: './income-form-modal.scss'
 })
 export class IncomeFormModal implements OnInit {
   private categoryColorService = inject(CategoryColorService);
+  private persistenceService = inject(PersistenceService);
+  private readonly CONTEXT = 'income';
+  public responsiveState = inject(ResponsiveState);
 
   @Input() initialIncome: IncomeSource | null = null;
   @Input() existingIncomes: IncomeSource[] = [];
@@ -35,6 +43,7 @@ export class IncomeFormModal implements OnInit {
   isClosing = false;
   defaultTags = ['Management', 'Developer', 'Consulting'];
   allThemeColors = THEME_COLORS;
+  private pendingCategoryColor: ThemeColor | string | null = null;
 
   public currencyOptions: ToggleOption[] = [
     { label: 'USD', value: 'USD' },
@@ -43,18 +52,23 @@ export class IncomeFormModal implements OnInit {
 
   // Curated list of popular generic and tech/finance Material Icons
   public curatedIcons = [
-    'category', 'account_balance', 'account_balance_wallet', 'savings', 'payments',
-    'credit_card', 'request_quote', 'receipt_long', 'trending_up', 'work',
-    'business_center', 'laptop_mac', 'computer', 'code', 'data_object',
-    'database', 'terminal', 'memory', 'dns', 'public',
-    'storefront', 'shopping_cart', 'local_shipping', 'restaurant', 'directions_car',
-    'flight', 'school', 'music_note', 'movie', 'sports_esports',
-    'home', 'apartment', 'build', 'engineering', 'science',
-    'gavel', 'health_and_safety', 'monitor_heart', 'fitness_center', 'group',
-    'person', 'support_agent', 'handshake', 'verified', 'stars',
-    'bolt', 'local_fire_department', 'diamond', 'rocket_launch', 'lightbulb',
-    'pie_chart', 'bar_chart', 'monitoring', 'timeline', 'hub'
+    'account_balance', 'home', 'shopping_cart', 'restaurant', 'directions_car',
+    'flight', 'school', 'health_and_safety', 'pets', 'fitness_center',
+    'redeem', 'savings', 'paid', 'credit_card', 'receipt',
+    'local_mall', 'sports_esports', 'movie', 'music_note', 'park',
+    'bolt', 'security', 'trending_up', 'work', 'business_center'
   ];
+
+  refinedPalette: (ThemeColor | string)[] = [
+    'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'orange', 'slate'
+  ];
+
+  showCustomPicker = false;
+  showIconExplorer = false;
+  iconSearchQuery = '';
+  recentIcons: string[] = [];
+  recentColors: string[] = [];
+  iconCategories = ICON_LIBRARY;
 
   constructor(private fb: FormBuilder) { }
 
@@ -70,6 +84,8 @@ export class IncomeFormModal implements OnInit {
       effortPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
     });
 
+    this.loadPersistence();
+
     if (this.initialIncome) {
       this.incomeForm.patchValue({
         name: this.initialIncome.name,
@@ -84,56 +100,84 @@ export class IncomeFormModal implements OnInit {
     }
   }
 
-  get tagColor(): ThemeColor {
-    return this.categoryColorService.getColor(this.incomeForm.get('categoryLabel')?.value);
+  get tagColor(): ThemeColor | string {
+    const category = this.incomeForm.get('categoryLabel')?.value;
+    if (!category && this.pendingCategoryColor) return this.pendingCategoryColor;
+    return this.categoryColorService.getColor(category);
   }
 
-  get cardColor(): ThemeColor {
+  get cardColor(): ThemeColor | string {
     return this.incomeForm.get('color')?.value || 'primary';
   }
 
-  getTagPreviewColorForColor(color: ThemeColor): string {
-    return COLOR_MAP[color] || COLOR_MAP['primary'];
+  getTagPreviewColorForColor(color: ThemeColor | string): string {
+    if (this.isCustomColor(color)) return color;
+    return COLOR_MAP[color as ThemeColor] || COLOR_MAP['primary'];
   }
 
-  get availableCategoryColors(): ThemeColor[] {
-    if (this.onboardingMode) return [...THEME_COLORS];
+  get availableCategoryColors(): (ThemeColor | string)[] {
     const currentCategory = this.incomeForm.get('categoryLabel')?.value;
     const usedColors = this.categoryColorService.getUsedColors();
     const currentColor = this.categoryColorService.getColor(currentCategory);
-    return THEME_COLORS.filter(color => !usedColors.has(color) || color === currentColor);
+    return this.refinedPalette.filter(color => !usedColors.has(color as ThemeColor) || color === currentColor);
   }
 
-  get availableCardColors(): ThemeColor[] {
-    if (this.onboardingMode) return [...THEME_COLORS];
+  get availableCardColors(): (ThemeColor | string)[] {
     const currentColor = this.incomeForm.get('color')?.value;
     const usedColors = new Set(this.existingIncomes
       .filter(i => i.id !== this.initialIncome?.id)
       .map(i => i.color));
-    return THEME_COLORS.filter(color => !usedColors.has(color) || color === currentColor);
+    return this.refinedPalette.filter(color => !usedColors.has(color) || color === currentColor);
   }
 
-  get currentAvailableColors(): ThemeColor[] {
+  get currentAvailableColors(): (ThemeColor | string)[] {
     return this.activeColorMode === 'card' ? this.availableCardColors : this.availableCategoryColors;
   }
 
-  get activeColorSelection(): ThemeColor {
+  get activeColorSelection(): ThemeColor | string {
     return this.activeColorMode === 'card' ? this.cardColor : this.tagColor;
   }
 
   selectColorMode(mode: 'card' | 'category') {
     this.activeColorMode = mode;
+    this.showCustomPicker = false;
   }
 
-  selectThemeColor(color: ThemeColor) {
+  selectThemeColor(color: string) {
+    if (this.activeColorMode === 'card') {
+      this.incomeForm.patchValue({ color });
+      this.persistenceService.saveSelection(this.CONTEXT, 'colors', color);
+      this.loadPersistence();
+    } else {
+      const category = this.incomeForm.get('categoryLabel')?.value;
+      if (category) {
+        this.categoryColorService.setColor(category, color as any);
+        this.persistenceService.saveSelection(this.CONTEXT, 'colors', color);
+        this.loadPersistence();
+      } else {
+        this.pendingCategoryColor = color;
+      }
+    }
+    this.showCustomPicker = false;
+  }
+
+  handleCustomColorChange(color: string) {
     if (this.activeColorMode === 'card') {
       this.incomeForm.patchValue({ color });
     } else {
       const category = this.incomeForm.get('categoryLabel')?.value;
       if (category) {
-        this.categoryColorService.setColor(category, color);
+        this.categoryColorService.setColor(category, color as any);
+      } else {
+        this.pendingCategoryColor = color;
       }
     }
+    this.persistenceService.saveSelection(this.CONTEXT, 'colors', color);
+    this.loadPersistence();
+  }
+
+  isCustomColor(color: ThemeColor | string): boolean {
+    return !!color && color.startsWith('#');
   }
 
   getTagPreviewColor(tag: string): string {
@@ -165,6 +209,13 @@ export class IncomeFormModal implements OnInit {
 
   selectTag(tag: string) {
     this.incomeForm.patchValue({ categoryLabel: tag });
+    
+    // Apply pending color if exists
+    if (this.pendingCategoryColor) {
+      this.categoryColorService.setColor(tag, this.pendingCategoryColor as any);
+      this.pendingCategoryColor = null;
+    }
+    
     this.showTagPicker = false;
     this.tagSearch = '';
   }
@@ -184,16 +235,55 @@ export class IncomeFormModal implements OnInit {
     }
   }
 
-  toggleIconPicker() {
-    this.showIconPicker = !this.showIconPicker;
-    if (this.showIconPicker) {
-      this.showTagPicker = false;
+  selectIcon(icon: string) {
+    this.incomeForm.patchValue({ icon });
+    this.persistenceService.saveSelection(this.CONTEXT, 'icons', icon);
+    this.recentIcons = this.persistenceService.getRecent(this.CONTEXT, 'icons');
+    if (this.showIconExplorer) {
+      this.showIconExplorer = false;
     }
   }
 
-  selectIcon(icon: string) {
-    this.incomeForm.patchValue({ icon });
-    this.showIconPicker = false;
+  toggleIconExplorer() {
+    this.showIconExplorer = !this.showIconExplorer;
+    this.iconSearchQuery = '';
+  }
+
+  onIconSearch(event: Event) {
+    this.iconSearchQuery = (event.target as HTMLInputElement).value;
+  }
+
+  get filteredIcons(): string[] {
+    const combined = [...new Set([...this.recentIcons, ...DEFAULT_ICONS])];
+    return combined.slice(0, 31);
+  }
+
+  private loadPersistence(): void {
+    this.recentIcons = this.persistenceService.getRecent(this.CONTEXT, 'icons');
+    const storedColors = this.persistenceService.getRecent(this.CONTEXT, 'colors');
+    
+    // Always ensure 8 colors are visible
+    this.recentColors = [...storedColors];
+    if (this.recentColors.length < 8) {
+      const remainingSlots = 8 - this.recentColors.length;
+      const defaultPaddings = this.refinedPalette.filter(c => !this.recentColors.includes(c));
+      this.recentColors.push(...defaultPaddings.slice(0, remainingSlots));
+    }
+  }
+
+  get filteredExplorerIcons(): string[] {
+    if (!this.iconSearchQuery) return [];
+    const query = this.iconSearchQuery.toLowerCase();
+    const result: string[] = [];
+    
+    this.iconCategories.forEach(cat => {
+      cat.icons.forEach(icon => {
+        if (icon.name.includes(query) || icon.tags.some(t => t.includes(query))) {
+          if (!result.includes(icon.name)) result.push(icon.name);
+        }
+      });
+    });
+    return result;
   }
 
   isImageUrl(str: string): boolean {
@@ -241,6 +331,10 @@ export class IncomeFormModal implements OnInit {
         category: formValue.categoryLabel,
         currency: formValue.currency
       };
+
+      // Save to persistence on submit
+      if (result.icon) this.persistenceService.saveSelection(this.CONTEXT, 'icons', result.icon);
+      if (result.color) this.persistenceService.saveSelection(this.CONTEXT, 'colors', result.color);
 
       this.save.emit(result);
     }

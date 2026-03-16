@@ -1,25 +1,32 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, OnDestroy } from '@angular/core';
+import { ICON_LIBRARY, DEFAULT_ICONS, IconCategory } from '../../../../shared/constants/icons.constants';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PersistenceService } from '../../../../shared/services/persistence.service';
 import { IAllocationItemDto } from '../../../../modules/odin/models/interfaces/api.response.interfaces';
-import { ThemeColor } from '../../models/odin-nivel3.model';
-import { THEME_COLORS } from '../../../../models/income.model';
+import { ThemeColor, THEME_COLORS, COLOR_MAP } from '../../../../models/income.model';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
 import { CurrencyManager } from '../../../../core/currency-manager/currency-manager.manager';
 import { Subscription } from 'rxjs';
+import { ResponsiveState } from '../../../../core/responsive/responsive.state';
+
+import { PremiumColorPicker } from '../../../../shared/components/premium-color-picker/premium-color-picker';
 
 @Component({
     selector: 'app-item-form-modal',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, DynamicCurrencySymbolPipe, DynamicCurrencyPipe, ToggleComponent],
+    imports: [CommonModule, ReactiveFormsModule, DynamicCurrencySymbolPipe, DynamicCurrencyPipe, ToggleComponent, PremiumColorPicker],
     templateUrl: './item-form-modal.html',
     styleUrls: ['./item-form-modal.scss']
 })
 export class ItemFormModalComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
     private readonly currencyState = inject(CurrencyManager);
+    private readonly persistenceService = inject(PersistenceService);
+    public readonly responsiveState = inject(ResponsiveState);
+    private readonly CONTEXT = 'item';
     private readonly subs = new Subscription();
 
     @Input() initialItem: IAllocationItemDto | null = null;
@@ -47,14 +54,21 @@ export class ItemFormModalComponent implements OnInit {
     ];
 
     public iconsList = [
-        'category', 'payments', 'home', 'shopping_cart', 'restaurant', 'directions_car',
+        'account_balance', 'home', 'shopping_cart', 'restaurant', 'directions_car',
         'flight', 'school', 'health_and_safety', 'pets', 'fitness_center',
         'redeem', 'savings', 'paid', 'credit_card', 'receipt',
         'local_mall', 'sports_esports', 'movie', 'music_note', 'park',
-        'bolt', 'security', 'trending_up', 'work', 'business_center',
-        'terminal', 'code', 'data_object', 'database', 'laptop_mac',
-        'currency_bitcoin', 'currency_exchange', 'account_balance_wallet', 'monetization_on', 'token'
+        'bolt', 'security', 'trending_up', 'work', 'business_center'
     ];
+    public refinedPalette: (ThemeColor | string)[] = [
+        'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'orange', 'slate'
+    ];
+    public showCustomPicker = false;
+    public showIconExplorer = false;
+    public iconSearchQuery = '';
+    public recentIcons: string[] = []; 
+    public recentColors: string[] = [];
+    public iconCategories = ICON_LIBRARY;
 
     public maxAllowedAmount: number = 0;
     public totalAvailableInBase: number = 0;
@@ -87,6 +101,8 @@ export class ItemFormModalComponent implements OnInit {
             })
         );
 
+        this.loadPersistence();
+
         if (this.initialItem) {
             this.form.patchValue({
                 name: this.initialItem.name,
@@ -113,6 +129,16 @@ export class ItemFormModalComponent implements OnInit {
             return false;
         }
         return this.usedColors.includes(color as ThemeColor);
+    }
+
+    public isCustomColor(color: string): boolean {
+        return !!color && color.startsWith('#');
+    }
+
+    public handleCustomColorChange(color: string) {
+        this.form.patchValue({ color });
+        this.persistenceService.saveSelection(this.CONTEXT, 'colors', color);
+        this.loadPersistence();
     }
 
     public onCurrencyChange(currency: 'USD' | 'ARS'): void {
@@ -165,13 +191,64 @@ export class ItemFormModalComponent implements OnInit {
         this.subs.unsubscribe();
     }
 
-    public selectIcon(icon: string): void {
-        this.form.patchValue({ icon });
+    public getTagPreviewColorForColor(color: string): string {
+        if (this.isCustomColor(color)) return color;
+        return (COLOR_MAP as any)[color] || (COLOR_MAP as any)['primary'];
     }
 
-    public selectColor(color: ThemeColor): void {
+    public selectIcon(icon: string): void {
+        this.form.patchValue({ icon });
+        this.persistenceService.saveSelection(this.CONTEXT, 'icons', icon);
+        this.recentIcons = this.persistenceService.getRecent(this.CONTEXT, 'icons');
+        if (this.showIconExplorer) {
+            this.showIconExplorer = false;
+        }
+    }
+
+    public toggleIconExplorer(): void {
+        this.showIconExplorer = !this.showIconExplorer;
+        this.iconSearchQuery = '';
+    }
+
+    public onIconSearch(event: Event): void {
+        this.iconSearchQuery = (event.target as HTMLInputElement).value;
+    }
+
+    public get filteredIcons(): string[] {
+        const combined = [...new Set([...this.recentIcons, ...DEFAULT_ICONS])];
+        return combined.slice(0, 31);
+    }
+
+    private loadPersistence(): void {
+        this.recentIcons = this.persistenceService.getRecent(this.CONTEXT, 'icons');
+        const savedColors = this.persistenceService.getRecent(this.CONTEXT, 'colors');
+        
+        // Ensure we always have a full palette (8 slots)
+        const defaults = ['primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'orange', 'slate'];
+        const uniqueColors = [...new Set([...savedColors, ...defaults])];
+        this.recentColors = uniqueColors.slice(0, 8);
+    }
+
+    public get filteredExplorerIcons(): string[] {
+        if (!this.iconSearchQuery) return [];
+        const query = this.iconSearchQuery.toLowerCase();
+        const result: string[] = [];
+        this.iconCategories.forEach(cat => {
+            cat.icons.forEach(icon => {
+                if (icon.name.includes(query) || icon.tags.some(t => t.includes(query))) {
+                    if (!result.includes(icon.name)) result.push(icon.name);
+                }
+            });
+        });
+        return result;
+    }
+
+    public selectColor(color: string): void {
         if (this.isColorUsed(color)) return;
         this.form.patchValue({ color });
+        this.persistenceService.saveSelection(this.CONTEXT, 'colors', color);
+        this.loadPersistence();
+        this.showCustomPicker = false;
     }
 
     public onSubmit(): void {
@@ -198,6 +275,10 @@ export class ItemFormModalComponent implements OnInit {
                 has_payment_control: val.has_payment_control,
                 paid: this.initialItem?.paid || false
             };
+            // Save to persistence on submit
+            if (result.icon) this.persistenceService.saveSelection(this.CONTEXT, 'icons', result.icon);
+            if (result.color) this.persistenceService.saveSelection(this.CONTEXT, 'colors', result.color);
+
             this.save.emit(result);
         }
     }

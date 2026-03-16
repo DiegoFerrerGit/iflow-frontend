@@ -42,7 +42,11 @@ export class AllocationCardComponent {
     }
   }
 
-  getHexColor(color: ThemeColor): string {
-    return COLOR_MAP[color] || COLOR_MAP['primary'];
+  getHexColor(color: ThemeColor | string): string {
+    if (!color) return COLOR_MAP['primary'];
+    // If it's a hex color (starts with #), return it directly
+    if (color.startsWith('#')) return color;
+    // Otherwise, look it up in the COLOR_MAP
+    return COLOR_MAP[color as ThemeColor] || COLOR_MAP['primary'];
   }
 }

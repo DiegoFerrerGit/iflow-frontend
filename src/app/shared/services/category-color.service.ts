@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ThemeColor, THEME_COLORS } from '../../models/income.model';
+import { Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -7,6 +8,9 @@ import { ThemeColor, THEME_COLORS } from '../../models/income.model';
 export class CategoryColorService {
     private readonly STORAGE_KEY = 'iflow_category_colors';
     private categoryMap: Record<string, ThemeColor> = {};
+    private colorUpdateSubject = new Subject<{ category: string, color: ThemeColor }>();
+
+    public colorUpdate$ = this.colorUpdateSubject.asObservable();
 
     constructor() {
         this.loadFromStorage();
@@ -51,6 +55,7 @@ export class CategoryColorService {
         const cleanCategory = category.trim().toLowerCase();
         this.categoryMap[cleanCategory] = color;
         this.saveToStorage();
+        this.colorUpdateSubject.next({ category: cleanCategory, color });
     }
 
     /**

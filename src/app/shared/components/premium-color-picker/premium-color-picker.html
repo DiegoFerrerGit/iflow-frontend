@@ -1,0 +1,40 @@
+<div class="premium-picker-container">
+    <!-- SL Area (Saturation & Lightness) -->
+    <div class="sl-area" #slArea
+         [style.backgroundColor]="'hsl(' + hue + ', 100%, 50%)'"
+         (mousedown)="onSLMouseDown($event)"
+         (touchstart)="onSLMouseDown($event)">
+        <div class="sl-gradient-white"></div>
+        <div class="sl-gradient-black"></div>
+        <div class="sl-cursor" 
+             [style.left.%]="saturation" 
+             [style.top.%]="100 - value">
+             <div class="cursor-inner" [style.backgroundColor]="hexCode"></div>
+        </div>
+    </div>
+
+    <div class="controls-row">
+        <!-- Hue Bar -->
+        <div class="hue-container">
+            <div class="hue-bar" #hueBar
+                 (mousedown)="onHueMouseDown($event)"
+                 (touchstart)="onHueMouseDown($event)">
+                <div class="hue-cursor" [style.left.%]="(hue / 360) * 100"></div>
+            </div>
+        </div>
+
+        <!-- Preview & Hex -->
+        <div class="preview-hex-row">
+            <div class="color-preview" [style.backgroundColor]="hexCode"></div>
+            <div class="hex-input-wrapper">
+                <span class="hex-hash">#</span>
+                <input type="text" 
+                       [(ngModel)]="hexCode" 
+                       (ngModelChange)="onHexChange()"
+                       maxlength="7"
+                       class="hex-field"
+                       spellcheck="false">
+            </div>
+        </div>
+    </div>
+</div>

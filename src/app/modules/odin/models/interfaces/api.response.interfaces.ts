@@ -54,11 +54,10 @@ export interface IAllocationSubCategoryDto {
 }
 
 export interface IAllocationBoxDetailResponse {
-    id: string;
-    name: string;
-    description: string;
-    type: 'permanent' | 'temporary';
-    calculation_type: 'percentage' | 'absolute';
+    allocation_box_id: string;
+    allocation_box_name: string;
+    allocation_box_type: 'permanent' | 'temporary';
+    allocation_box_calculation_type: 'percentage' | 'absolute';
     available_amount_to_assign: number; // Always in USD
     sub_categories: IAllocationSubCategoryDto[];
 }
@@ -75,6 +74,12 @@ export interface IAllocationItemDto {
 }
 
 export interface ISubCategoryDetailResponse {
+    allocation_box_id: string;
+    allocation_box_name: string;
+    allocation_box_type: 'permanent' | 'temporary';
+    allocation_box_calculation_type: 'percentage' | 'absolute';
+    sub_category_id: string;
+    sub_category_name: string;
     available_amount_to_assign: number;
     items: IAllocationItemDto[];
 }

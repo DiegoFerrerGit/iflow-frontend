@@ -35,7 +35,7 @@ export interface IncomeSource {
     amount: number;
     effortPercentage: number;
     icon?: string;
-    color: ThemeColor;       // Frontend-managed: card color
+    color: ThemeColor | string;       // Frontend-managed: card color or hex
     category: string;        // Just the label: "Management", "Developer", etc. Color is deterministic.
     currency?: 'USD' | 'ARS';
 }

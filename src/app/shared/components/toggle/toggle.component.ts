@@ -17,11 +17,12 @@ export interface ToggleOption {
 export class ToggleComponent {
     @Input({ required: true }) options: ToggleOption[] = [];
     @Input({ required: true }) selectedValue: any;
+    @Input() disabled: boolean = false;
     @Input() label?: string;
     @Output() selectionChange = new EventEmitter<any>();
 
     selectOption(value: any) {
-        if (this.selectedValue !== value) {
+        if (!this.disabled && this.selectedValue !== value) {
             this.selectionChange.emit(value);
         }
     }

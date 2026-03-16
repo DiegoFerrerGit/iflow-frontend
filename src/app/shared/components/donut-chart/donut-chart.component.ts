@@ -67,7 +67,7 @@ export class DonutChartComponent {
     get titleClass(): string {
         const isMobile = this.responsiveState.isMobile();
         switch (this.size) {
-            case 'lg': return isMobile ? 'text-[10px]' : 'text-[15px]';
+            case 'lg': return isMobile ? 'text-[10px]' : 'text-[13px]';
             case 'sm': return 'text-[8px]';
             default: return isMobile ? 'text-[9px]' : 'text-[12px]';
         }

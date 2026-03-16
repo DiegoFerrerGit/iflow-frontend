@@ -1,4 +1,4 @@
-<div class="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex items-center shadow-2xl transition-all duration-300">
+<div class="fixed right-0 top-1/2 -translate-y-1/2 z-[150] flex items-center shadow-2xl transition-all duration-300">
     <div class="flex items-stretch bg-[#1f222e] rounded-l-2xl transition-all duration-300 border-y border-l overflow-hidden"
         [ngClass]="{
             'max-h-[48px] border-slate-700/50 shadow-xl': !isOpen(),
@@ -11,7 +11,15 @@
             [class.opacity-0]="!isOpen()" [class.pointer-events-none]="!isOpen()" [class.w-[260px]]="isOpen()"
             [class.opacity-100]="isOpen()">
 
-            <div class="p-5 flex flex-col w-[260px] whitespace-nowrap">
+            <!-- Close Button Overlay for panel -->
+            @if (isOpen()) {
+            <button (click)="togglePanel()"
+                class="absolute right-3 top-3 w-6 h-6 flex items-center justify-center rounded-full bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-all z-20">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+            }
+
+            <div class="p-5 flex flex-col w-[260px] whitespace-nowrap pt-8">
                 <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase mb-3">Tasa de cambio</span>
 
                 <div class="flex items-center justify-between mb-5">
@@ -31,7 +39,7 @@
                     <button (click)="setCurrency('USD')"
                         class="flex-1 py-3 px-2 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center whitespace-nowrap"
                         [ngClass]="{
-                'bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]': currencyState.currentCurrency() === 'USD',
+                'bg-emerald-500 text-white shadow-[0_0_15_rgba(16,185,129,0.3)]': currencyState.currentCurrency() === 'USD',
                 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50': currencyState.currentCurrency() !== 'USD'
               }">
                         USD
@@ -39,7 +47,7 @@
                     <button (click)="setCurrency('ARS')"
                         class="flex-1 py-3 px-2 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center whitespace-nowrap"
                         [ngClass]="{
-                'bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]': currencyState.currentCurrency() === 'ARS',
+                'bg-cyan-500 text-white shadow-[0_0_15_rgba(6,182,212,0.3)]': currencyState.currentCurrency() === 'ARS',
                 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50': currencyState.currentCurrency() !== 'ARS'
               }">
                         ARS
@@ -58,3 +66,8 @@
         </button>
     </div>
 </div>
+
+<!-- Transparent Full Screen Overlay to ensure closure on outside click even with open modals -->
+@if (isOpen()) {
+    <div class="fixed inset-0 z-[140] bg-transparent" (click)="togglePanel()"></div>
+}

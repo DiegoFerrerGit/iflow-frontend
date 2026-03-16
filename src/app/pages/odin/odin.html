@@ -145,7 +145,7 @@
                     </div>
                     }
 
-                    @if (allocations.length >= 4) {
+                    @if (allocations.length >= 4 && freeMoney > 0) {
                     <button (click)="openAllocationModal()"
                         class="group relative hidden sm:inline-flex items-center justify-center bg-white/5 border border-white/10 px-6 py-2.5 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                         <span
@@ -168,7 +168,7 @@
                 }
 
                 <!-- Empty State Card (Only shown if less than 4 items and ONLY on desktop/tablet) -->
-                @if (allocations.length < 4) { <div
+                @if (allocations.length < 4 && freeMoney > 0) { <div
                     class="w-[85vw] sm:w-[350px] shrink-0 snap-center md:w-auto md:shrink-1 md:snap-align-none md:col-span-1 hidden md:flex h-full min-h-[260px]">
                     <button (click)="openAllocationModal()" data-onboarding-target="onboarding-add-allocation-action"
                         class="allocation-card border-2 border-dashed border-white/10 hover:border-white/30 rounded-[24px] p-6 flex flex-col items-center justify-center h-full w-full relative cursor-pointer group transition-all duration-300 bg-white/[0.02] hover:bg-white/[0.04]">
@@ -284,6 +284,7 @@
         </button>
 
         <!-- New Allocation (Bottom, most offset) -->
+        @if (freeMoney > 0) {
         <button (click)="openAllocationModal(); toggleFabMenu()"
             class="flex items-center gap-3 translate-x-[-45px] animate-in slide-in-from-bottom-6 duration-500 group">
             <div
@@ -294,6 +295,7 @@
                 class="bg-[#1f222e] text-white/90 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase shadow-xl border border-white/5">Nueva
                 Caja</span>
         </button>
+        }
     </div>
 
     <!-- Main Toggle Button (Darker Purple, No Shadow) -->

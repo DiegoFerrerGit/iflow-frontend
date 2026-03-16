@@ -1,42 +1,52 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AllocationBox } from '../../../../models/allocation.model';
 import { ThemeColor } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-currency-symbol.pipe';
-
 import { ToggleComponent, ToggleOption } from '../../../../shared/components/toggle/toggle.component';
-
+import { PremiumColorPicker } from '../../../../shared/components/premium-color-picker/premium-color-picker';
+import { PersistenceService } from '../../../../shared/services/persistence.service';
+import { ICON_LIBRARY, DEFAULT_ICONS, IconCategory } from '../../../../shared/constants/icons.constants';
+import { ResponsiveState } from '../../../../core/responsive/responsive.state';
 
 @Component({
   selector: 'app-allocation-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCurrencyPipe, DynamicCurrencySymbolPipe, ToggleComponent],
+  imports: [CommonModule, FormsModule, DynamicCurrencyPipe, DynamicCurrencySymbolPipe, ToggleComponent, PremiumColorPicker],
   templateUrl: './allocation-form-modal.html',
   styleUrl: './allocation-form-modal.scss'
 })
 export class AllocationFormModalComponent implements OnInit {
+  public responsiveState = inject(ResponsiveState);
   @Input() totalPool: number = 0;
   @Input() availablePool: number = 0;
   @Input() existingAllocations: AllocationBox[] = [];
   @Input() initialAllocation: AllocationBox | null = null;
   @Input() isLoading: boolean = false;
-  @Input() onboardingMode: boolean = false;
+  @Input() onboardingMode = false;
   @Output() save = new EventEmitter<AllocationBox>();
   @Output() cancel = new EventEmitter<void>();
 
+  constructor(private persistenceService: PersistenceService) { }
+
+  showCustomPicker = false;
+  showIconExplorer = false;
+  iconSearchQuery = '';
+  recentIcons: string[] = [];
+
   public calculationTypeOptions: ToggleOption[] = [
-    { label: 'Suma de Ítems', value: 'absolute', icon: 'list_alt' },
+    { label: 'Fijo con categorías', value: 'absolute', icon: 'list_alt' },
     { label: 'Porcentaje', value: 'percentage', icon: 'percent' }
   ];
 
   public typeOptions: ToggleOption[] = [
-    { label: 'Permanente (Fijo)', value: 'permanent', icon: 'lock' },
+    { label: 'Permanente', value: 'permanent', icon: 'lock' },
     { label: 'Temporal (Objetivo)', value: 'temporary', icon: 'flag' }
   ];
 
-  Math = Math; // To expose Math floor/min max to template if needed
+  Math = Math;
 
   // Form Model
   formData: Partial<AllocationBox> = {
@@ -54,26 +64,42 @@ export class AllocationFormModalComponent implements OnInit {
   isClosing = false;
   errors: { [key: string]: string } = {};
 
-  iconsList = [
-    'account_balance', 'home', 'shopping_cart', 'restaurant', 'directions_car',
-    'flight', 'school', 'health_and_safety', 'pets', 'fitness_center',
-    'redeem', 'savings', 'paid', 'credit_card', 'receipt',
-    'local_mall', 'sports_esports', 'movie', 'music_note', 'park',
-    'bolt', 'security', 'trending_up', 'work', 'business_center'
+  iconsList = [...DEFAULT_ICONS];
+
+  get filteredIcons(): string[] {
+    // Show Recents + Defaults (limited to 31 items total to fit Ver más as 32nd)
+    const combined = [...new Set([...this.recentIcons, ...this.iconsList])];
+    return combined.slice(0, 31);
+  }
+
+  get iconCategories(): IconCategory[] {
+    return ICON_LIBRARY;
+  }
+
+  colorsList: string[] = [
+    'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'orange', 'slate'
   ];
 
-  colorsList: ThemeColor[] = ['primary', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange', 'fuchsia'];
+  public recentColors: string[] = [];
 
-  get availableColors(): ThemeColor[] {
+  get availableColors(): (ThemeColor | string)[] {
     const usedColors = this.existingAllocations.map(a => a.color);
     return this.colorsList.filter(c => !usedColors.includes(c));
   }
 
-  isColorInUse(color: ThemeColor): boolean {
+  isColorInUse(color: ThemeColor | string): boolean {
     return this.existingAllocations.some(a => a.color === color);
   }
 
   ngOnInit(): void {
+    this.recentIcons = this.persistenceService.getRecent('allocation', 'icons');
+    this.recentColors = this.persistenceService.getRecent('allocation', 'colors');
+
+    // If no recent colors, initialize with defaults
+    if (this.recentColors.length === 0) {
+      this.recentColors = [...this.colorsList];
+    }
+
     if (this.onboardingMode) {
       // Onboarding: pre-fill 'Inversión' with locked fields
       this.formData = {
@@ -119,17 +145,77 @@ export class AllocationFormModalComponent implements OnInit {
     return (this.formData.targetAmount / 100) * this.totalPool;
   }
 
-  get availablePoolPercentage(): number {
-    if (this.totalPool === 0) return 0;
-    return (this.availablePool / this.totalPool) * 100;
+  get effectiveAvailablePool(): number {
+    if (this.initialAllocation && this.initialAllocation.calculationType === 'percentage') {
+      const initialAmountInUsd = (this.initialAllocation.targetAmount / 100) * this.totalPool;
+      return this.availablePool + initialAmountInUsd;
+    }
+    return this.availablePool;
   }
 
-  selectColor(color: ThemeColor) {
+  get availablePoolPercentage(): number {
+    if (this.totalPool === 0) return 0;
+    return (this.effectiveAvailablePool / this.totalPool) * 100;
+  }
+
+  selectColor(color: string) {
+    if (this.onboardingMode || this.isColorInUse(color)) return;
     this.formData.color = color;
+    this.persistenceService.saveSelection('allocation', 'colors', color);
+    this.recentColors = this.persistenceService.getRecent('allocation', 'colors');
+    this.showCustomPicker = false;
+  }
+
+  selectHexColor(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input && input.value) {
+      this.formData.color = input.value;
+    }
+  }
+
+  handleCustomColorChange(color: string) {
+    this.formData.color = color;
+    this.persistenceService.saveSelection('allocation', 'colors', color);
+    this.recentColors = this.persistenceService.getRecent('allocation', 'colors');
+  }
+
+  isCustomColor(color: ThemeColor | string): boolean {
+    return !!color && color.startsWith('#');
   }
 
   selectIcon(icon: string) {
     this.formData.icon = icon;
+    this.persistenceService.saveSelection('allocation', 'icons', icon);
+    this.recentIcons = this.persistenceService.getRecent('allocation', 'icons');
+    this.showIconExplorer = false;
+    this.iconSearchQuery = '';
+  }
+
+  get filteredExplorerIcons(): string[] {
+    const query = this.iconSearchQuery.toLowerCase().trim();
+    if (!query) return [];
+
+    // Search across ALL categories by name or tags
+    const allAvailable = ICON_LIBRARY.flatMap(cat => cat.icons);
+
+    return [...new Set(allAvailable
+      .filter(icon =>
+        icon.name.toLowerCase().includes(query) ||
+        icon.tags.some(tag => tag.toLowerCase().includes(query))
+      )
+      .map(icon => icon.name))];
+  }
+
+  toggleIconExplorer() {
+    this.showIconExplorer = !this.showIconExplorer;
+    if (!this.showIconExplorer) {
+      this.iconSearchQuery = '';
+    }
+  }
+
+  onIconSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.iconSearchQuery = input?.value || '';
   }
 
   // Handle number input changes to enforce constraints
@@ -144,11 +230,11 @@ export class AllocationFormModalComponent implements OnInit {
 
     const numValue = Number(value) || 0;
     // It's percentage
-    const maxPercentage = (this.availablePool / this.totalPool) * 100;
+    const maxPercentage = (this.effectiveAvailablePool / this.totalPool) * 100;
 
     // We only enforce maximums, not minimums dynamically to avoid frustrating typing experience
     if (numValue > maxPercentage) {
-      this.formData.targetAmount = maxPercentage;
+      this.formData.targetAmount = Number(maxPercentage.toFixed(1));
       this.errors['targetAmount'] = `Porcentaje excede el disponible (${maxPercentage.toFixed(1)}%). Limitado al máximo.`;
     } else {
       this.formData.targetAmount = numValue;
@@ -173,6 +259,14 @@ export class AllocationFormModalComponent implements OnInit {
       this.errors['description'] = 'La descripción es requerida.';
     }
 
+    // Save icon usage to persistence (handled via selectIcon usually, but for safety)
+    if (this.formData.icon) {
+      this.persistenceService.saveSelection('allocation', 'icons', this.formData.icon);
+    }
+    if (this.formData.color) {
+      this.persistenceService.saveSelection('allocation', 'colors', this.formData.color);
+    }
+
     // Only validate targetAmount and savingsTarget if it's a new allocation or relevant fields are visible
     // But since they are fixed when editing, we still want to ensure they are valid.
     const currentCalcType = this.initialAllocation ? this.initialAllocation.calculationType : this.formData.calculationType;
@@ -191,7 +285,7 @@ export class AllocationFormModalComponent implements OnInit {
       // For absolute it's 0 usually but let's be consistent
     } else if (currentCalcType === 'percentage') {
       const percentageAmountValue = (this.formData.targetAmount! / 100) * this.totalPool;
-      if (percentageAmountValue > this.availablePool) {
+      if (percentageAmountValue > this.effectiveAvailablePool + 0.01) { // 0.01 for floating point safety
         this.errors['targetAmount'] = 'El porcentaje excede el dinero disponible del pool.';
       }
     }

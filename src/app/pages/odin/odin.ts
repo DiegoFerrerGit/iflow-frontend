@@ -313,7 +313,7 @@ export class OdinPageComponent implements OnInit {
         color: this.getCategoryColor(box.color),
         icon: box.icon,
         name: box.name,
-        amountColorClass: `text-${box.color}-400`
+        amountColorClass: box.color.startsWith('#') ? 'text-white' : `text-${box.color}-400`
       };
 
       currentOffset += strokeLength;
@@ -374,8 +374,10 @@ export class OdinPageComponent implements OnInit {
     });
   }
 
-  private getCategoryColor(color: ThemeColor): string {
-    return COLOR_MAP[color] || COLOR_MAP['primary'];
+  private getCategoryColor(color: ThemeColor | string): string {
+    if (!color) return COLOR_MAP['primary'];
+    if (color.startsWith('#')) return color;
+    return COLOR_MAP[color as ThemeColor] || COLOR_MAP['primary'];
   }
 
   // Override to exact chart colors:

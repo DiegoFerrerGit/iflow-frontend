@@ -13,5 +13,5 @@ export interface AllocationBox {
     savingsTarget?: number;
 
     icon: string;
-    color: ThemeColor;
+    color: ThemeColor | string;
 }

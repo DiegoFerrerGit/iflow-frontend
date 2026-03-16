@@ -71,8 +71,6 @@ export class AllocationDetailsPage implements OnInit {
 
   boxId = signal<string | null>(null);
   allocationData = signal<IAllocationBoxDetailResponse | null>(null);
-  initialName = signal<string | null>(null);
-  initialType = signal<string | null>(null);
 
   // Modal Loading State
   isSubCategoryModalOpen = signal(false);
@@ -95,7 +93,8 @@ export class AllocationDetailsPage implements OnInit {
   private longPressTimer: any;
 
   // Computed helper for box type
-  parentBoxType = computed(() => this.allocationData()?.calculation_type || this.initialType() || 'absolute');
+  parentBoxType = computed(() => this.allocationData()?.allocation_box_calculation_type || 'absolute');
+  allocationBoxType = computed(() => this.allocationData()?.allocation_box_type || 'permanent');
 
   activeDraggingSubCategory = computed<DonutChartSegment | null>(() => {
     const id = this.activeDraggingId();
@@ -162,8 +161,8 @@ export class AllocationDetailsPage implements OnInit {
         id: sub.id,
         name: sub.name,
         amount: sub.calculatedAmount,
-        color: COLOR_MAP[sub.color as ThemeColor] || '#64748b',
-        amountColorClass: (sub.color ? TEXT_CLASS_MAP[sub.color] : undefined) || 'text-slate-400',
+        color: sub.color?.startsWith('#') ? sub.color : (COLOR_MAP[sub.color as ThemeColor] || '#64748b'),
+        amountColorClass: sub.color?.startsWith('#') ? 'text-white/90' : ((sub.color ? TEXT_CLASS_MAP[sub.color] : undefined) || 'text-slate-400'),
         percentage: percentage,
         dashArray: `${visualStrokeLength} ${circumference - visualStrokeLength}`,
         dashOffset: -initialOffset,
@@ -236,14 +235,7 @@ export class AllocationDetailsPage implements OnInit {
   }
 
   ngOnInit() {
-    // Attempt to get name and type from navigation state to avoid "Cargando..."
-    const state = history.state;
-    if (state?.name) this.initialName.set(state.name);
-    if (state?.type) this.initialType.set(state.type);
-    if (state?.totalPool) {
-      // If we have totalPool, we can pre-calculate some values if we had the box object,
-      // but we'll wait for the loadDetails to get the full box detail.
-    }
+    // We no longer rely on history.state for breadcrumbs or metadata
 
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
@@ -281,7 +273,7 @@ export class AllocationDetailsPage implements OnInit {
 
         // Calculate trueBoxCapacity and boxPercentage without calling /odin
         if (passedTotalPool !== undefined && passedBox) {
-          if (detail.calculation_type === 'percentage') {
+          if (detail.allocation_box_calculation_type === 'percentage') {
             this.boxPercentage.set(passedBox.targetAmount || null);
 
             if (passedBox.targetAmount) {
@@ -304,7 +296,7 @@ export class AllocationDetailsPage implements OnInit {
   }
 
   getBoxName(): string {
-    return this.allocationData()?.name || this.initialName() || 'Cargando...';
+    return this.allocationData()?.allocation_box_name || 'Cargando...';
   }
 
   getConvertedAmount(amount: number, currency: string): number {
@@ -591,8 +583,6 @@ export class AllocationDetailsPage implements OnInit {
     const type = this.parentBoxType();
     this.router.navigate(['/odin/allocation-details', boxId, 'subcategories', subCategoryId], {
       state: {
-        parentBoxType: type,
-        boxName: this.getBoxName(),
         subCategoryName: sub?.name
       }
     });
