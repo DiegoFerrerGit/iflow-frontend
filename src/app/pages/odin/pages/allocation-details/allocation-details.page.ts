@@ -92,6 +92,13 @@ export class AllocationDetailsPage implements OnInit {
   isTrashZoneActive = signal(false);
   private longPressTimer: any;
 
+  // Swipe-to-Reveal State (Mobile Only)
+  activeSwipedId = signal<string | null>(null);
+  swipeOffsetX = signal<number>(0);
+  isSwipingLeft = signal<boolean>(false);
+  private swipeStartX = 0;
+  private swipeStartY = 0;
+
   // Computed helper for box type
   parentBoxType = computed(() => this.allocationData()?.allocation_box_calculation_type || 'absolute');
   allocationBoxType = computed(() => this.allocationData()?.allocation_box_type || 'permanent');
@@ -528,8 +535,22 @@ export class AllocationDetailsPage implements OnInit {
     const initialX = touch.clientX;
     const initialY = touch.clientY;
 
+    // Swipe logic setup
+    this.swipeStartX = initialX;
+    this.swipeStartY = initialY;
+    this.isSwipingLeft.set(false);
+
+    // If touching a different item while one is swiped, close the swiped one
+    if (this.activeSwipedId() && this.activeSwipedId() !== id) {
+      this.closeSwipe();
+    }
+
     this.longPressTimer = setTimeout(() => {
+      // If we've started swiping horizontally, don't trigger long press drag
+      if (this.isSwipingLeft() || this.activeSwipedId() === id) return;
+
       this.activeDraggingId.set(id);
+      this.closeSwipe(); // close any open swipe menu
       this.dragPosition.set({ x: initialX, y: initialY });
 
       // Haptic feedback if available
@@ -539,24 +560,53 @@ export class AllocationDetailsPage implements OnInit {
     }, 500); // 500ms for long press
   }
 
-  onItemTouchMove(event: TouchEvent) {
-    if (!this.activeDraggingId()) {
-      // If we move before the long press triggers, cancel the timer
-      if (this.longPressTimer) clearTimeout(this.longPressTimer);
+  onItemTouchMove(id: string, event: TouchEvent) {
+    if (this.activeDraggingId()) {
+      const touch = event.touches[0];
+      this.dragPosition.set({ x: touch.clientX, y: touch.clientY });
+
+      // Check if we are over the trash zone (positioned at bottom-[80px], height ~128px / h-32)
+      // We check if Y is between (innerHeight - 200) and (innerHeight - 80)
+      const overTrash = touch.clientY > window.innerHeight - 200 && touch.clientY < window.innerHeight - 80;
+      this.isTrashZoneActive.set(overTrash);
+
+      // Prevent scrolling while dragging
+      if (event.cancelable) {
+        event.preventDefault();
+      }
       return;
     }
 
     const touch = event.touches[0];
-    this.dragPosition.set({ x: touch.clientX, y: touch.clientY });
+    const deltaX = touch.clientX - this.swipeStartX;
+    const deltaY = touch.clientY - this.swipeStartY;
 
-    // Check if we are over the trash zone (positioned at bottom-[80px], height ~128px / h-32)
-    // We check if Y is between (innerHeight - 200) and (innerHeight - 80)
-    const overTrash = touch.clientY > window.innerHeight - 200 && touch.clientY < window.innerHeight - 80;
-    this.isTrashZoneActive.set(overTrash);
+    // Determine if it's a horizontal swipe vs vertical scroll
+    if (!this.isSwipingLeft() && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      this.isSwipingLeft.set(true);
+      if (this.longPressTimer) clearTimeout(this.longPressTimer); // cancel long press
+    }
 
-    // Prevent scrolling while dragging
-    if (event.cancelable) {
-      event.preventDefault();
+    if (this.isSwipingLeft()) {
+      // Prevent vertical scrolling while swiping
+      if (event.cancelable) event.preventDefault();
+      
+      this.activeSwipedId.set(id);
+      
+      // Calculate offset (allow swiping strictly left)
+      let offset = deltaX;
+      
+      // Add resistance if trying to swipe right or past max left
+      if (offset > 0) {
+        offset = offset * 0.2; // minimal elastic drag to right
+      } else if (offset < -150) {
+        offset = -150 + ((offset + 150) * 0.2); // elastic drag past -150 (width of 2 buttons)
+      }
+      
+      this.swipeOffsetX.set(offset);
+    } else if (this.activeSwipedId() === null && Math.abs(deltaY) > 10) {
+      // if scrolling vertically, cancel long press
+      if (this.longPressTimer) clearTimeout(this.longPressTimer);
     }
   }
 
@@ -568,9 +618,28 @@ export class AllocationDetailsPage implements OnInit {
       this.deleteSubCategory(draggingId);
     }
 
-    // Reset state
+    // Reset drag state
     this.activeDraggingId.set(null);
     this.isTrashZoneActive.set(false);
+
+    // Reset swipe state
+    if (this.isSwipingLeft()) {
+      const currentOffset = this.swipeOffsetX();
+      // Snap to open (-150) or close (0) based on threshold
+      if (currentOffset < -75) {
+        // Snap open
+        this.swipeOffsetX.set(-150); 
+      } else {
+        // Snap closed
+        this.closeSwipe();
+      }
+      this.isSwipingLeft.set(false);
+    }
+  }
+
+  closeSwipe() {
+    this.activeSwipedId.set(null);
+    this.swipeOffsetX.set(0);
   }
 
   navigateToSubCategory(subCategoryId: string) {

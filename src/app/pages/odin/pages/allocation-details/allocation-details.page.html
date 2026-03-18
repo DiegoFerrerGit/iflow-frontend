@@ -200,55 +200,84 @@
             </div>
 
             <!-- Mobile Categories List -->
-            <!-- Mobile Action Menu Backdrop -->
-            @if (activeMobileMenuId()) {
-            <div class="fixed inset-0 z-[105] bg-transparent" (click)="closeMobileMenu()"></div>
+            <!-- Mobile Action/Swipe Menu Backdrop -->
+            @if (activeMobileMenuId() || activeSwipedId()) {
+            <div class="fixed inset-0 z-[105] bg-transparent" (touchstart)="closeMobileMenu(); closeSwipe()" (click)="closeMobileMenu(); closeSwipe()"></div>
             }
 
-            <div *iflowResponsive="'MOBILE'" class="grid grid-cols-1 gap-3 relative z-10 px-0.5">
+            <div *iflowResponsive="'MOBILE'" class="grid grid-cols-1 gap-3 relative px-0.5" 
+                 [class.z-[110]]="activeSwipedId() || activeMobileMenuId()"
+                 [class.z-10]="!activeSwipedId() && !activeMobileMenuId()"
+                 [class.overflow-x-hidden]="activeSwipedId()">
                 @for (segment of donutSegments(); track segment.id) {
                 @if (segment.id !== 'unassigned') {
-                <div (click)="!activeDraggingId() && segment.type === 'sum_items' ? navigateToSubCategory(segment.id) : null"
-                    (touchstart)="onItemTouchStart(segment.id, $event)" (touchmove)="onItemTouchMove($event)"
-                    (touchend)="onItemTouchEnd($event)" (touchcancel)="onItemTouchEnd($event)"
-                    class="bg-[#141722]/50 border border-white/5 rounded-2xl py-2.5 px-3 flex items-center justify-between group active:bg-[#1a1e2d] transition-all relative overflow-hidden select-none"
-                    [class.opacity-50]="activeDraggingId() === segment.id"
-                    [class.cursor-pointer]="segment.type === 'sum_items' && !activeDraggingId()">
-
-                    <div class="flex items-center gap-3 pointer-events-none">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-[22px]" [ngClass]="segment.amountColorClass">
-                                {{ segment.icon || 'category' }}
-                            </span>
-                        </div>
-                        <div class="flex flex-col">
-                            <div class="flex items-center gap-1.5 min-h-[1.25em]">
-                                <h3 class="font-black text-[13px] tracking-wide text-white uppercase leading-none">
-                                    {{ segment.name }}
-                                </h3>
-                                @if (segment.type === 'sum_items') {
-                                <span
-                                    class="text-rose-400 font-black text-[18px] leading-[0.8] select-none translate-y-[-0.5px]">></span>
-                                }
-                            </div>
-                            <span class="text-slate-400 text-[9px] font-bold tracking-wider uppercase leading-tight">
-                                {{ segment.percentage | number:'1.0-1' }}% de esta caja
-                            </span>
-                        </div>
+                <div class="relative w-full rounded-2xl touch-pan-y" 
+                     (click)="$event.stopPropagation()">
+                     
+                    <!-- Acción: Editar / Eliminar (Detrás estilo Acordeón WhatsApp) -->
+                    <div class="absolute inset-y-0 right-0 flex z-0 rounded-r-2xl overflow-hidden will-change-[width] transition-colors" 
+                         [ngClass]="activeSwipedId() === segment.id && swipeOffsetX() < 0 ? 'bg-[#141722] border border-white/5 border-l-0' : ''"
+                         [style.width.px]="activeSwipedId() === segment.id ? -swipeOffsetX() : 0"
+                         [style.transition-duration]="isSwipingLeft() && activeSwipedId() === segment.id ? '0ms' : '300ms'">
+                        
+                        <button (click)="openSubCategoryModal(undefined, segment); closeSwipe(); $event.stopPropagation()"
+                            class="flex-1 h-full min-w-[50px] flex flex-col items-center justify-center gap-[3px] bg-[rgb(47,79,79)] text-white active:bg-[rgba(47,79,79,0.8)] transition-colors">
+                            <span class="material-symbols-outlined text-[24px]">edit</span>
+                            <span class="text-[11px] font-medium tracking-wide">Editar</span>
+                        </button>
+                        <button (click)="deleteSubCategory(segment.id); closeSwipe(); $event.stopPropagation()"
+                            class="flex-1 h-full min-w-[50px] flex flex-col items-center justify-center gap-[3px] bg-[rgb(178,34,34)] text-white active:bg-[rgba(178,34,34,0.8)] transition-colors">
+                            <span class="material-symbols-outlined text-[24px]">delete</span>
+                            <span class="text-[11px] font-medium tracking-wide">Borrar</span>
+                        </button>
                     </div>
 
-                    <div class="flex items-center gap-3 text-right">
-                        <div class="flex items-baseline justify-end gap-0.5 pointer-events-none">
-                            <span class="text-slate-400 text-[10px] font-bold">u$d</span>
-                            <span class="text-white text-lg font-black tracking-tighter">
-                                {{ segment.amount | dynamicCurrency:currencyState.currentCurrency() }}
-                            </span>
+                    <!-- Frente del Item (Swipeable) -->
+                    <div (click)="!activeDraggingId() && segment.type === 'sum_items' ? navigateToSubCategory(segment.id) : null"
+                        (touchstart)="onItemTouchStart(segment.id, $event)" (touchmove)="onItemTouchMove(segment.id, $event)"
+                        (touchend)="onItemTouchEnd($event)" (touchcancel)="onItemTouchEnd($event)"
+                        class="bg-[#141722] border border-white/5 py-2.5 px-3 flex items-center justify-between active:bg-[#1a1e2d] relative z-10 select-none will-change-transform transition-all"
+                        [class.shadow-[0_2px_10px_rgba(0,0,0,0.5)]]="activeSwipedId() !== segment.id"
+                        [class.shadow-none]="activeSwipedId() === segment.id"
+                        [class.rounded-2xl]="activeSwipedId() !== segment.id || swipeOffsetX() === 0"
+                        [class.rounded-l-2xl]="activeSwipedId() === segment.id && swipeOffsetX() < 0"
+                        [class.border-r-0]="activeSwipedId() === segment.id && swipeOffsetX() < 0"
+                        [style.transform]="activeSwipedId() === segment.id ? 'translateX(' + swipeOffsetX() + 'px)' : 'translateX(0px)'"
+                        [style.transition-duration]="isSwipingLeft() && activeSwipedId() === segment.id ? '0ms' : '300ms'"
+                        [style.transition-timing-function]="'cubic-bezier(0.32, 0.72, 0, 1)'"
+                        [class.opacity-50]="activeDraggingId() === segment.id"
+                        [class.cursor-pointer]="segment.type === 'sum_items' && !activeDraggingId()">
+
+                        <div class="flex items-center gap-3 pointer-events-none">
+                            <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[22px]" [ngClass]="segment.amountColorClass">
+                                    {{ segment.icon || 'category' }}
+                                </span>
+                            </div>
+                            <div class="flex flex-col">
+                                <div class="flex items-center gap-1.5 min-h-[1.25em]">
+                                    <h3 class="font-black text-[13px] tracking-wide text-white uppercase leading-none">
+                                        {{ segment.name }}
+                                    </h3>
+                                    @if (segment.type === 'sum_items') {
+                                    <span class="text-rose-400 font-black text-[18px] leading-[0.8] select-none translate-y-[-0.5px]">></span>
+                                    }
+                                </div>
+                                <span class="text-slate-400 text-[9px] font-bold tracking-wider uppercase leading-tight">
+                                    {{ segment.percentage | number:'1.0-1' }}% de esta caja
+                                </span>
+                            </div>
                         </div>
-                        <button (click)="openSubCategoryModal(undefined, segment); $event.stopPropagation()"
-                            class="w-9 h-9 rounded-full flex items-center justify-center border-2 border-white/10 border-opacity-20 transition-all active:bg-indigo-500/20 active:border-indigo-500/50">
-                            <span
-                                class="material-symbols-outlined text-[20px] text-slate-400 active:text-indigo-400">edit</span>
-                        </button>
+
+                        <div class="flex items-center gap-3 text-right">
+                            <div class="flex items-baseline justify-end gap-0.5 pointer-events-none">
+                                <span class="text-slate-400 text-[10px] font-bold">u$d</span>
+                                <span class="text-white text-lg font-black tracking-tighter">
+                                    {{ segment.amount | dynamicCurrency:currencyState.currentCurrency() }}
+                                </span>
+                            </div>
+                            <!-- Botón de edición removido para usar Swipe -->
+                        </div>
                     </div>
                 </div>
                 }

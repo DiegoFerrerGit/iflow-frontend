@@ -284,80 +284,103 @@
             </div>
 
             <!-- MOBILE ITEM ROW -->
-            <div *iflowResponsive="'MOBILE'"
-                class="bg-[#141722]/50 border border-white/5 rounded-2xl py-2.5 px-3 flex items-center justify-between group active:bg-[#1a1e2d] transition-all relative overflow-visible select-none"
-                [class.z-[110]]="activeMobileMenuId() === item.id">
-
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-[20px]" [ngClass]="item.textColorClass">
-                            {{ item.icon || 'category' }}
-                        </span>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <div class="flex items-center gap-1.5 min-h-[1.25em]">
-                            <h3 class="font-black text-[14px] tracking-wide text-white uppercase leading-none">
-                                {{ item.name }}
-                            </h3>
-                            @if (item.has_payment_control && item.paid) {
-                            <span class="material-symbols-outlined text-emerald-400 text-[14px]">check_circle</span>
-                            }
-                        </div>
-                        <div class="flex items-center gap-1.5 mt-0.5">
-                            <span class="text-[9px] font-black uppercase tracking-wider opacity-60"
-                                [ngClass]="item.textColorClass">
-                                {{ item.percentage | number:'1.0-0' }}% de {{ subCategoryName() }}
-                            </span>
-                        </div>
-                    </div>
+            <div *iflowResponsive="'MOBILE'" class="relative w-full rounded-2xl touch-pan-y"
+                 [class.z-[110]]="activeSwipedId() === item.id || activeMobileMenuId() === item.id"
+                 [class.z-10]="!activeSwipedId() && !activeMobileMenuId()"
+                 [class.overflow-x-hidden]="activeSwipedId()">
+                 
+                <!-- Acción Derecha (Swipe Left): Editar / Eliminar -->
+                <div class="absolute inset-y-0 right-0 flex z-0 rounded-r-2xl overflow-hidden will-change-[width] transition-colors" 
+                     [ngClass]="activeSwipedId() === item.id && swipeOffsetX() < 0 ? 'bg-[#141722]/50 border border-white/5 border-l-0' : ''"
+                     [style.width.px]="activeSwipedId() === item.id && swipeOffsetX() < 0 ? -swipeOffsetX() : 0"
+                     [style.transition-duration]="isSwipingActive() && activeSwipedId() === item.id ? '0ms' : '300ms'">
+                    
+                    <button (click)="openItemModal(item); closeSwipe(); $event.stopPropagation()"
+                        class="flex-1 h-full min-w-[75px] flex flex-col items-center justify-center gap-[3px] bg-[rgb(47,79,79)] text-white active:bg-[rgba(47,79,79,0.8)] transition-colors">
+                        <span class="material-symbols-outlined text-[24px]">edit</span>
+                        <span class="text-[11px] font-medium tracking-wide">Editar</span>
+                    </button>
+                    <button (click)="openDeleteModal(item); closeSwipe(); $event.stopPropagation()"
+                        class="flex-1 h-full min-w-[75px] flex flex-col items-center justify-center gap-[3px] bg-[rgb(178,34,34)] text-white active:bg-[rgba(178,34,34,0.8)] transition-colors">
+                        <span class="material-symbols-outlined text-[24px]">delete</span>
+                        <span class="text-[11px] font-medium tracking-wide">Borrar</span>
+                    </button>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="flex items-baseline gap-0.5">
-                        <span class="text-slate-500 text-[9px] font-black uppercase">u$d</span>
-                        <span class="text-white font-black text-sm">
-                            {{ item.calculatedAmount | dynamicCurrency:currencyState.currentCurrency() }}
+                <!-- Acción Izquierda (Swipe Right): Marcar Pago -->
+                @if (item.has_payment_control) {
+                <div class="absolute inset-y-0 left-0 flex z-0 rounded-l-2xl overflow-hidden will-change-[width] transition-colors" 
+                     [ngClass]="activeSwipedId() === item.id && swipeOffsetX() > 0 ? 'bg-[#141722]/50 border border-white/5 border-r-0' : ''"
+                     [style.width.px]="activeSwipedId() === item.id && swipeOffsetX() > 0 ? swipeOffsetX() : 0"
+                     [style.transition-duration]="isSwipingActive() && activeSwipedId() === item.id ? '0ms' : '300ms'">
+                    <button (click)="togglePaidStatus(item.id); closeSwipe(); $event.stopPropagation()"
+                        class="flex-1 h-full w-full min-w-[75px] flex flex-col items-center justify-center gap-[3px] bg-[rgb(0,139,139)] text-white active:bg-[rgba(0,139,139,0.8)] transition-colors">
+                        <span class="material-symbols-outlined text-[24px]">
+                            {{ item.paid ? 'remove_done' : 'check_circle' }}
                         </span>
+                        <span class="text-[11px] font-medium tracking-wide">
+                            {{ item.paid ? 'Desmarcar' : 'Pagar' }}
+                        </span>
+                    </button>
+                </div>
+                }
+
+                <!-- Frente del Item (Swipeable) -->
+                <div (touchstart)="onItemTouchStart(item.id, $event)" (touchmove)="onItemTouchMove(item.id, $event)"
+                     (touchend)="onItemTouchEnd($event)" (touchcancel)="onItemTouchEnd($event)"
+                    class="bg-[#141722]/50 border border-white/5 py-2.5 px-3 flex items-center justify-between active:bg-[#1a1e2d] relative z-10 select-none will-change-transform transition-all"
+                    [class.shadow-[0_2px_10px_rgba(0,0,0,0.5)]]="activeSwipedId() !== item.id"
+                    [class.shadow-none]="activeSwipedId() === item.id"
+                    [class.rounded-2xl]="activeSwipedId() !== item.id || swipeOffsetX() === 0"
+                    [class.rounded-l-2xl]="activeSwipedId() === item.id && swipeOffsetX() < 0"
+                    [class.rounded-r-2xl]="activeSwipedId() === item.id && swipeOffsetX() > 0"
+                    [class.border-r-0]="activeSwipedId() === item.id && swipeOffsetX() < 0"
+                    [class.border-l-0]="activeSwipedId() === item.id && swipeOffsetX() > 0"
+                    [style.transform]="activeSwipedId() === item.id ? 'translateX(' + swipeOffsetX() + 'px)' : 'translateX(0px)'"
+                    [style.transition-duration]="isSwipingActive() && activeSwipedId() === item.id ? '0ms' : '300ms'"
+                    [style.transition-timing-function]="'cubic-bezier(0.32, 0.72, 0, 1)'"
+                    [class.opacity-50]="activeDraggingId() === item.id"
+                    [class.cursor-pointer]="!activeDraggingId()">
+
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[20px]" [ngClass]="item.textColorClass">
+                                {{ item.icon || 'category' }}
+                            </span>
+                        </div>
+
+                        <div class="flex flex-col pointer-events-none">
+                            <div class="flex items-center gap-1.5 min-h-[1.25em]">
+                                <h3 class="font-black text-[14px] tracking-wide text-white uppercase leading-none">
+                                    {{ item.name }}
+                                </h3>
+                                @if (item.has_payment_control && item.paid) {
+                                <span class="material-symbols-outlined text-emerald-400 text-[14px]">check_circle</span>
+                                }
+                            </div>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-[9px] font-black uppercase tracking-wider opacity-60"
+                                    [ngClass]="item.textColorClass">
+                                    {{ item.percentage | number:'1.0-0' }}% de {{ subCategoryName() }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="relative">
-                        <button (click)="toggleMobileMenu(item.id, $event)"
-                            class="w-8 h-8 rounded-full flex items-center justify-center border border-white/10 transition-all"
-                            [class.border-rose-500/50]="activeMobileMenuId() === item.id"
-                            [class.bg-rose-500/10]="activeMobileMenuId() === item.id">
-                            <span class="material-symbols-outlined text-[18px]"
-                                [class.text-rose-400]="activeMobileMenuId() === item.id"
-                                [class.text-slate-500]="activeMobileMenuId() !== item.id">
-                                {{ activeMobileMenuId() === item.id ? 'close' : 'more_horiz' }}
-                            </span>
-                        </button>
-
-                        <!-- Action Menu Overlay -->
-                        @if (activeMobileMenuId() === item.id) {
-                        <div
-                            class="absolute right-0 top-10 min-w-[120px] bg-[#1a1e2d] border border-white/10 rounded-xl shadow-2xl z-[120] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                            @if (item.has_payment_control) {
-                            <button (click)="togglePaidStatus(item.id); closeMobileMenu(); $event.stopPropagation()"
-                                class="w-full flex items-center gap-2 px-4 py-3 text-white hover:bg-white/5 transition-colors border-b border-white/5">
-                                <span class="material-symbols-outlined text-[18px]" [class.text-emerald-400]="item.paid"
-                                    [class.text-slate-400]="!item.paid">check_circle</span>
-                                <span class="text-[11px] font-bold tracking-widest uppercase">{{ item.paid ? 'Marc.
-                                    Pendiente' : 'Marc. Pagado' }}</span>
-                            </button>
-                            }
-                            <button (click)="openItemModal(item); closeMobileMenu(); $event.stopPropagation()"
-                                class="w-full flex items-center gap-2 px-4 py-3 text-white hover:bg-white/5 transition-colors border-b border-white/5">
-                                <span class="material-symbols-outlined text-[18px] text-indigo-400">edit</span>
-                                <span class="text-[11px] font-bold tracking-widest uppercase">Editar</span>
-                            </button>
-                            <button (click)="openDeleteModal(item); closeMobileMenu(); $event.stopPropagation()"
-                                class="w-full flex items-center gap-2 px-4 py-3 text-rose-500 hover:bg-rose-500/5 transition-colors">
-                                <span class="material-symbols-outlined text-[18px]">delete</span>
-                                <span class="text-[11px] font-bold tracking-widest uppercase">Eliminar</span>
-                            </button>
-                        </div>
+                    <div class="flex flex-col items-end justify-center pointer-events-none gap-0.5 min-h-[32px]">
+                        @if (item.has_payment_control) {
+                        <span class="text-[8px] font-black uppercase tracking-widest leading-none"
+                              [class.text-emerald-400]="item.paid"
+                              [class.text-red-400]="!item.paid">
+                            {{ item.paid ? 'PAGADO' : 'FALTA PAGAR' }}
+                        </span>
                         }
+                        <div class="flex items-baseline gap-0.5">
+                            <span class="text-slate-500 text-[9px] font-black uppercase">u$d</span>
+                            <span class="text-white font-black text-sm leading-none">
+                                {{ item.calculatedAmount | dynamicCurrency:currencyState.currentCurrency() }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -434,3 +457,68 @@
     (cancel)="cancelDelete()">
 </app-delete-confirmation-modal>
 }
+
+    <!-- Drag-to-Delete Ghost Overlay -->
+    @if (activeDraggingId() && activeDraggingItem()) {
+    <div class="fixed pointer-events-none z-[1000] flex items-center gap-4 bg-[#1a1e2d] border border-white/10 rounded-2xl py-3 px-4 shadow-[0_30px_60px_rgba(0,0,0,0.5)] ghost-item"
+        [style.left.px]="dragPosition().x" [style.top.px]="dragPosition().y">
+        <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center shrink-0 shadow-inner">
+            <span class="material-symbols-outlined text-3xl"
+                [ngClass]="activeDraggingItem()!.textColorClass || ''">
+                {{ activeDraggingItem()!.icon || 'category' }}
+            </span>
+        </div>
+        <div class="flex flex-col gap-1">
+            <h3 class="font-black text-sm tracking-widest text-white uppercase leading-none">
+                {{ activeDraggingItem()!.name }}
+            </h3>
+            <div class="flex items-baseline gap-1">
+                <span class="text-slate-500 text-[11px] font-bold">u$d</span>
+                <span class="text-white text-xl font-black tracking-tighter">
+                    {{ activeDraggingItem()!.calculatedAmount | dynamicCurrency:currencyState.currentCurrency() }}
+                </span>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Mobile Trash Zone (Ethereal Glow Area) -->
+    @if (activeDraggingId()) {
+    <div *iflowResponsive="'MOBILE'"
+        class="fixed bottom-[80px] left-0 right-0 w-full h-32 z-[900] flex flex-col items-center justify-center overflow-hidden trash-zone"
+        [class.active]="isTrashZoneActive()">
+
+        <!-- Background Glow Layers -->
+        <div class="absolute inset-0 bg-[#0d0a11]/40 backdrop-blur-3xl transition-colors duration-500"
+            [class.bg-rose-950/40]="isTrashZoneActive()"></div>
+
+        <!-- Faint Top Border Glow -->
+        <div class="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent">
+        </div>
+
+        <!-- Center Content -->
+        <div class="relative z-10 flex flex-col items-center gap-2 transition-all duration-300"
+            [class.scale-110]="isTrashZoneActive()" [class.text-rose-500]="isTrashZoneActive()"
+            [class.text-white/90]="!isTrashZoneActive()">
+
+            <div class="relative flex items-center justify-center">
+                <span class="material-symbols-outlined text-5xl transition-all duration-300"
+                    [class.animate-pulse]="isTrashZoneActive()"
+                    [class.drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]]="isTrashZoneActive()">delete</span>
+
+                @if (isTrashZoneActive()) {
+                <div class="absolute inset-0 bg-rose-500/30 blur-3xl rounded-full scale-150 animate-pulse"></div>
+                }
+            </div>
+
+            <div class="flex flex-col items-center">
+                <span class="text-[10px] font-black tracking-[0.6em] uppercase text-center">
+                    {{ isTrashZoneActive() ? 'Suelta ahora' : 'Arrastra aquí' }}
+                </span>
+                <span class="text-[7px] font-bold tracking-[0.3em] uppercase text-white/40 mt-0.5">
+                    para eliminar
+                </span>
+            </div>
+        </div>
+    </div>
+    }

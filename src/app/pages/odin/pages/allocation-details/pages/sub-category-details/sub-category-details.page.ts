@@ -113,6 +113,23 @@ export class SubCategoryDetailsPage implements OnInit {
     activeMobileMenuId = signal<string | null>(null);
     isFabMenuOpen = signal<boolean>(false);
 
+    // Gestos Móviles: Drag to Delete & Swipe to Reveal
+    activeDraggingId = signal<string | null>(null);
+    dragPosition = signal<{ x: number, y: number }>({ x: 0, y: 0 });
+    isTrashZoneActive = signal<boolean>(false);
+    activeDraggingItem = signal<any | null>(null);
+
+    activeSwipedId = signal<string | null>(null);
+    swipeOffsetX = signal<number>(0);
+    isSwipingActive = signal<boolean>(false);
+
+    private touchStartX = 0;
+    private touchStartY = 0;
+    private initialSwipeOffset = 0;
+    private longPressTimer: any;
+    private isLongPress = false;
+    private isHorizontalSwipe = false;
+
 
     // Calculate accumulated total based on the items and currency conversion
     accumulatedTotal = computed(() => {
@@ -389,5 +406,137 @@ export class SubCategoryDetailsPage implements OnInit {
         if (this.isFabMenuOpen()) {
             this.activeMobileMenuId.set(null);
         }
+    }
+
+    // --- Gestos Táctiles (Swipe & Drag) ---
+    onItemTouchStart(itemId: string, event: TouchEvent) {
+        if (!this.responsiveState.isMobile()) return;
+
+        if (this.activeSwipedId() && this.activeSwipedId() !== itemId) {
+            this.closeSwipe();
+            return;
+        }
+
+        const touch = event.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+        this.initialSwipeOffset = this.activeSwipedId() === itemId ? this.swipeOffsetX() : 0;
+        this.isLongPress = false;
+        this.isHorizontalSwipe = false;
+        this.isSwipingActive.set(false);
+
+        this.longPressTimer = setTimeout(() => {
+            if (!this.isHorizontalSwipe) {
+                this.isLongPress = true;
+                this.activeDraggingId.set(itemId);
+                
+                const item = this.itemsWithDetails().find(i => i.id === itemId);
+                if (item) {
+                    this.activeDraggingItem.set(item);
+                }
+
+                this.dragPosition.set({
+                    x: touch.clientX - 100,
+                    y: touch.clientY - 40
+                });
+                
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+            }
+        }, 150);
+    }
+
+    onItemTouchMove(itemId: string, event: TouchEvent) {
+        if (!this.responsiveState.isMobile()) return;
+
+        const touch = event.touches[0];
+        const deltaX = touch.clientX - this.touchStartX;
+        const deltaY = touch.clientY - this.touchStartY;
+
+        if (!this.isLongPress && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            clearTimeout(this.longPressTimer);
+            this.isHorizontalSwipe = true;
+            this.isSwipingActive.set(true);
+            this.activeSwipedId.set(itemId);
+        }
+
+        if (this.isHorizontalSwipe) {
+            if (event.cancelable) event.preventDefault();
+
+            const item = this.itemsWithDetails().find(i => i.id === itemId);
+            const canSwipeRight = item ? item.has_payment_control : false;
+
+            let targetOffset = this.initialSwipeOffset + deltaX;
+
+            if (targetOffset > 0 && !canSwipeRight) {
+                targetOffset = targetOffset * 0.1;
+            } else if (targetOffset > 0) {
+                if (targetOffset > 75) {
+                    targetOffset = 75 + ((targetOffset - 75) * 0.2);
+                }
+            } else if (targetOffset < 0) {
+                if (targetOffset < -150) {
+                    targetOffset = -150 + ((targetOffset + 150) * 0.2);
+                }
+            }
+
+            this.swipeOffsetX.set(targetOffset);
+            return;
+        }
+
+        if (this.isLongPress && this.activeDraggingId() === itemId) {
+            if (event.cancelable) event.preventDefault();
+            
+            this.dragPosition.set({
+                x: touch.clientX - 100,
+                y: touch.clientY - 40
+            });
+
+            const windowHeight = window.innerHeight;
+            if (touch.clientY > windowHeight - 128) {
+                this.isTrashZoneActive.set(true);
+            } else {
+                this.isTrashZoneActive.set(false);
+            }
+        }
+    }
+
+    onItemTouchEnd(event: TouchEvent) {
+        if (!this.responsiveState.isMobile()) return;
+
+        clearTimeout(this.longPressTimer);
+
+        if (this.isLongPress) {
+            if (this.isTrashZoneActive()) {
+                const item = this.activeDraggingItem();
+                if (item) {
+                    this.openDeleteModal(item);
+                }
+            }
+            this.activeDraggingId.set(null);
+            this.activeDraggingItem.set(null);
+            this.isTrashZoneActive.set(false);
+            this.isLongPress = false;
+        }
+
+        if (this.isHorizontalSwipe) {
+            this.isSwipingActive.set(false);
+            const currentOffset = this.swipeOffsetX();
+            if (currentOffset < -75) {
+                this.swipeOffsetX.set(-150);
+            } else if (currentOffset > 40) {
+                this.swipeOffsetX.set(75);
+            } else {
+                this.closeSwipe();
+            }
+            this.isHorizontalSwipe = false;
+        }
+    }
+
+    closeSwipe() {
+        this.activeSwipedId.set(null);
+        this.swipeOffsetX.set(0);
+        this.isSwipingActive.set(false);
     }
 }
