@@ -1,7 +1,24 @@
-<section class="py-4 md:py-6 w-full relative flex flex-col items-center justify-center overflow-hidden hero-gradient">
-    <div class="absolute inset-0 synth-grid pointer-events-none opacity-30"></div>
-    <div class="relative z-10 text-center max-w-2xl mx-auto px-6">
-        <!-- OJO DE ODÍN (Componente animado) -->
+<section class="banner-hero">
+    <!-- Parallax Video Wrapper -->
+    <div class="video-container">
+        <video #videoPlayer 
+               autoplay 
+               muted 
+               loop 
+               playsinline 
+               class="banner-video"
+               (loadeddata)="attemptVideoPlay()"
+               (canplay)="attemptVideoPlay()"
+               (playing)="attemptVideoPlay()">
+            <source src="https://media.istockphoto.com/id/1332685361/video/hand-gesture-on-digital-tablet-for-analyzing-stock-market.mp4?s=mp4-640x640-is&k=20&c=gvrekH1Mxu9UPLQO5veg9BJLdxw64jF7fDAdMTHBytE=" type="video/mp4">
+        </video>
+        <!-- Purple/Violet Overlay -->
+        <div class="banner-overlay"></div>
+    </div>
+
+    <!-- Content (Eye logo, Title, Subtitle) -->
+    <div class="relative z-20 text-center max-w-2xl mx-auto px-6 py-12 md:py-20">
+        <!-- OJO DE ODÍN -->
         <div class="relative flex flex-col items-center -mb-4 md:-mb-6">
             <div class="w-32 h-32 md:w-40 md:h-40">
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -12,24 +29,15 @@
                             <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
                         </linearGradient>
                     </defs>
-
-                    <!-- Forma exterior del Ojo (Almendra) -->
                     <path d="M25 50 C 35 15, 75 15, 85 50 C 75 85, 35 85, 25 50 Z" fill="url(#odinEyeGrad)" />
-
-                    <!-- Iris (Círculo interno oscuro) -->
                     <circle cx="55" cy="50" r="18" fill="#0f0a15" />
-
-                    <!-- Pupila (Barra vertical característica 'I') -->
                     <rect x="53" y="38" width="4" height="24" rx="2" fill="#f1f5f9" class="eye-pupil-bar" />
                 </svg>
             </div>
         </div>
-        <h1 class="text-7xl font-black tracking-tighter mb-2 text-white text-center leading-none">ODIN</h1>
-        <p class="text-secondary font-black tracking-[0.5em] uppercase text-xs mb-1 text-center">Operational
-            Distribution
-            of Income Netflow</p>
-        <p class="hidden md:block text-slate-400 text-sm font-semibold text-center opacity-80">Distribución Operativa
-            del Flujo Neto de
-            Ingresos</p>
+        <h1 class="text-7xl font-black tracking-tighter mb-2 text-white text-center leading-none glow-text">ODIN</h1>
+        <p class="text-secondary font-black tracking-[0.5em] uppercase text-xs mb-1 text-center glow-subtext">Operational
+            Distribution of Income Netflow</p>
+        <p class="hidden md:block text-slate-400 text-sm font-semibold text-center opacity-80">Distribución Operativa del Flujo Neto de Ingresos</p>
     </div>
 </section>
