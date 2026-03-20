@@ -22,18 +22,17 @@
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                /* Natural look: No filters */
+                // Removed brightness filter for natural look
             }
 
             .overlay {
                 position: absolute;
                 inset: 0;
-                // Natural look: Very light blue gradient overlay
+                // Much lighter gradient to maintain readability without being "opaque"
                 background: linear-gradient(to bottom,
-                        rgba(15, 23, 42, 0.1) 0%,   /* Very subtle top */
-                        rgba(15, 23, 42, 0.25) 50%,
-                        rgba(15, 23, 42, 0.45) 100% /* Still light at bottom */
-                    );
+                        rgba(15, 23, 42, 0.1) 0%,
+                        rgba(15, 23, 42, 0.3) 50%,
+                        rgba(15, 23, 42, 0.6) 100%);
             }
         }
 
