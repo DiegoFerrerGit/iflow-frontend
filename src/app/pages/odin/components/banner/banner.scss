@@ -30,11 +30,11 @@
         .banner-overlay {
             position: absolute;
             inset: 0;
-            /* Darker signature purple gradient for high contrast (Reverted) */
+            /* High-contrast purple gradient for Odin (Re-reverted) */
             background: linear-gradient(to bottom,
-                    rgba(15, 10, 21, 0.4) 0%,
-                    rgba(15, 10, 21, 0.75) 50%,
-                    rgba(11, 7, 16, 0.95) 100%);
+                    rgba(10, 5, 15, 0.7) 0%,
+                    rgba(15, 10, 21, 0.9) 50%,
+                    rgba(11, 7, 16, 0.99) 100%);
         }
 
     }
