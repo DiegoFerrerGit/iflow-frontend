@@ -2,9 +2,10 @@
     <!-- Full-screen Video Banner -->
     <section class="hero-banner">
         <div class="video-wrapper">
-            <video #videoPlayer autoplay muted loop playsinline class="bg-video" (loadeddata)="attemptVideoPlay()"
-                (canplay)="attemptVideoPlay()" (playing)="attemptVideoPlay()">
-                <source src="/assets/videos/portfolio-background.mov" type="video/quicktime">
+            <video #videoPlayer autoplay muted loop playsinline preload="auto" class="bg-video"
+                (loadeddata)="attemptVideoPlay()" (canplay)="attemptVideoPlay()" (playing)="attemptVideoPlay()"
+                src="assets/videos/portfolio-background.mov">
+                <source src="assets/videos/portfolio-background.mov">
             </video>
             <!-- Premium Blue Overlay -->
             <div class="overlay"></div>
