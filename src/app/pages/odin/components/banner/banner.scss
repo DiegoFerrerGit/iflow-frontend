@@ -32,10 +32,11 @@
             inset: 0;
             /* Darker signature purple gradient for high contrast (Reverted) */
             background: linear-gradient(to bottom,
-                    rgba(10, 5, 15, 0.7) 0%,
-                    rgba(15, 10, 21, 0.9) 50%,
-                    rgba(11, 7, 16, 0.99) 100%);
+                    rgba(15, 10, 21, 0.4) 0%,
+                    rgba(15, 10, 21, 0.75) 50%,
+                    rgba(11, 7, 16, 0.95) 100%);
         }
+
     }
 
     .glow-text {
@@ -59,10 +60,13 @@
 }
 
 @keyframes eye-float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0) scale(1);
         filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.4));
     }
+
     50% {
         transform: translateY(-15px) scale(1.05);
         filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.6));
@@ -70,10 +74,14 @@
 }
 
 @keyframes pupil-blink {
-    0%, 90%, 100% {
+
+    0%,
+    90%,
+    100% {
         transform: scaleY(1);
         opacity: 1;
     }
+
     95% {
         transform: scaleY(0.1);
         opacity: 0.5;
