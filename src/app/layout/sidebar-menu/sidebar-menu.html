@@ -33,7 +33,7 @@
     <div class="flex-1 py-8 px-4 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
 
         <nav class="flex flex-col gap-1"> <!-- Item: ODIN -->
-            <a #odinLink="routerLinkActive" routerLink="/odin" routerLinkActive="!text-[var(--nav-accent-from)]"
+            <a #odinLink="routerLinkActive" routerLink="/odin" routerLinkActive="!text-[var(--nav-accent-to)]"
                 [routerLinkActiveOptions]="{exact: false}"
                 class="flex items-center gap-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-white/5 hover:text-white"
                 [class.px-3]="isExpanded" [class.justify-start]="isExpanded" [class.px-0]="!isExpanded"
@@ -58,7 +58,7 @@
             </a>
 
             <!-- Item: PATRIMONIO -->
-            <a routerLink="/portfolio" routerLinkActive="!text-[var(--nav-accent-from)]"
+            <a routerLink="/portfolio" routerLinkActive="!text-[var(--nav-accent-to)]"
                 [routerLinkActiveOptions]="{exact: true}"
                 class="flex items-center gap-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-white/5 hover:text-white"
                 [class.px-3]="isExpanded" [class.justify-start]="isExpanded" [class.px-0]="!isExpanded"
