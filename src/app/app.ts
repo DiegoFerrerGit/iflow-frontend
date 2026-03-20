@@ -15,6 +15,7 @@ import { ResponsiveState } from './core/responsive/responsive.state';
 import { BottomNavComponent } from './core/layout/bottom-nav/bottom-nav';
 import { InstallPromptComponent } from './core/components/install-prompt/install-prompt.component';
 import { PwaService } from './core/services/pwa.service';
+import { NavigationThemeService } from './core/services/navigation-theme.service';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +35,7 @@ export class AppComponent implements OnInit {
   public readonly toastService = inject(ToastService);
   public readonly responsiveState = inject(ResponsiveState);
   public readonly pwaService = inject(PwaService);
+  private navigationThemeService = inject(NavigationThemeService);
 
   public inProgress$!: Observable<boolean>;
 

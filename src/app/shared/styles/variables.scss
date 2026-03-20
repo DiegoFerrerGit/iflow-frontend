@@ -4,4 +4,13 @@
   --color-background: #0f0a15;
   --color-surface: #16121d;
   --color-error: #ef4444;
+
+  // Dynamic Navigation Theme Variables (Odin Defaults)
+  --nav-bg: #0f0a15;
+  --nav-accent-from: #8b5cf6;
+  --nav-accent-to: #ec4899;
+  --nav-glow: rgba(168, 85, 247, 0.4);
+  
+  // Transition speed for theme changes
+  --nav-transition: background-color 0.5s ease, color 0.3s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }
