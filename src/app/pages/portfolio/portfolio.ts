@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 export class PortfolioPage implements OnInit, AfterViewInit {
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
   isDevelopment = isDevMode();
-
+  isLoading = false;
 
   constructor() { }
 
