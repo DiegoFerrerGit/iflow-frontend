@@ -19,6 +19,7 @@ export interface IAllocationBoxRequestApi {
     color: string;
     saved_amount?: IAmountWithCurrency;
     savings_target?: IAmountWithCurrency;
+    background?: string;
 }
 export interface IAllocationSubCategoryRequestApi {
     name: string;

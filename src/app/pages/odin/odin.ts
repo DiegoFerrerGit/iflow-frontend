@@ -199,7 +199,8 @@ export class OdinPageComponent implements OnInit {
       savedAmount: apiAlloc.saved_amount?.amount,
       savingsTarget: apiAlloc.savings_target?.amount,
       icon: apiAlloc.icon,
-      color: apiAlloc.color as ThemeColor
+      color: apiAlloc.color as ThemeColor,
+      background: apiAlloc.background
     }));
   }
   // #endregion
@@ -260,9 +261,9 @@ export class OdinPageComponent implements OnInit {
     // Standardize math: everything in USD (base)
     // 1. totalPool in USD from source incomes
     this.totalPool = this.incomes.reduce((sum, income) => {
-        // Source amount is already in its 'currency', we convert it to USD
-        const inUsd = income.currency === 'USD' ? income.amount : income.amount / this.currencyState.exchangeRate();
-        return sum + inUsd;
+      // Source amount is already in its 'currency', we convert it to USD
+      const inUsd = income.currency === 'USD' ? income.amount : income.amount / this.currencyState.exchangeRate();
+      return sum + inUsd;
     }, 0);
 
     const poolInUsd = this.totalPool;
@@ -469,7 +470,8 @@ export class OdinPageComponent implements OnInit {
       icon: newBox.icon,
       color: newBox.color,
       saved_amount: newBox.savedAmount !== undefined ? { amount: newBox.savedAmount, currency: 'USD' } : undefined,
-      savings_target: newBox.savingsTarget !== undefined ? { amount: newBox.savingsTarget, currency: 'USD' } : undefined
+      savings_target: newBox.savingsTarget !== undefined ? { amount: newBox.savingsTarget, currency: 'USD' } : undefined,
+      background: newBox.background
     };
 
     this.isAllocationModalSaving = true;

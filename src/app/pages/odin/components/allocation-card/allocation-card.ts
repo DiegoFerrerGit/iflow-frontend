@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { DomSanitizer, SafeUrl, SafeStyle } from '@angular/platform-browser';
 import { AllocationBox } from '../../../../models/allocation.model';
 import { ThemeColor, COLOR_MAP } from '../../../../models/income.model';
 import { DynamicCurrencyPipe } from '../../../../shared/pipes/dynamic-currency-pipe';
@@ -13,7 +14,21 @@ import { DynamicCurrencySymbolPipe } from '../../../../shared/pipes/dynamic-curr
   templateUrl: './allocation-card.html',
   styleUrl: './allocation-card.scss'
 })
-export class AllocationCardComponent {
+export class AllocationCardComponent implements OnInit, OnChanges {
+  safeBackgroundUrl: SafeUrl | undefined;
+  
+  constructor(private sanitizer: DomSanitizer) {}
+
+  ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['box'] && this.box?.background) {
+      // Caching the sanitized URL to prevent Angular from re-rendering the video/image element on every change detection cycle
+      this.safeBackgroundUrl = this.sanitizer.bypassSecurityTrustUrl(this.box.background);
+    }
+  }
+
   @Input({ required: true }) box!: AllocationBox;
   @Input({ required: true }) totalPool!: number;
   @Input() isLoading: boolean = false;

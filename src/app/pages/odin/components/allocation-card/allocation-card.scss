@@ -1,3 +1,15 @@
 .allocation-card {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .ken-burns-image {
+        transition: transform 8s ease-out;
+    }
+
+    &:hover .ken-burns-image {
+        transform: scale(1.3) translate(-2%, -2%);
+    }
+
+    .neon-glow-top {
+        box-shadow: 0 0 15px currentColor, 0 0 5px currentColor;
+    }
 }

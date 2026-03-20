@@ -34,6 +34,7 @@ export interface IAllocationBoxApi {
     calculated_amount_in_usd: number;
     saved_amount?: IAmountWithCurrency;
     savings_target?: IAmountWithCurrency;
+    background?: string;
 }
 
 export interface IOdinResponse {

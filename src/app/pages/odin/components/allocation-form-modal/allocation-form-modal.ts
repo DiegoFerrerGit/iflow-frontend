@@ -58,7 +58,8 @@ export class AllocationFormModalComponent implements OnInit {
     icon: 'category',
     color: 'emerald',
     savedAmount: 0,
-    savingsTarget: undefined
+    savingsTarget: undefined,
+    background: ''
   };
 
   isClosing = false;
@@ -78,11 +79,11 @@ export class AllocationFormModalComponent implements OnInit {
   }
 
   colorsList: string[] = [
-    'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange', 'blue', 'fuchsia', 'violet'
+    'primary', 'cyan', 'pink', 'emerald', 'amber', 'indigo', 'rose', 'orange', 'blue', 'fuchsia'
   ];
 
   get displayColors(): string[] {
-    const limit = this.responsiveState.isMobile() ? 5 : 11;
+    const limit = this.responsiveState.isMobile() ? 5 : 10;
     return this.recentColors.slice(0, limit);
   }
 
@@ -101,9 +102,9 @@ export class AllocationFormModalComponent implements OnInit {
     this.recentIcons = this.persistenceService.getRecent('allocation', 'icons');
     this.recentColors = this.persistenceService.getRecent('allocation', 'colors');
 
-    // Ensure recent colors are populated up to 11 items for desktop
-    if (this.recentColors.length < 11) {
-      const remainingSlots = 11 - this.recentColors.length;
+    // Ensure recent colors are populated up to 10 items for desktop
+    if (this.recentColors.length < 10) {
+      const remainingSlots = 10 - this.recentColors.length;
       const defaultPaddings = this.colorsList.filter(c => !this.recentColors.includes(c));
       this.recentColors.push(...defaultPaddings.slice(0, remainingSlots));
     }
@@ -132,7 +133,8 @@ export class AllocationFormModalComponent implements OnInit {
         icon: this.initialAllocation.icon,
         color: this.initialAllocation.color,
         savedAmount: this.initialAllocation.savedAmount || 0,
-        savingsTarget: this.initialAllocation.savingsTarget
+        savingsTarget: this.initialAllocation.savingsTarget,
+        background: this.initialAllocation.background
       };
     } else {
       // For creating: auto-pick color
@@ -321,6 +323,7 @@ export class AllocationFormModalComponent implements OnInit {
       targetAmount: boxCalcType === 'percentage' ? this.formData.targetAmount! : (this.initialAllocation?.targetAmount || 0),
       icon: this.formData.icon!,
       color: this.formData.color!,
+      background: this.formData.background
     };
 
     if (boxToSave.type === 'temporary') {

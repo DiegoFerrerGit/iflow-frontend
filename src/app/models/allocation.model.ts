@@ -14,4 +14,5 @@ export interface AllocationBox {
 
     icon: string;
     color: ThemeColor | string;
+    background?: string;
 }

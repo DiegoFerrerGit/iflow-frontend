@@ -281,6 +281,26 @@
                                 </div> <!-- picker wrapper -->
                             </div> <!-- color grid -->
                     </div> <!-- subsection info -->
+                    <!-- Background URL -->
+                    <div class="space-y-3 pt-2">
+                        <div class="flex items-center justify-between pl-1">
+                            <label class="text-[10px] font-black text-slate-500 tracking-widest uppercase">
+                                Imagen de fondo <span class="text-slate-400 font-bold ml-1">(Opcional)</span>
+                            </label>
+                            <a href="https://www.pexels.com/" target="_blank"
+                                class="flex items-center gap-1 text-[9px] font-black text-primary hover:text-primary-hover uppercase tracking-widest transition-colors group">
+                                <span>Buscar en Pexels</span>
+                                <span class="material-symbols-outlined text-[14px] group-hover:translate-x-0.5 transition-transform">open_in_new</span>
+                            </a>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-500 material-symbols-outlined text-[20px]">image</span>
+                            <input type="text" [(ngModel)]="formData.background" name="background"
+                                class="w-full bg-[#151821] border border-white/10 rounded-xl pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm font-medium"
+                                placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                        <p class="text-[9px] text-slate-500 font-medium pl-1 italic">Pega aquí el enlace directo a una imagen para personalizar la tarjeta.</p>
+                    </div>
                 </div> <!-- Closes Appearance -->
 
             <!-- Icons Second -->
