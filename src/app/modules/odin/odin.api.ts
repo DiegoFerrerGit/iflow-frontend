@@ -9,6 +9,7 @@ import { catchError, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorsManager } from '../../core/errors/error.manager';
 import { ERROR_CONTEXTS } from '../../core/errors/models/constants/error-contexts.constants';
+import { ODIN_CACHE_GET_OPTIONS, ODIN_CACHE_INVALIDATE_OPTIONS, GET_BOX_DETAIL_CACHE, INVALIDATE_BOX_CACHE, GET_SUBCATEGORY_DETAIL_CACHE, INVALIDATE_SUBCATEGORY_CACHE, ODIN_CACHE_OPTIONS } from './cache/odin-cache.constants';
 
 @Injectable({
     providedIn: 'root'
@@ -19,7 +20,7 @@ export class OdinApiService {
     private readonly API_URL: string = `${environment.apiUrl}/odin`;
 
     public getOdin(): Observable<IOdinResponse> {
-        return this.http.get<IOdinResponse>(this.API_URL).pipe(
+        return this.http.get<IOdinResponse>(this.API_URL, ODIN_CACHE_GET_OPTIONS).pipe(
             map(response => ({
                 ...response,
                 income_sources: response.income_sources
@@ -34,7 +35,7 @@ export class OdinApiService {
 
     // #region ONBOARDING
     public completeOnboarding(): Observable<void> {
-        return this.http.patch<void>(`${this.API_URL}/onboarding-completed`, {}, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.patch<void>(`${this.API_URL}/onboarding-completed`, {}, ODIN_CACHE_INVALIDATE_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -45,7 +46,7 @@ export class OdinApiService {
 
     // #region INCOME SECTION
     public createIncomeSource(data: IIncomeSourceRequesApi): Observable<IIncomeSourceApi> {
-        return this.http.post<IIncomeSourceApi>(`${this.API_URL}/income-sources`, data, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.post<IIncomeSourceApi>(`${this.API_URL}/income-sources`, data, ODIN_CACHE_INVALIDATE_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -54,7 +55,7 @@ export class OdinApiService {
     }
 
     public updateIncomeSource(id: string, data: IIncomeSourceRequesApi): Observable<void> {
-        return this.http.put<void>(`${this.API_URL}/income-sources/${id}`, data, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.put<void>(`${this.API_URL}/income-sources/${id}`, data, ODIN_CACHE_INVALIDATE_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -63,7 +64,7 @@ export class OdinApiService {
     }
 
     public deleteIncomeSource(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.API_URL}/income-sources/${id}`, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.delete<void>(`${this.API_URL}/income-sources/${id}`, ODIN_CACHE_INVALIDATE_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -74,7 +75,7 @@ export class OdinApiService {
 
     // #region ALLOCATION SECTION
     public createAllocationBox(data: IAllocationBoxRequestApi): Observable<IAllocationBoxApi> {
-        return this.http.post<IAllocationBoxApi>(`${this.API_URL}/allocation-boxes`, data, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.post<IAllocationBoxApi>(`${this.API_URL}/allocation-boxes`, data, ODIN_CACHE_INVALIDATE_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_CREATE_BOX);
                 return throwError(() => error);
@@ -83,7 +84,7 @@ export class OdinApiService {
     }
 
     public updateAllocationBox(id: string, data: IAllocationBoxRequestApi): Observable<IAllocationBoxApi> {
-        return this.http.put<IAllocationBoxApi>(`${this.API_URL}/allocation-boxes/${id}`, data, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.put<IAllocationBoxApi>(`${this.API_URL}/allocation-boxes/${id}`, data, ODIN_CACHE_INVALIDATE_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_UPDATE_BOX);
                 return throwError(() => error);
@@ -92,7 +93,7 @@ export class OdinApiService {
     }
 
     public deleteAllocationBox(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.API_URL}/allocation-boxes/${id}`, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.delete<void>(`${this.API_URL}/allocation-boxes/${id}`, ODIN_CACHE_INVALIDATE_OPTIONS).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -101,7 +102,7 @@ export class OdinApiService {
     }
 
     public getAllocationBoxDetail(id: string): Observable<IAllocationBoxDetailResponse> {
-        return this.http.get<IAllocationBoxDetailResponse>(`${this.API_URL}/allocation-boxes/${id}`).pipe(
+        return this.http.get<IAllocationBoxDetailResponse>(`${this.API_URL}/allocation-boxes/${id}`, GET_BOX_DETAIL_CACHE(id)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -115,7 +116,7 @@ export class OdinApiService {
     // #region SUB CATEGORIES
 
     public createSubCategory(allocationId: string, data: IAllocationSubCategoryRequestApi): Observable<IAllocationSubCategoryDto> {
-        return this.http.post<IAllocationSubCategoryDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories`, data, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.post<IAllocationSubCategoryDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories`, data, INVALIDATE_BOX_CACHE(allocationId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_CREATE_SUBCATEGORY);
                 return throwError(() => error);
@@ -124,7 +125,7 @@ export class OdinApiService {
     }
 
     public updateSubCategory(allocationId: string, subCategoryId: string, data: IAllocationSubCategoryRequestApi): Observable<void> {
-        return this.http.put<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}`, data, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.put<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}`, data, INVALIDATE_BOX_CACHE(allocationId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_UPDATE_SUBCATEGORY);
                 return throwError(() => error);
@@ -133,7 +134,7 @@ export class OdinApiService {
     }
 
     public deleteSubCategory(allocationId: string, subCategoryId: string): Observable<void> {
-        return this.http.delete<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}`, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.delete<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}`, INVALIDATE_BOX_CACHE(allocationId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -142,7 +143,7 @@ export class OdinApiService {
     }
 
     public getSubCategoryDetails(allocationId: string, subCategoryId: string): Observable<ISubCategoryDetailResponse> {
-        return this.http.get<ISubCategoryDetailResponse>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}`).pipe(
+        return this.http.get<ISubCategoryDetailResponse>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}`, GET_SUBCATEGORY_DETAIL_CACHE(allocationId, subCategoryId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error);
                 return throwError(() => error);
@@ -155,7 +156,7 @@ export class OdinApiService {
     // #region ITEMS of SUB CATEGORIES
 
     public createItem(allocationId: string, subCategoryId: string, request: IAllocationItemRequestApi): Observable<IAllocationItemDto> {
-        return this.http.post<IAllocationItemDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items`, request, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.post<IAllocationItemDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items`, request, INVALIDATE_SUBCATEGORY_CACHE(allocationId, subCategoryId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_CREATE_ITEM);
                 return throwError(() => error);
@@ -164,7 +165,7 @@ export class OdinApiService {
     }
 
     public updateItem(allocationId: string, subCategoryId: string, itemId: string, request: IAllocationItemRequestApi): Observable<IAllocationItemDto> {
-        return this.http.put<IAllocationItemDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}`, request, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.put<IAllocationItemDto>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}`, request, INVALIDATE_SUBCATEGORY_CACHE(allocationId, subCategoryId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_UPDATE_ITEM);
                 return throwError(() => error);
@@ -173,7 +174,7 @@ export class OdinApiService {
     }
 
     public deleteItem(allocationId: string, subCategoryId: string, itemId: string): Observable<void> {
-        return this.http.delete<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}`, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.delete<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}`, INVALIDATE_SUBCATEGORY_CACHE(allocationId, subCategoryId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_DELETE_ITEM);
                 return throwError(() => error);
@@ -182,7 +183,7 @@ export class OdinApiService {
     }
 
     public togglePaidItem(allocationId: string, subCategoryId: string, itemId: string): Observable<void> {
-        return this.http.patch<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}/toggle-paid`, {}, HIDE_SPINNER_OPTIONS).pipe(
+        return this.http.patch<void>(`${this.API_URL}/allocation-boxes/${allocationId}/subcategories/${subCategoryId}/items/${itemId}/toggle-paid`, {}, INVALIDATE_SUBCATEGORY_CACHE(allocationId, subCategoryId)).pipe(
             catchError((error: HttpErrorResponse) => {
                 this.errorsManager.handle(error, ERROR_CONTEXTS.ODIN_UPDATE_ITEM);
                 return throwError(() => error);

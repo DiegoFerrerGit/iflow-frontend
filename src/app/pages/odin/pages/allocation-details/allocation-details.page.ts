@@ -12,8 +12,10 @@ import { BackButtonComponent } from '../../../../shared/components/back-button/b
 import { ThemeColor, COLOR_MAP } from '../../../../models/income.model';
 import { CurrencyManager } from '../../../../core/currency-manager/currency-manager.manager';
 import { LoaderManager } from '../../../../core/loader-manager/loader.manager';
+import { CacheManager } from '../../../../core/cache/cache.manager';
 import { SubCategoryFormModal } from '../../components/sub-category-form-modal/sub-category-form-modal';
 import { DeleteConfirmationModal } from '../../components/delete-confirmation-modal/delete-confirmation-modal';
+import { ODIN_CACHE_OPTIONS } from '../../../../modules/odin/cache/odin-cache.constants';
 import { ResponsiveDirective } from '../../../../shared/directives/responsive.directive';
 import { ResponsiveState } from '../../../../core/responsive/responsive.state';
 
@@ -63,6 +65,7 @@ export class AllocationDetailsPage implements OnInit {
   public currencyState = inject(CurrencyManager);
   public responsiveState = inject(ResponsiveState);
   private loaderService = inject(LoaderManager);
+  private cacheManager = inject(CacheManager);
 
   trueBoxCapacity = signal<number | null>(null);
   boxPercentage = signal<number | null>(null);
@@ -262,8 +265,8 @@ export class AllocationDetailsPage implements OnInit {
     let passedBox = state?.box;
 
     if (passedTotalPool === undefined) {
-      const storedPool = sessionStorage.getItem('odin_total_pool');
-      if (storedPool) passedTotalPool = parseFloat(storedPool);
+      const storedPool = this.cacheManager.get<number>(ODIN_CACHE_OPTIONS.KEYS.TOTAL_POOL);
+      if (storedPool) passedTotalPool = storedPool;
     }
 
     this.odinApi.getAllocationBoxDetail(id).subscribe({
@@ -271,9 +274,8 @@ export class AllocationDetailsPage implements OnInit {
         this.allocationData.set(detail);
 
         if (passedBox === undefined) {
-          const storedBoxes = sessionStorage.getItem('odin_allocation_boxes');
-          if (storedBoxes) {
-            const boxes = JSON.parse(storedBoxes);
+          const boxes = this.cacheManager.get<any[]>(ODIN_CACHE_OPTIONS.KEYS.ALLOCATION_BOXES);
+          if (boxes) {
             passedBox = boxes.find((b: any) => b.id === id);
           }
         }
@@ -655,6 +657,6 @@ export class AllocationDetailsPage implements OnInit {
         subCategoryName: sub?.name
       }
     });
-    sessionStorage.setItem(`odin_box_type_${boxId}`, type);
+    this.cacheManager.set(ODIN_CACHE_OPTIONS.KEYS.BOX_TYPE(boxId), type, 60);
   }
 }

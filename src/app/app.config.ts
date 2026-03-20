@@ -12,12 +12,13 @@ import { appReducers, metaReducers } from './core/state/global.state';
 import { AuthenticationEffects } from './modules/authentication/state/authentication.effects';
 import { authInterceptor } from './modules/authentication/interceptors/authentication.interceptor';
 import { loaderInterceptor } from './core/interceptors/loader.interceptor';
+import { cacheInterceptor } from './core/cache/interceptors/cache.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, loaderInterceptor])),
+    provideHttpClient(withInterceptors([loaderInterceptor, cacheInterceptor, authInterceptor])),
     provideStore(appReducers, { metaReducers }),
     provideEffects([AuthenticationEffects]),
     provideStoreDevtools({

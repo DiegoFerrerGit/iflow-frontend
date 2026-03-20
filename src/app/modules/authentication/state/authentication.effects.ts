@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthActions } from './authentication.actions';
 import { AuthenticationApi } from '../authentication.api';
 import { UserApi } from '../../user/user.api';
+import { CacheManager } from '../../../core/cache/cache.manager';
 import { HIDE_SPINNER_OPTIONS } from '../../../core/interceptors/models/constants/interceptors.constants';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class AuthenticationEffects {
     private authApi = inject(AuthenticationApi);
     private userApi = inject(UserApi);
     private router = inject(Router);
+    private cacheManager = inject(CacheManager);
 
     /** Bootstrap: try to load profile from existing cookies */
     bootstrapAuth$ = createEffect(() =>
@@ -131,7 +133,10 @@ export class AuthenticationEffects {
         () =>
             this.actions$.pipe(
                 ofType(AuthActions.logoutSuccess),
-                tap(() => this.router.navigate(['/login'])),
+                tap(() => {
+                    this.cacheManager.clearAll();
+                    this.router.navigate(['/login']);
+                }),
             ),
         { dispatch: false },
     );

@@ -17,6 +17,8 @@ import { DynamicCurrencyPipe } from '../../shared/pipes/dynamic-currency-pipe';
 import { DynamicCurrencySymbolPipe } from '../../shared/pipes/dynamic-currency-symbol.pipe';
 import { CurrencyManager } from '../../core/currency-manager/currency-manager.manager';
 import { LoaderManager } from '../../core/loader-manager/loader.manager';
+import { CacheManager } from '../../core/cache/cache.manager';
+import { ODIN_CACHE_OPTIONS } from '../../modules/odin/cache/odin-cache.constants';
 import { OdinOnboardingStore } from '../../modules/odin/onboarding/odin-onboarding.store';
 import { OdinOnboardingService } from '../../modules/odin/onboarding/odin-onboarding.service';
 import { OdinOnboardingOverlayComponent } from './components/onboarding/odin-onboarding-overlay.component';
@@ -36,6 +38,7 @@ export class OdinPageComponent implements OnInit {
   private readonly odinApiService = inject(OdinApiService);
   public readonly currencyState = inject(CurrencyManager);
   private readonly loaderService = inject(LoaderManager);
+  private readonly cacheManager = inject(CacheManager);
   private readonly cdr = inject(ChangeDetectorRef);
   public responsiveState = inject(ResponsiveState);
 
@@ -129,8 +132,8 @@ export class OdinPageComponent implements OnInit {
         );
 
         // Persist summary for deep links (AllocationDetailsPage reloads)
-        sessionStorage.setItem('odin_total_pool', this.totalPool.toString());
-        sessionStorage.setItem('odin_allocation_boxes', JSON.stringify(response.allocation_boxes));
+        this.cacheManager.set(ODIN_CACHE_OPTIONS.KEYS.TOTAL_POOL, this.totalPool, 60);
+        this.cacheManager.set(ODIN_CACHE_OPTIONS.KEYS.ALLOCATION_BOXES, response.allocation_boxes, 60);
       },
       error: () => {
         // Errors are globally handled by ErrorsManager
