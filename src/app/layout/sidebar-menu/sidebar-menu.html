@@ -29,11 +29,12 @@
     <div class="flex-1 py-8 px-4 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
 
         <nav class="flex flex-col gap-1"> <!-- Item: ODIN -->
-            <a routerLink="/odin" routerLinkActive="bg-[#2d1b4e] text-fuchsia-300 shadow-sm"
+            <a #odinLink="routerLinkActive" routerLink="/odin" routerLinkActive="!text-fuchsia-400"
                 [routerLinkActiveOptions]="{exact: false}"
                 class="flex items-center gap-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-white/5 hover:text-white"
                 [class.px-3]="isExpanded" [class.justify-start]="isExpanded" [class.px-0]="!isExpanded"
                 [class.justify-center]="!isExpanded">
+                
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0">
                     <defs>
                         <linearGradient id="odinEyeGradSidebar" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -41,13 +42,27 @@
                             <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
                         </linearGradient>
                     </defs>
-                    <path d="M25 50 C 35 15, 75 15, 85 50 C 75 85, 35 85, 25 50 Z" fill="url(#odinEyeGradSidebar)" />
+                    <path d="M25 50 C 35 15, 75 15, 85 50 C 75 85, 35 85, 25 50 Z" 
+                          [attr.fill]="odinLink.isActive ? 'url(#odinEyeGradSidebar)' : 'currentColor'" />
                     <circle cx="55" cy="50" r="18" fill="#0f0a15" />
                     <rect x="53" y="38" width="4" height="24" rx="2" fill="#f1f5f9" />
                 </svg>
                 <span class="nav-label text-sm font-bold transition-opacity duration-300"
                     [class.opacity-100]="isExpanded" [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
                     ODIN
+                </span>
+            </a>
+
+            <!-- Item: PATRIMONIO -->
+            <a routerLink="/portfolio" routerLinkActive="!text-[rgb(30,144,255)]"
+                [routerLinkActiveOptions]="{exact: true}"
+                class="flex items-center gap-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-white/5 hover:text-white"
+                [class.px-3]="isExpanded" [class.justify-start]="isExpanded" [class.px-0]="!isExpanded"
+                [class.justify-center]="!isExpanded">
+                <span class="material-symbols-outlined text-2xl shrink-0">account_balance</span>
+                <span class="nav-label text-sm font-bold transition-opacity duration-300"
+                    [class.opacity-100]="isExpanded" [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
+                    PATRIMONIO
                 </span>
             </a>
         </nav>
