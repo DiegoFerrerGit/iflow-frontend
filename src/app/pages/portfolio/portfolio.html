@@ -1,11 +1,20 @@
-<div class="portfolio-container">
+<div class="portfolio-container" [class.content-loaded]="!isLoading">
+    <!-- Loader Overlay -->
+    @if (isLoading) {
+    <div class="video-loader">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <p>Preparando Patrimonio</p>
+        </div>
+    </div>
+    }
+
     <!-- Full-screen Video Banner -->
-    <section class="hero-banner">
+    <section class="hero-banner" [class.ready]="!isLoading">
         <div class="video-wrapper">
             <video #videoPlayer autoplay muted loop playsinline preload="auto" class="bg-video"
-                (loadeddata)="attemptVideoPlay()" (canplay)="attemptVideoPlay()" (playing)="attemptVideoPlay()"
-                src="assets/videos/portfolio-background.mov">
-                <source src="assets/videos/portfolio-background.mov">
+                (loadeddata)="onVideoLoad()" (canplaythrough)="onVideoLoad()" (playing)="onVideoLoad()">
+                <source src="assets/videos/portfolio-background.mp4" type="video/mp4">
             </video>
             <!-- Premium Blue Overlay -->
             <div class="overlay"></div>

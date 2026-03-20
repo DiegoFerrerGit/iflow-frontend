@@ -1,5 +1,5 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, effect, Renderer2 } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { BannerComponent } from './components/banner/banner';
 import { IncomeCardComponent } from './components/income-card/income-card';
 import { IncomeSource, ThemeColor, COLOR_MAP } from '../../models/income.model';
@@ -41,6 +41,8 @@ export class OdinPageComponent implements OnInit {
   private readonly cacheManager = inject(CacheManager);
   private readonly cdr = inject(ChangeDetectorRef);
   public responsiveState = inject(ResponsiveState);
+  private readonly renderer = inject(Renderer2);
+  private readonly document = inject(DOCUMENT);
 
   // Onboarding
   public readonly onboardingStore = inject(OdinOnboardingStore);
@@ -109,6 +111,18 @@ export class OdinPageComponent implements OnInit {
 
   public ngOnInit(): void {
     this.loadData();
+    this.preloadPatrimonioVideo();
+  }
+
+  private preloadPatrimonioVideo(): void {
+    // We preload the optimized .mp4 video
+    const videoPath = 'assets/videos/portfolio-background.mp4';
+
+    const link = this.renderer.createElement('link');
+    this.renderer.setAttribute(link, 'rel', 'preload');
+    this.renderer.setAttribute(link, 'as', 'video');
+    this.renderer.setAttribute(link, 'href', videoPath);
+    this.renderer.appendChild(this.document.head, link);
   }
 
   private loadData(): void {
