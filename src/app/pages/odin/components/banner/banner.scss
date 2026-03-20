@@ -30,11 +30,11 @@
         .banner-overlay {
             position: absolute;
             inset: 0;
-            /* Darker signature purple gradient */
+            /* Even darker signature purple gradient for maximum contrast */
             background: linear-gradient(to bottom,
-                    rgba(15, 10, 21, 0.5) 0%,
-                    rgba(26, 11, 46, 0.8) 50%,
-                    rgba(15, 10, 21, 0.95) 100%);
+                    rgba(10, 5, 15, 0.7) 0%,
+                    rgba(15, 10, 21, 0.9) 50%,
+                    rgba(11, 7, 16, 0.99) 100%);
         }
     }
 
