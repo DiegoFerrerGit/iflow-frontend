@@ -8,13 +8,13 @@
         position: relative;
         width: 100%;
         height: 100vh;
-        overflow: hidden;
+        clip-path: inset(0); // Creates a viewport for the fixed video
         display: flex;
         align-items: center;
         justify-content: center;
 
         .video-wrapper {
-            position: absolute;
+            position: fixed; // Fixed to viewport but clipped by banner
             inset: 0;
             z-index: 0;
 
@@ -29,12 +29,10 @@
                 position: absolute;
                 inset: 0;
                 // Refined blue gradient overlay
-                background: linear-gradient(
-                    to bottom,
-                    rgba(15, 23, 42, 0.4) 0%,
-                    rgba(15, 23, 42, 0.7) 50%,
-                    rgba(15, 23, 42, 0.95) 100%
-                );
+                background: linear-gradient(to bottom,
+                        rgba(15, 23, 42, 0.4) 0%,
+                        rgba(15, 23, 42, 0.7) 50%,
+                        rgba(15, 23, 42, 0.95) 100%);
                 backdrop-filter: blur(2px);
             }
         }
@@ -80,10 +78,14 @@
             gap: 12px;
             animation: fadeIn 2s ease-in-out infinite alternate;
 
+            @media (max-width: 768px) {
+                bottom: 110px; // Increased to clear the bottom nav
+            }
+
             .mouse {
                 width: 26px;
                 height: 42px;
-                border: 2px solid rgba(148, 163, 184, 0.3);
+                border: 2px solid #38bdf8; // Celeste border
                 border-radius: 20px;
                 position: relative;
 
@@ -123,7 +125,7 @@
 
         .section-header {
             margin-bottom: 60px;
-            
+
             .section-title {
                 font-size: 2rem;
                 font-weight: 800;
@@ -173,7 +175,7 @@
                     font-size: 2.5rem;
                     font-weight: 900;
                     color: #fff;
-                    
+
                     &.positive {
                         color: #10b981; // Emerald
                     }
@@ -220,6 +222,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -227,13 +230,25 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0.4; }
-    to { opacity: 1; }
+    from {
+        opacity: 0.4;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes scrollWheel {
-    0% { transform: translate(-50%, 0); opacity: 1; }
-    100% { transform: translate(-50%, 20px); opacity: 0; }
+    0% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, 20px);
+        opacity: 0;
+    }
 }
 
 // Responsive

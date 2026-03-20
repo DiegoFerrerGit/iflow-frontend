@@ -63,7 +63,8 @@
     <div class="flex items-center justify-between px-6 h-[60px] md:h-[76px] pb-2 pt-2">
 
         <!-- Center-Left: Odin Navigation -->
-        <a routerLink="/odin" (click)="closeUserMenu()" routerLinkActive="!text-white"
+        <a #odinLink="routerLinkActive" routerLink="/odin" (click)="closeUserMenu()" 
+            routerLinkActive="!text-fuchsia-400"
             [routerLinkActiveOptions]="{exact: false}"
             class="flex flex-col items-center justify-center h-full text-slate-400 hover:text-white transition-colors group">
 
@@ -77,11 +78,22 @@
                         <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
                     </linearGradient>
                 </defs>
-                <path d="M25 50 C 35 15, 75 15, 85 50 C 75 85, 35 85, 25 50 Z" fill="url(#odinEyeGradBottomNav)" />
+                <path d="M25 50 C 35 15, 75 15, 85 50 C 75 85, 35 85, 25 50 Z" 
+                      [attr.fill]="odinLink.isActive ? 'url(#odinEyeGradBottomNav)' : 'currentColor'" />
                 <circle cx="55" cy="50" r="18" fill="#0f0a15" />
                 <rect x="53" y="38" width="4" height="24" rx="2" fill="#f1f5f9" />
             </svg>
             <span class="text-[9px] font-bold mt-1 text-inherit">Odin</span>
+        </a>
+
+        <!-- Center: Patrimonio Navigation -->
+        <a routerLink="/portfolio" (click)="closeUserMenu()" 
+            routerLinkActive="!text-[rgb(30,144,255)]"
+            [routerLinkActiveOptions]="{exact: true}"
+            class="flex flex-col items-center justify-center h-full text-slate-400 hover:text-white transition-colors group">
+            
+            <span class="material-symbols-outlined text-[24px] md:text-[28px] group-hover:scale-110 transition-transform">account_balance</span>
+            <span class="text-[9px] font-bold mt-1 text-inherit">Patrimonio</span>
         </a>
 
         <!-- Right: User Avatar / Settings Menu Toggle -->
@@ -89,7 +101,8 @@
             class="flex flex-col items-center justify-center h-full transition-all focus:outline-none group">
 
             <div class="w-[28px] h-[28px] md:w-[32px] md:h-[32px] rounded-full transition-all relative"
-                 [class.ring-2]="isMenuOpen()" [class.ring-primary]="isMenuOpen()" [class.ring-offset-1]="isMenuOpen()" [class.ring-offset-[#0f0a15]]="isMenuOpen()">
+                [class.ring-2]="isMenuOpen()" [class.ring-primary]="isMenuOpen()" [class.ring-offset-1]="isMenuOpen()"
+                [class.ring-offset-[#0f0a15]]="isMenuOpen()">
                 @if (userAvatarUrl()) {
                 <img [src]="userAvatarUrl()" alt="Avatar" referrerpolicy="no-referrer"
                     class="w-full h-full rounded-full object-cover border border-white/10"
@@ -102,8 +115,8 @@
                 </div>
                 }
             </div>
-            <span class="text-[9px] font-bold mt-1 transition-colors"
-                  [class.text-white]="isMenuOpen()" [class.text-slate-400]="!isMenuOpen()">Tu</span>
+            <span class="text-[9px] font-bold mt-1 transition-colors" [class.text-white]="isMenuOpen()"
+                [class.text-slate-400]="!isMenuOpen()">Tu</span>
         </button>
 
     </div>
