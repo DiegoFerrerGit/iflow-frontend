@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, inject, computed } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { NgIf, AsyncPipe } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -12,7 +12,7 @@ import { OdinOverlayService } from '../../core/services/odin-overlay.service';
 @Component({
   selector: 'app-sidebar-menu',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CurrencySwitcherComponent],
+  imports: [RouterLink, RouterLinkActive, CurrencySwitcherComponent, AsyncPipe],
   templateUrl: './sidebar-menu.html',
   styleUrl: './sidebar-menu.scss',
 })

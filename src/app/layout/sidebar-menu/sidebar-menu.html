@@ -66,7 +66,23 @@
                     [class.opacity-100]="isExpanded" [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
                     DARK OVERLAY
                 </span>
-            </button>
+            </button> <!-- Temp Dark Overlay Toggle -->
+
+            <!-- Temporal Video List -->
+            @if (overlayService.videos$ | async; as videos) {
+                @for (video of videos; track video; let i = $index) {
+                <div class="flex items-center justify-between gap-2 py-2 px-3 rounded-xl transition-all"
+                    [class.bg-white/10]="(overlayService.selectedVideo$ | async) === video"
+                    [class.hidden]="!isExpanded">
+                    <button (click)="overlayService.selectVideo(video)" class="flex-1 text-left text-xs text-slate-400 hover:text-white truncate cursor-pointer">
+                        Video {{ i + 1 }}
+                    </button>
+                    <button (click)="overlayService.removeVideo(video)" class="text-red-500 hover:text-red-400 cursor-pointer">
+                        <span class="material-symbols-outlined text-[1rem]">delete</span>
+                    </button>
+                </div>
+                }
+            }
 
             <!-- Item: PATRIMONIO -->
             <a routerLink="/portfolio" routerLinkActive="!text-[#1e90ff]"
