@@ -116,7 +116,7 @@ export class OdinPageComponent implements OnInit {
 
   private preloadPatrimonioVideo(): void {
     // We preload the optimized .mp4 video
-    const videoPath = 'assets/videos/portfolio-background.mp4';
+    const videoPath = 'assets/videos/portfolio-background-MD.mp4';
 
     const link = this.renderer.createElement('link');
     this.renderer.setAttribute(link, 'rel', 'preload');

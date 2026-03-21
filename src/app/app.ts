@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, RendererFactory2 } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { delay, filter, map, mergeMap, Observable, Subscription, tap } from 'rxjs';
 import { SidebarMenu } from './layout/sidebar-menu/sidebar-menu';
@@ -7,7 +7,7 @@ import { LayoutService } from './layout/layout';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { Store } from '@ngrx/store';
 import { selectLoader } from './core/loader-manager/state/loader.selectors';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DOCUMENT } from '@angular/common';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ToastService } from './shared/components/toast/toast.service';
 import { ResponsiveDirective } from './shared/directives/responsive.directive';
@@ -36,9 +36,11 @@ export class AppComponent implements OnInit {
   public readonly responsiveState = inject(ResponsiveState);
   public readonly pwaService = inject(PwaService);
   private navigationThemeService = inject(NavigationThemeService);
+  private rendererFactory = inject(RendererFactory2);
+  private document = inject(DOCUMENT);
 
   public inProgress$!: Observable<boolean>;
-
+  private hasPreloadedVideo = false;
 
 
   ngOnInit(): void {
@@ -77,6 +79,22 @@ export class AppComponent implements OnInit {
     ).subscribe(data => {
       const hideSidebar = data['hideSidebar'] === true;
       this.layoutService.setSidebarVisibility(!hideSidebar);
+
+      // Eager load background video once user is past login
+      if (!hideSidebar && !this.hasPreloadedVideo) {
+        this.hasPreloadedVideo = true;
+        this.preloadPatrimonioVideo();
+      }
     });
+  }
+
+  private preloadPatrimonioVideo(): void {
+    const videoPath = 'assets/videos/portfolio-background-MD.mp4';
+    const renderer = this.rendererFactory.createRenderer(null, null);
+    const link = renderer.createElement('link');
+    renderer.setAttribute(link, 'rel', 'preload');
+    renderer.setAttribute(link, 'as', 'video');
+    renderer.setAttribute(link, 'href', videoPath);
+    renderer.appendChild(this.document.head, link);
   }
 }
