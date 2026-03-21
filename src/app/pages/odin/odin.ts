@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, effect, Renderer2 } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, effect, Renderer2, HostListener } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { BannerComponent } from './components/banner/banner';
 import { IncomeCardComponent } from './components/income-card/income-card';
@@ -114,6 +114,11 @@ export class OdinPageComponent implements OnInit {
     this.preloadPatrimonioVideo();
   }
 
+  @HostListener('window:beforeunload')
+  saveScrollPosition() {
+    sessionStorage.setItem('odin_scroll_pos', window.scrollY.toString());
+  }
+
   private preloadPatrimonioVideo(): void {
     // We preload the optimized .mp4 video
     const videoPath = 'assets/videos/portfolio-background-MD.mp4';
@@ -137,6 +142,15 @@ export class OdinPageComponent implements OnInit {
 
         // Save real data for onboarding restore
         this.saveRealData();
+
+        // Restore scroll position ONLY if returning from F5 / Reload
+        setTimeout(() => {
+          const savedScroll = sessionStorage.getItem('odin_scroll_pos');
+          if (savedScroll) {
+            window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+            sessionStorage.removeItem('odin_scroll_pos');
+          }
+        }, 100);
 
         // Initialize onboarding if backend says so — smart-resume based on existing data
         this.onboardingService.initialize(
