@@ -1,14 +1,17 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { OdinOverlayService } from '../../../../core/services/odin-overlay.service';
 
 @Component({
   selector: 'app-banner',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './banner.html',
   styleUrl: './banner.scss',
 })
 export class BannerComponent implements AfterViewInit {
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
+  public overlayService = inject(OdinOverlayService);
 
   ngAfterViewInit(): void {
     this.attemptVideoPlay();

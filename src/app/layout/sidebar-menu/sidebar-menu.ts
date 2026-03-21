@@ -7,7 +7,8 @@ import { selectUserFullName, selectUserAvatarUrl } from '../../modules/authentic
 import { AuthActions } from '../../modules/authentication/state/authentication.actions';
 
 import { CurrencySwitcherComponent } from '../currency-switcher/currency-switcher';
- 
+import { OdinOverlayService } from '../../core/services/odin-overlay.service';
+
 @Component({
   selector: 'app-sidebar-menu',
   standalone: true,
@@ -20,6 +21,7 @@ export class SidebarMenu {
   isExpanded: boolean = true;
 
   private store = inject(Store);
+  public overlayService = inject(OdinOverlayService);
 
   /** User data from NgRx store */
   userFullName = toSignal(this.store.select(selectUserFullName), { initialValue: null });
