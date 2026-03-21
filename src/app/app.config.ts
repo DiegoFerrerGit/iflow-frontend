@@ -17,7 +17,7 @@ import { cacheInterceptor } from './core/cache/interceptors/cache.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
     provideHttpClient(withInterceptors([loaderInterceptor, cacheInterceptor, authInterceptor])),
     provideStore(appReducers, { metaReducers }),
     provideEffects([AuthenticationEffects]),
