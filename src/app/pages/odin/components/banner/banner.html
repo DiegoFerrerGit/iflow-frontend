@@ -2,11 +2,11 @@
     <!-- Parallax Video Wrapper -->
     <div class="video-container">
         <video #videoPlayer autoplay muted loop playsinline class="banner-video" (loadeddata)="attemptVideoPlay()"
-            (canplay)="attemptVideoPlay()" (playing)="attemptVideoPlay()"
-            [src]="overlayService.selectedVideo$ | async">
+            (canplay)="attemptVideoPlay()" (playing)="attemptVideoPlay()">
+            <source src="assets/videos/background-odin-MD.mp4" type="video/mp4">
         </video>
         <!-- Purple/Violet Overlay -->
-        <div class="banner-overlay" [class.dark-overlay]="overlayService.isDark$ | async"></div>
+        <div class="banner-overlay"></div>
     </div>
 
 

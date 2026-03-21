@@ -57,33 +57,6 @@
                 </span>
             </a>
 
-            <!-- Temporal Toggle for Odin Overlay -->
-            <button (click)="overlayService.toggleDarkOverlay()"
-                class="flex items-center gap-4 py-3 rounded-xl transition-all text-orange-400 hover:bg-orange-400/10 cursor-pointer"
-                [class.px-3]="isExpanded" [class.justify-start]="isExpanded" [class.px-0]="!isExpanded" [class.justify-center]="!isExpanded">
-                <span class="material-symbols-outlined text-2xl shrink-0">contrast</span>
-                <span class="nav-label text-sm font-bold transition-opacity duration-300"
-                    [class.opacity-100]="isExpanded" [class.opacity-0]="!isExpanded" [class.hidden]="!isExpanded">
-                    DARK OVERLAY
-                </span>
-            </button> <!-- Temp Dark Overlay Toggle -->
-
-            <!-- Temporal Video List -->
-            @if (overlayService.videos$ | async; as videos) {
-                @for (video of videos; track video; let i = $index) {
-                <div class="flex items-center justify-between gap-2 py-2 px-3 rounded-xl transition-all"
-                    [class.bg-white/10]="(overlayService.selectedVideo$ | async) === video"
-                    [class.hidden]="!isExpanded">
-                    <button (click)="overlayService.selectVideo(video)" class="flex-1 text-left text-xs text-slate-400 hover:text-white truncate cursor-pointer">
-                        Video {{ i + 1 }}
-                    </button>
-                    <button (click)="overlayService.removeVideo(video)" class="text-red-500 hover:text-red-400 cursor-pointer">
-                        <span class="material-symbols-outlined text-[1rem]">delete</span>
-                    </button>
-                </div>
-                }
-            }
-
             <!-- Item: PATRIMONIO -->
             <a routerLink="/portfolio" routerLinkActive="!text-[#1e90ff]"
                 [routerLinkActiveOptions]="{exact: true}"

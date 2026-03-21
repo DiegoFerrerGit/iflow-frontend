@@ -1,31 +1,17 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { OdinOverlayService } from '../../../../core/services/odin-overlay.service';
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-banner',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './banner.html',
   styleUrl: './banner.scss',
 })
-export class BannerComponent implements AfterViewInit, OnDestroy {
+export class BannerComponent implements AfterViewInit {
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
-  public overlayService = inject(OdinOverlayService);
-  private sub?: Subscription;
 
   ngAfterViewInit(): void {
-    this.sub = this.overlayService.selectedVideo$.subscribe(() => {
-      if (this.videoPlayer?.nativeElement) {
-        this.videoPlayer.nativeElement.load();
-        this.attemptVideoPlay();
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.attemptVideoPlay();
   }
 
   public attemptVideoPlay(): void {

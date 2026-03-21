@@ -83,18 +83,24 @@ export class AppComponent implements OnInit {
       // Eager load background video once user is past login
       if (!hideSidebar && !this.hasPreloadedVideo) {
         this.hasPreloadedVideo = true;
-        this.preloadPatrimonioVideo();
+        this.preloadBackgroundVideos();
       }
     });
   }
 
-  private preloadPatrimonioVideo(): void {
-    const videoPath = 'assets/videos/portfolio-background-MD.mp4';
+  private preloadBackgroundVideos(): void {
+    const videoPaths = [
+      'assets/videos/background-odin-MD.mp4',
+      'assets/videos/portfolio-background-MD.mp4'
+    ];
     const renderer = this.rendererFactory.createRenderer(null, null);
-    const link = renderer.createElement('link');
-    renderer.setAttribute(link, 'rel', 'preload');
-    renderer.setAttribute(link, 'as', 'video');
-    renderer.setAttribute(link, 'href', videoPath);
-    renderer.appendChild(this.document.head, link);
+    
+    videoPaths.forEach(videoPath => {
+      const link = renderer.createElement('link');
+      renderer.setAttribute(link, 'rel', 'preload');
+      renderer.setAttribute(link, 'as', 'video');
+      renderer.setAttribute(link, 'href', videoPath);
+      renderer.appendChild(this.document.head, link);
+    });
   }
 }
