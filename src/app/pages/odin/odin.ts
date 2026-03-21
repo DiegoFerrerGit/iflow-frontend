@@ -147,7 +147,7 @@ export class OdinPageComponent implements OnInit {
         setTimeout(() => {
           const savedScroll = sessionStorage.getItem('odin_scroll_pos');
           if (savedScroll) {
-            window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+            window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'smooth' });
             sessionStorage.removeItem('odin_scroll_pos');
           }
         }, 100);
