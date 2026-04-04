@@ -327,30 +327,34 @@ export class OdinPageComponent implements OnInit {
     const circumference = 2 * Math.PI * r;
 
     // First map actual allocations
-    const segments = this.allocations.map(box => {
-      const amount = box.calculationType === 'absolute'
-        ? box.targetAmount
-        : (box.targetAmount / 100) * pool;
+    const segments = this.allocations
+      .map(box => {
+        const amount = box.calculationType === 'absolute'
+          ? box.targetAmount
+          : (box.targetAmount / 100) * pool;
+        return { box, amount };
+      })
+      .filter(({ amount }) => amount > 0)
+      .map(({ box, amount }) => {
+        const percentage = amount / pool; // relative to entire pool to fit with free money
+        const strokeLength = percentage * circumference;
+        const dashArray = `${strokeLength} ${circumference}`;
 
-      const percentage = amount / pool; // relative to entire pool to fit with free money
-      const strokeLength = percentage * circumference;
-      const dashArray = `${strokeLength} ${circumference}`;
+        const segment: DonutChartSegment = {
+          id: box.id,
+          amount,
+          percentage: percentage * 100,
+          dashArray,
+          dashOffset: -currentOffset,
+          color: this.getCategoryColor(box.color),
+          icon: box.icon,
+          name: box.name,
+          amountColorClass: box.color.startsWith('#') ? 'text-white' : `text-${box.color}-400`
+        };
 
-      const segment: DonutChartSegment = {
-        id: box.id,
-        amount,
-        percentage: percentage * 100,
-        dashArray,
-        dashOffset: -currentOffset,
-        color: this.getCategoryColor(box.color),
-        icon: box.icon,
-        name: box.name,
-        amountColorClass: box.color.startsWith('#') ? 'text-white' : `text-${box.color}-400`
-      };
-
-      currentOffset += strokeLength;
-      return segment;
-    });
+        currentOffset += strokeLength;
+        return segment;
+      });
 
     // Append Free Money block if available
     if (freeMoney > 0) {
@@ -383,27 +387,32 @@ export class OdinPageComponent implements OnInit {
     const r = 50;
     const circumference = 2 * Math.PI * r;
 
-    return this.incomes.map(income => {
-      const convertedAmount = this.currencyState.convert(income.amount, income.currency || 'USD');
-      const percentage = (convertedAmount / total);
-      const strokeLength = percentage * circumference;
-      const dashArray = `${strokeLength} ${circumference}`;
+    return this.incomes
+      .map(income => {
+        const convertedAmount = this.currencyState.convert(income.amount, income.currency || 'USD');
+        return { income, convertedAmount };
+      })
+      .filter(({ convertedAmount }) => convertedAmount > 0)
+      .map(({ income, convertedAmount }) => {
+        const percentage = (convertedAmount / total);
+        const strokeLength = percentage * circumference;
+        const dashArray = `${strokeLength} ${circumference}`;
 
-      const segment: DonutChartSegment = {
-        id: income.id,
-        dashArray,
-        dashOffset: -currentOffset,
-        color: this.getCategoryColor(income.color),
-        percentage: percentage * 100,
-        icon: income.icon,
-        name: income.name,
-        amount: convertedAmount,
-        amountColorClass: 'text-white'
-      };
+        const segment: DonutChartSegment = {
+          id: income.id,
+          dashArray,
+          dashOffset: -currentOffset,
+          color: this.getCategoryColor(income.color),
+          percentage: percentage * 100,
+          icon: income.icon,
+          name: income.name,
+          amount: convertedAmount,
+          amountColorClass: 'text-white'
+        };
 
-      currentOffset += strokeLength;
-      return segment;
-    });
+        currentOffset += strokeLength;
+        return segment;
+      });
   }
 
   private getCategoryColor(color: ThemeColor | string): string {
